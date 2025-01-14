@@ -1,0 +1,128 @@
+/* General styling */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    height: 100vh;
+    display: flex;
+}
+
+
+
+/* Main Content */
+.main-content {
+    
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+   
+   
+}
+.heading-grid{
+    background-color: #e7e7e7;
+    margin-bottom: 50px;
+    width: 100%;
+}
+
+.heading-grid h1{
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    font-size: 24px;
+}
+.open-sider {
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+/* User Grid */
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    grid-auto-rows: 190px; /* Ensure uniform height */
+    gap: 20px; /* Space between cards */
+    justify-content: center; /* Center content horizontally */
+  }
+.user-grid > :nth-child(4),
+.user-grid > :nth-child(5) {
+  grid-column: span 1; /* Span one column */
+}
+
+.user-grid > :nth-child(6) {
+  grid-column: 2 / 4; /* Centered for 2 cards in the last row */
+}
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #e3dddd;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.user-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.user-card p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
+.team-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    padding: 20px;
+    cursor: pointer;
+    width: 350px;
+    transition: transform 0.2s ease-in-out;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
+    background-color: #ebe4e44a;
+}
+
+.team-card:hover {
+    transform: scale(1.05); /* Slightly enlarge the card on hover */
+    box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.2); /* Increase shadow depth */
+    background-color: #fff; /* Optional: Lighten the background */
+    color: #e9bf07; /* Change text color on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .user-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+.sider:not(.open) {
+    width: 260px; /* Closed state width, showing only icons */
+    overflow: visible;
+  }
+  .sider:not(.open) li span {
+    display: none; /* Hide text when closed */
+  }
+  

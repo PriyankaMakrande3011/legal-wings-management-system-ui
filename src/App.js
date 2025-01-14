@@ -1,23 +1,51 @@
-import logo from './logo.svg';
-import './App.css';
+
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
+import Dashboard from './Dashboard';
+import ClientPage from './Pages/ClientPage';
+import CallingTeam from './Pages/CallingTeam';
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Slider from './Pages/Slider';
+import { useState } from 'react';
+import AddClient from './Pages/AddClient';
 
 function App() {
+
+
+const teams = [
+  { name: 'Calling Team', path: '/calling-team' },
+  { name: 'Executive Team', path: '/executive-team' },
+  { name: 'Backend Team', path: '/backend-team' },
+  { name: 'Account Team', path: '/account-team' },
+  { name: 'Marketing Team', path: '/marketing-team' },
+];
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <Router>
+      
+      <Routes>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/register' element={<Register />}/>
+        <Route path="/dashboard" element={<Dashboard />} /> {/* Dashboard */}
+        <Route path="/clients" element={<ClientPage />} />
+        <Route path="/addclients" element={<AddClient />} />
+        <Route path="/calling-team" element={<CallingTeam />} />
+        {/* {teams.map((team, index) => (
+          <Route
+            key={index}
+            path={team.path}
+            element={<CallingTeam teamName={team.name} />}
+          />
+        ))} */}
+      </Routes>
+      
+      <ToastContainer/>
+     </Router>
+    
     </div>
   );
 }

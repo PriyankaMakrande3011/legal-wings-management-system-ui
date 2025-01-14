@@ -1,0 +1,158 @@
+.client-container {
+  display: flex;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4; /* Light grey background for the full page */
+  color: #333;
+  padding: 20px;
+  min-height: 100vh;
+  overflow: hidden; /* Prevent full-page scrolling */
+}
+
+.client-main-container {
+  width: 100%;
+}
+
+.client-page {
+  background-color: #ffffff; /* White background for the page */
+  padding: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.client-filter select {
+  width: 200px; /* Adjust the width of the dropdown */
+  padding: 10px; /* Add some padding for better clickability */
+  font-size: 16px; /* Set font size for readability */
+  border: 1px solid #ccc; /* Add a subtle border */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #f9f9f9; /* Light background color */
+  color: #333; /* Text color */
+  outline: none; /* Remove default outline */
+  transition: all 0.3s ease; /* Smooth transition for hover and focus effects */
+  appearance: none; /* Remove default dropdown arrow in most browsers */
+  cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.client-filter select:hover {
+  border-color: #888; /* Darken border on hover */
+  background-color: #fff; /* Change background on hover */
+}
+
+.client-filter select:focus {
+  border-color: #007bff; /* Highlight border on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle shadow on focus */
+}
+
+.client-filter {
+  display: flex;
+  gap: 15px; /* Space between dropdowns */
+  margin: 20px 0; /* Add some vertical margin */
+}
+
+.client-filter select option {
+  background-color: #fff; /* Background for dropdown options */
+  color: #333; /* Text color for options */
+  padding: 5px; /* Padding inside options */
+}
+
+
+.client-content-box {
+  border: 1px solid rgb(220, 218, 218); /* Light grey border */
+  padding: 20px; /* Inner spacing */
+  border-radius: 8px; /* Optional: Rounded corners */
+  background-color: #ffffff; /* White background inside the box */
+  margin-top: 20px; /* Space between this box and the content above */
+  overflow: hidden; /* Prevent scrolling for the entire box */
+}
+
+.client-action {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 15px;
+  margin-top: 10px;
+  gap: 20px;
+}
+.client-filter button{
+  background-color: #ff8c42; /* Orange color for buttons */
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.client-action button {
+  background-color: #ff8c42; /* Orange color for buttons */
+  border: none;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.client-action button:hover {
+  background-color: #e6783b; /* Darker orange on hover */
+  transform: scale(1.05);
+}
+
+.table-container {
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 412px; /* Limit the height of the container */
+  width: 100%; /* Ensure the container spans the parent width */
+  margin-top: 20px; /* Add spacing above the table */
+  border: 1px solid #ddd; /* Optional: Border around the container */
+  border-radius: 8px; /* Optional: Rounded corners */
+  padding: 10px; /* Inner padding for aesthetics */
+  background-color: #fff; /* White background for the container */
+}
+
+.table {
+  width: 100%; /* Stretch table to fill container width */
+  min-width: 1500px; /* Ensure a minimum width for horizontal scrolling */
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 10px 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #cbc8c8;
+  color: #5d5b5b;
+}
+
+.table tbody tr:hover {
+  background-color: #ffe4cc; /* Soft orange on hover */
+  cursor: pointer;
+}
+
+.table td {
+  color: #555;
+}
+body.no-scroll {
+  overflow: hidden; /* Disable scrolling */
+}
+
+/* Add this to your ClientPage.css */
+.action-icon {
+  cursor: pointer;
+  margin-right: 10px;
+  color: #f8a219; /* You can change the color as per your preference */
+}
+
+.action-icon:hover {
+  color: #1e213339;
+}
