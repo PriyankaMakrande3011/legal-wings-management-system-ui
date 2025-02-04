@@ -111,6 +111,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import AddClient from "./AddClient";
+import { MdKeyboardArrowDown } from "react-icons/md";
 
 const ClientPage = () => {
   const [columns, setColumns] = useState([]);
@@ -126,10 +127,10 @@ const ClientPage = () => {
   //   navigate("/addclients");
   // };
   const handleAddClient = () => {
-    setIsModalOpen(true); // Open the modal when the button is clicked
+    setIsModalOpen(true); 
   };
   const handleCloseModal = () => {
-    setIsModalOpen(false); // Close the modal
+    setIsModalOpen(false); 
   };
 
 
@@ -185,6 +186,7 @@ const ClientPage = () => {
               </option>
               <option value="Mumbai">Mumbai</option>
               <option value="Pune">Pune</option>
+              <MdKeyboardArrowDown />
             </select>
 
             {/* Area Dropdown */}
@@ -202,11 +204,18 @@ const ClientPage = () => {
                 </option>
               ))}
             </select>
-
+            <select>
+              <option >
+                Select Client Type
+              </option>
+              <option value="Owner">Owner</option>
+              <option value="Tenant">Tenant</option>
+              <option value="Agent">Agent</option>
+            </select>
             {/* Client Dropdown */}
             <select disabled={!clients.length}>
               <option value="" >
-                Select Client
+              Search
               </option>
               {clients.map((client, index) => (
                 <option key={index} value={client}>
@@ -214,11 +223,12 @@ const ClientPage = () => {
                 </option>
               ))}
             </select>
+            <button>Submit</button>
           </div>
 
           <hr />
           <div className="client-action">
-            <button>Search Client</button>
+            
             <button onClick={handleAddClient}>
               <FaPlus className="plus" />
              Add Client
@@ -238,20 +248,20 @@ const ClientPage = () => {
                 {records.map((d, i) => (
                   <tr key={i}>
                     <td>{d.id}</td>
-                    <td>{d.firstName}</td>
-                    <td>{d.lastName}</td>
-                    <td>{d.contactNumber}</td>
-                    <td>{d.email}</td>
-                    <td>{d.address}</td>
-                    <td>{d.city}</td>
-                    <td>{d.area}</td>
-                    <td>{d.aadharNumber}</td>
-                    <td>{d.panNumber}</td>
-                    <td>{d.clientType}</td>
-                    <td>{d.createdBy}</td>
-                    <td>{d.created_date}</td>
-                    <td>{d.updatedBy}</td>
-                    <td>{d.updated_date}</td>
+                    <td>{d.FirstName}</td>
+                    <td>{d.LastName}</td>
+                    <td>{d.ContactNumber}</td>
+                    <td>{d.Email}</td>
+                    <td>{d.Address}</td>
+                    <td>{d.City}</td>
+                    <td>{d.Area}</td>
+                    <td>{d.Aadhar_Number}</td>
+                    <td>{d.PAN_Number}</td>
+                    <td>{d.ClientType}</td>
+                    <td>{d.CreatedBy}</td>
+                    <td>{d.Created_date}</td>
+                    <td>{d.UpdatedBy}</td>
+                    <td>{d.Updated_date}</td>
                     <td>
                       <FaEye
                         className="action-icon"

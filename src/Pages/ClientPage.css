@@ -1,11 +1,17 @@
+html, body {
+  overflow-y: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 .client-container {
   display: flex;
   font-family: 'Arial', sans-serif;
-  background-color: #f4f4f4; /* Light grey background for the full page */
+  background-color: #f4f4f4;
   color: #333;
   padding: 20px;
   min-height: 100vh;
-  overflow: hidden; /* Prevent full-page scrolling */
+  overflow: hidden;
 }
 
 .client-main-container {
@@ -13,56 +19,55 @@
 }
 
 .client-page {
-  background-color: #ffffff; /* White background for the page */
+  background-color: #ffffff;
   padding: 20px;
   width: 100%;
   overflow: hidden;
 }
 
 .client-filter select {
-  width: 200px; /* Adjust the width of the dropdown */
-  padding: 10px; /* Add some padding for better clickability */
-  font-size: 16px; /* Set font size for readability */
-  border: 1px solid #ccc; /* Add a subtle border */
-  border-radius: 5px; /* Rounded corners */
-  background-color: #f9f9f9; /* Light background color */
-  color: #333; /* Text color */
-  outline: none; /* Remove default outline */
-  transition: all 0.3s ease; /* Smooth transition for hover and focus effects */
-  appearance: none; /* Remove default dropdown arrow in most browsers */
-  cursor: pointer; /* Change cursor to pointer on hover */
+  width: 200px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+  appearance: none;
+  cursor: pointer;
 }
 
 .client-filter select:hover {
-  border-color: #888; /* Darken border on hover */
-  background-color: #fff; /* Change background on hover */
+  border-color: #888;
+  background-color: #fff;
 }
 
 .client-filter select:focus {
-  border-color: #007bff; /* Highlight border on focus */
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle shadow on focus */
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .client-filter {
   display: flex;
-  gap: 15px; /* Space between dropdowns */
-  margin: 20px 0; /* Add some vertical margin */
+  gap: 15px;
+  margin: 20px 0;
 }
 
 .client-filter select option {
-  background-color: #fff; /* Background for dropdown options */
-  color: #333; /* Text color for options */
-  padding: 5px; /* Padding inside options */
+  background-color: #fff;
+  color: #333;
+  padding: 5px;
 }
 
-
 .client-content-box {
-  border: 1px solid rgb(220, 218, 218); /* Light grey border */
-  padding: 20px; /* Inner spacing */
-  border-radius: 8px; /* Optional: Rounded corners */
-  background-color: #ffffff; /* White background inside the box */
-  margin-top: 20px; /* Space between this box and the content above */
-  overflow: hidden; /* Prevent scrolling for the entire box */
+  border: 1px solid rgb(220, 218, 218);
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-top: 20px;
+  overflow: hidden;
 }
 
 .client-action {
@@ -72,8 +77,9 @@
   margin-top: 10px;
   gap: 20px;
 }
-.client-filter button{
-  background-color: #ff8c42; /* Orange color for buttons */
+
+.client-filter button {
+  background-color: #ff8c42;
   border: none;
   color: #fff;
   padding: 10px 15px;
@@ -85,8 +91,9 @@
   gap: 10px;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 .client-action button {
-  background-color: #ff8c42; /* Orange color for buttons */
+  background-color: #ff8c42;
   border: none;
   color: #fff;
   padding: 10px 15px;
@@ -100,25 +107,24 @@
 }
 
 .client-action button:hover {
-  background-color: #e6783b; /* Darker orange on hover */
+  background-color: #e6783b;
   transform: scale(1.05);
 }
 
 .table-container {
-  overflow-x: auto; /* Enable horizontal scrolling */
-  overflow-y: auto; /* Enable vertical scrolling */
-  max-height: 412px; /* Limit the height of the container */
-  width: 100%; /* Ensure the container spans the parent width */
-  margin-top: 20px; /* Add spacing above the table */
-  border: 1px solid #ddd; /* Optional: Border around the container */
-  border-radius: 8px; /* Optional: Rounded corners */
-  padding: 10px; /* Inner padding for aesthetics */
-  background-color: #fff; /* White background for the container */
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 412px;
+  width: 100%;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
 }
 
 .table {
-  width: 100%; /* Stretch table to fill container width */
-  min-width: 1500px; /* Ensure a minimum width for horizontal scrolling */
+  width: 100%;
+  min-width: 1500px;
   border-collapse: collapse;
 }
 
@@ -135,24 +141,107 @@
 }
 
 .table tbody tr:hover {
-  background-color: #ffe4cc; /* Soft orange on hover */
+  background-color: #ffe4cc;
   cursor: pointer;
 }
 
 .table td {
   color: #555;
 }
+
 body.no-scroll {
-  overflow: hidden; /* Disable scrolling */
+  overflow: hidden;
 }
 
-/* Add this to your ClientPage.css */
 .action-icon {
   cursor: pointer;
   margin-right: 10px;
-  color: #f8a219; /* You can change the color as per your preference */
+  color: #f8a219;
 }
 
 .action-icon:hover {
   color: #1e213339;
+}
+
+.card-Container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-section {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.date-input,
+.client-select,
+.search-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  font-size: 14px;
+  width: 100% !important;
+}
+
+.stats-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.stat-card strong {
+  font-size: 20px;
+  color: #333;
+}
+
+.button-section {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.add-leads-btn {
+  padding: 12px 20px;
+  background-color: #fbb129;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-leads-btn:hover {
+  background-color: #555;
+}
+
+.submit-button {
+  width: 52%;
+  background-color: orange;
+  border: none;
+  color: white;
+  font-size: 17px;
+  border-radius: 13px;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
