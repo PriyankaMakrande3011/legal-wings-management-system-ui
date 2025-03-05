@@ -8,8 +8,7 @@ html, body {
   display: flex;
   font-family: 'Arial', sans-serif;
   background-color: #f4f4f4;
-  color: #333;
-  padding: 20px;
+  color: #f1ac18;
   min-height: 100vh;
   overflow: hidden;
 }
@@ -20,22 +19,52 @@ html, body {
 
 .client-page {
   background-color: #ffffff;
-  padding: 20px;
   width: 100%;
   overflow: hidden;
 }
+.date-range-container {
+  /* display: flex; */
+  align-items: center;
+  gap: 20px;
+}
 
+.date-field {
+  display: flex;
+  flex-direction: column;
+  
+}
+
+.date-field label {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.custom-input {
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 14px;
+  width: 200px;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 15px;
+  background-color: white;
+  z-index: 1;
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important; /* Forces calendar to be on top */
+}
 .client-filter select {
   width: 200px;
   padding: 10px;
   font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 15px;
   background-color: #f9f9f9;
   color: #333;
   outline: none;
   transition: all 0.3s ease;
-  appearance: none;
+  padding: 10px 30px 10px 10px; 
   cursor: pointer;
 }
 
@@ -66,7 +95,7 @@ html, body {
   padding: 20px;
   border-radius: 8px;
   background-color: #ffffff;
-  margin-top: 20px;
+  margin: 20px;
   overflow: hidden;
 }
 
@@ -79,16 +108,21 @@ html, body {
 }
 
 .client-filter button {
+  font-size: 15px;
   background-color: #ff8c42;
   border: none;
   color: #fff;
+  width: 120px;
+  text-align: center;
   padding: 10px 15px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  display: flex;
+  display: flex
+;
   align-items: center;
   gap: 10px;
+  justify-content: center;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
@@ -122,30 +156,31 @@ html, body {
   background-color: #fff;
 }
 
-.table {
+.client-table {
   width: 100%;
   min-width: 1500px;
   border-collapse: collapse;
 }
 
-.table th,
-.table td {
+.client-table th,
+.client-table td {
   padding: 10px 15px;
   text-align: left;
   border: 1px solid #ddd;
 }
 
-.table th {
+.client-table th {
   background-color: #cbc8c8;
   color: #5d5b5b;
+  font-size: 14px;
 }
 
-.table tbody tr:hover {
+.client-table tbody tr:hover {
   background-color: #ffe4cc;
   cursor: pointer;
 }
 
-.table td {
+.client-table td {
   color: #555;
 }
 
@@ -190,12 +225,13 @@ body.no-scroll {
 
 .stats-section {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+ 
+  gap: 20px;
 }
 
+
 .stat-card {
-  flex: 1;
+  
   padding: 15px;
   background-color: #f9f9f9;
   border: 1px solid #ddd;
@@ -206,7 +242,7 @@ body.no-scroll {
 
 .stat-card strong {
   font-size: 20px;
-  color: #333;
+  
 }
 
 .button-section {
@@ -237,6 +273,42 @@ body.no-scroll {
   font-size: 17px;
   border-radius: 13px;
 }
+/* Custom Dropdown Styling */
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 200px;
+}
+
+/* Hide default dropdown arrow */
+.custom-dropdown select {
+  width: 100%;
+  padding: 10px;
+  appearance: none; /* Removes default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  background-color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Custom Dropdown Arrow */
+.dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  font-size: 20px;
+  transform: translateY(-50%);
+  pointer-events: none; /* Prevents icon from blocking dropdown */
+  color: #555;
+}
+
+.searchClient{
+  border: 1px solid rgb(172, 170, 170) !important;
+  border-radius: 15px;
+}
 
 .table thead {
   position: sticky;
@@ -244,4 +316,83 @@ body.no-scroll {
   background: #f8f9fa;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   z-index: 100;
+}
+
+
+  /* Wrapper for DatePicker */
+.date-picker-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Style the DatePicker Input */
+.custom-input {
+  width: 100%;
+  padding: 10px 35px 10px 10px; /* Space for icon */
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Style the Calendar Icon */
+.calendar-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  pointer-events: none; /* Prevents clicking on the icon */
+}
+.red-star {
+  color: red !important;
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 3px;
+}
+/* Search container to position input & icon */
+.search-container {
+  position: relative;
+  display: inline-block;
+  width: 250px; /* Adjust width as needed */
+}
+
+/* Search input */
+.searchClient {
+  width: 100%;
+  padding: 10px 35px 10px 10px; /* Space for icon */
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  font-size: 16px;
+  background-color: white;
+  outline: none;
+}
+
+/* Search icon */
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  font-size: 18px;
+  pointer-events: none; /* Prevents icon from being clickable */
+}
+
+.action-column {
+  position: sticky;
+  right: 0;
+  background: white;
+  z-index: 2;
+  min-width: 150px;
+  text-align: center;
+  border-left: 1px solid #ddd;
+}
+
+/* Icons Spacing */
+.action-icons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }

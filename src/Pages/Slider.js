@@ -6,7 +6,7 @@ import {motion} from 'framer-motion'
 import { FaRegUser } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
-import { AiOutlineDown, AiOutlineRight } from "react-icons/ai";
+import { AiOutlineDown, AiOutlineRight, AiOutlineLeft } from "react-icons/ai";
 import '../Pages/Slider.css'
 
 
@@ -20,6 +20,8 @@ const toggleSider =() =>{
     setIsSiderOpen(!isSiderOpen)
 
 }    
+
+
 
 const toggleDataManagement = () => {
     setIsDataManagementOpen(!isDataManagementOpen);
@@ -66,10 +68,17 @@ const showAnimation = {
 
 
 <div className='slidermain-container'>
-    <motion.div animate={{width: isSiderOpen ? "250px" :"50px",transition:{duration:0.5,type:"spring",damping:10}}} className='sidebar'>
+    <motion.div initial={{ width: "80px" }}
+               animate={{ width: isSiderOpen ? "250px" : "80px" }}
+                transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                className='sidebar'
+                onMouseEnter={() => setIsSiderOpen(true)}
+                onMouseLeave={() => setIsSiderOpen(false)}>
         <div className='sidebar-logo'>
-            {isSiderOpen && <img src={logo} alt="Logo" />}
-        <div className='sidebar-close' ><FaBars   onClick={toggleSider}/></div>
+           <div className='sidebar-logo'>
+{isSiderOpen && <img src={logo} alt="Logo" />}
+</div>
+       
         </div>
 
 <section className='sidebar-content'>
@@ -139,8 +148,19 @@ const showAnimation = {
 
 
     </motion.div>
+    <motion.div
+                initial={{ left: "80px" }}
+                animate={{ left: isSiderOpen ? "250px" : "80px" }}
+                transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                className="sidebar-toggle"
+                
+            >
+                {isSiderOpen ? <AiOutlineLeft size={20} /> : <AiOutlineRight size={20} />}
+            </motion.div>
+  
 </div>
   )
 }
 
 export default Slider
+

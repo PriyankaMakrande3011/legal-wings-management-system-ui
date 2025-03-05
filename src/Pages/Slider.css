@@ -33,7 +33,13 @@ a{
   margin: 10px 10px;
   
 }
-
+.sidebar-content{
+  display: flex
+;
+    flex-direction: column;
+    justify-content: center;
+   
+}
 .sidebar-link{
   display: flex;
   color: white;
@@ -52,4 +58,118 @@ a{
 .sidebar-text{
   white-space: nowrap;
   font-size: 15px;
+} 
+
+.slidermain-container {
+  display: flex;
+  height: 100vh;
+  position: relative;
 }
+
+.sidebar-toggle {
+  position: absolute;
+  top: 50px;
+  background: #f78317;
+  color: white;
+  border: 1px solid orange;
+  padding: 10px;
+  border-radius: 15%;
+  cursor: pointer;
+  
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-toggle:hover {
+  background: #888787;
+  transition: 0.2s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+}
+
+
+/* Sidebar */
+/* .sidebar {
+  background: #2c3e50;
+  color: white;
+  height: 100vh;
+  transition: all 0.5s ease-in-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 3px 0px 5px rgba(0, 0, 0, 0.2);
+  border-right: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+}
+
+.sidebar-logo img {
+  width: 120px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-content {
+  width: 100%;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.sidebar-icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.sidebar-text {
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.sidebar-divider {
+  width: 80%;
+  margin: 10px auto;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dropdown-container {
+  margin-left: 20px;
+}
+
+.dropdown-link {
+  padding-left: 20px;
+}
+
+
+.sidebar-toggle {
+  position: absolute;
+  top: 20px;
+  background: #2c3e50;
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-toggle:hover {
+  background: #1e2b38;
+  transform: scale(1.1);
+} */ 

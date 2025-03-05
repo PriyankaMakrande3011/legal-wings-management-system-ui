@@ -1,108 +1,4 @@
 
-// import React, { useEffect, useState } from 'react';
-// import Slider from './Slider';
-// import Header from './Header.js';
-// import './ClientPage.css';
-// import axios from 'axios';
-// import { FaPlus } from "react-icons/fa";
-// import { useNavigate } from "react-router-dom";
-
-// const ClientPage = () => {
-//   const [columns, setColumns] = useState([]);
-//   const [records, setRecords] = useState([]);
-//   const navigate = useNavigate();
-
-//  const handleAddClient = () =>{
-//   navigate("/addClient");
-//  }
-//   useEffect(() => {
-//     axios.get('http://localhost:3001/clients').then((res) => {
-//       setColumns(Object.keys(res.data[0]));
-//       setRecords(res.data);
-//     });
-//   }, []);
-
-//   return (
-//     <div className="client-container">
-//        <Slider />
-      
-//       <div className="client-page">
-//       <Header />
-//         <div className="client-content-box">
-//           {/* Black-bordered box starts here */}
-//           <div className="client-filter">
-//   <select>
-//     <option value="" disabled selected>
-//       Select City
-//     </option>
-//     <option value="Mumbai">Mumbai</option>
-//     <option value="Pune">Pune</option>
-//   </select>
-
-//   <select>
-//     <option value="" disabled selected>
-//       Select Area
-//     </option>
-    
-//   </select>
-
-//   <select>
-//     <option value="" disabled selected>
-//       Select Client
-//     </option>
-   
-//   </select>
-// </div>
-
-//           <hr></hr>
-//           <div className="client-action">
-           
-//             <button>Search Client</button>
-//             <button onClick={handleAddClient}><FaPlus className='plus'/>Add Client</button>
-//           </div>
-//           <div className="table-container">
-//   <table className="table">
-//     <thead>
-//       <tr>
-//         {columns.map((c, i) => (
-//           <th key={i}>{c}</th>
-//         ))}
-//       </tr>
-//     </thead>
-//     <tbody>
-//       {records.map((d, i) => (
-//         <tr key={i}>
-//           <td>{d.id}</td>
-//           <td>{d.firstName}</td>
-//           <td>{d.lastName}</td>
-//           <td>{d.contactNumber}</td>
-//           <td>{d.email}</td>
-//           <td>{d.address}</td>
-//           <td>{d.city}</td>
-//           <td>{d.area}</td>
-//           <td>{d.aadharNumber}</td>
-//           <td>{d.panNumber}</td>
-//           <td>{d.clientType}</td>
-//           <td>{d.createdBy}</td>
-//           <td>{d.created_date}</td>
-//           <td>{d.updatedBy}</td>
-//           <td>{d.updated_date}</td>
-//         </tr>
-//       ))}
-//     </tbody>
-//   </table>
-// </div>
-
-//           {/* Black-bordered box ends here */}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ClientPage;
-
-
 import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
@@ -112,8 +8,10 @@ import { useNavigate } from "react-router-dom";
 import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import AddClient from "./AddClient";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-const ClientPage = () => {
+const ClientPage = ({id}) => {
   const [columns, setColumns] = useState([]);
   const [records, setRecords] = useState([]);
   const [city, setCity] = useState("");
@@ -122,6 +20,9 @@ const ClientPage = () => {
   const [clients, setClients] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [fromDate, setFromDate] = useState(new Date());
+  const [toDate, setToDate] = useState(new Date());
+
 
   // const handleAddClient = () => {
   //   navigate("/addclients");
@@ -134,15 +35,56 @@ const ClientPage = () => {
   };
 
 
+  const fetchClients = async () => {
+    try {
+      const response = await axios.post(
+        "http://13.50.102.11:8080/legal-wings-management/clients/getClients",
+        {
+          fromDate: fromDate.toISOString().split("T")[0], // Format to YYYY-MM-DD
+          toDate: toDate.toISOString().split("T")[0],
+          clientType: "",
+          areaId: area ? areas.indexOf(area) + 1 : null,
+          cityId: city ? (city === "Mumbai" ? 2 : 1) : null,
+          searchText: "",
+          pageNumber: 0,
+          pageSize: 10,
+          sortField: "id",
+          sortOrder: "asc",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.data.clientPage) {
+        setColumns(response.data.clientPage.content.length > 0 ? Object.keys(response.data.clientPage.content[0]) : []);
+        setRecords(response.data.clientPage.content);
+      } else {
+        setColumns([]);
+        setRecords([]);
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  };
+  
   useEffect(() => {
-    axios.get("http://localhost:3001/clients").then((res) => {
-      setColumns(Object.keys(res.data[0]));
-      setRecords(res.data);
-    });
+    fetchClients();
   }, []);
-
+  
+  useEffect(() => {
+    fetchClients();
+  }, []);
+  
+  const handleSubmit = () => {
+    fetchClients();
+  };
+  
   // Handle city change and update areas
   const handleCityChange = (e) => {
+    
     const selectedCity = e.target.value;
     setCity(selectedCity);
     setArea(""); // Reset area
@@ -178,7 +120,28 @@ const ClientPage = () => {
       <div className="client-page">
         <Header />
         <div className="client-content-box">
+        <div className="date-range-container">
+      <div className="date-field">
+        <label>From Date*</label>
+        <DatePicker
+          selected={fromDate}
+          onChange={(date) => setFromDate(date)}
+          dateFormat="dd-MM-yyyy"
+          className="custom-input"
+        />
+      </div>
+      <div className="date-field">
+        <label>To Date*</label>
+        <DatePicker
+          selected={toDate}
+          onChange={(date) => setToDate(date)}
+          dateFormat="dd-MM-yyyy"
+          className="custom-input"
+        />
+      </div>
+    </div>
           <div className="client-filter">
+            
             {/* City Dropdown */}
             <select value={city} onChange={handleCityChange}>
               <option value="" disabled>
@@ -213,17 +176,8 @@ const ClientPage = () => {
               <option value="Agent">Agent</option>
             </select>
             {/* Client Dropdown */}
-            <select disabled={!clients.length}>
-              <option value="" >
-              Search
-              </option>
-              {clients.map((client, index) => (
-                <option key={index} value={client}>
-                  {client}
-                </option>
-              ))}
-            </select>
-            <button>Submit</button>
+            <input type="text" className="searchClient" placeholder="Search" />
+            <button onClick={handleSubmit}>Submit</button>
           </div>
 
           <hr />
@@ -248,20 +202,25 @@ const ClientPage = () => {
                 {records.map((d, i) => (
                   <tr key={i}>
                     <td>{d.id}</td>
-                    <td>{d.FirstName}</td>
-                    <td>{d.LastName}</td>
-                    <td>{d.ContactNumber}</td>
-                    <td>{d.Email}</td>
-                    <td>{d.Address}</td>
-                    <td>{d.City}</td>
-                    <td>{d.Area}</td>
-                    <td>{d.Aadhar_Number}</td>
-                    <td>{d.PAN_Number}</td>
-                    <td>{d.ClientType}</td>
-                    <td>{d.CreatedBy}</td>
-                    <td>{d.Created_date}</td>
-                    <td>{d.UpdatedBy}</td>
-                    <td>{d.Updated_date}</td>
+                    <td>{d.firstName}</td>
+                    <td>{d.lastName}</td>
+                    <td>{d.clientType}</td>
+                    <td>{d.email}</td>
+                    <td>{d.phoneNo}</td>
+                    <td>{d.address}</td>
+                    <td>{d.areaName}</td>
+                    <td>{d.areaId}</td>
+                    <td>{d.cityName}</td>
+                    <td>{d.cityId}</td>
+                    <td>{d.pinCode}</td>
+                    <td>{d.aadharNumber}</td>
+                    <td>{d.panNumber}</td>
+                    <td>{d.createDate}</td>
+                    <td>{d.createdByUserId}</td>
+                    <td>{d.createdByUserName}</td>
+                    <td>{d.updatedDate}</td>
+                    <td>{d.updatedByUserId}</td>
+                    <td>{d.updatedByUserName}</td>
                     <td>
                       <FaEye
                         className="action-icon"
@@ -292,4 +251,4 @@ const ClientPage = () => {
   );
 };
 
-export default ClientPage;
+ export default ClientPage;

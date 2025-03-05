@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom'; // For navigation
-
 import { AiOutlineUser } from "react-icons/ai";
 import { RiDashboardLine } from "react-icons/ri";
 import { FaRegUserCircle } from "react-icons/fa";
@@ -36,7 +35,12 @@ const Dashboard = () => {
   <Header/>
             {/* Main Content */}
             <div className="main-content">
-               
+            <div className="flex justify-center w-full items-center py-2">
+            <div className="text-primary text-sm powered-heading">
+                <h4>Powered By Legal Wings</h4>
+            </div>
+            
+        </div>
                <div className='heading-grid'>
                 <h1>Welcome to the LegalWings Rent Agreement System</h1>
                </div>
@@ -49,10 +53,13 @@ const Dashboard = () => {
                             onClick={() => handleTeamClick(team.path)}
                         >
                             <AiOutlineUser   size={60} />
-                            <p style={{fontSize:"20px", marginTop:"10px"}}>{team.name}</p>
+                            <p style={{fontSize:"20px", marginTop:"10px",fontWeight:"bold"}}>{team.name}</p>
                         </div>
                     ))}
                 </div>
+              <div>
+                
+              </div>
             </div>
             </div>
         </div>

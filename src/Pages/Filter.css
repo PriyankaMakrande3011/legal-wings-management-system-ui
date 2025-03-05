@@ -1,0 +1,83 @@
+
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Distributes items evenly */
+  }
+  
+  .filter-row > div {
+    flex: 1; /* Makes all elements the same width */
+    min-width: 200px; /* Prevents too-small elements */
+  }
+  
+  .search-submit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .search-submit-row input {
+    flex-grow: 1;
+  }
+  /* Style the entire dropdown */
+.p-dropdown {
+    width: 200px; /* Adjust width as needed */
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  
+ 
+  
+  /* Style the dropdown panel (when opened) */
+  .p-dropdown-panel {
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Style dropdown items */
+  .p-dropdown-item {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  /* Highlight dropdown item on hover */
+  
+  
+  /* Style selected value inside dropdown */
+  .p-dropdown .p-dropdown-label {
+    padding: 8px;
+    font-size: 14px;
+  }
+ 
+
+  .p-calendar .p-inputtext {
+    padding: 10px;
+    width: 93%;
+    border: 1px solid #eae9e8; 
+    border-radius: 5px;
+    color: #6b6767
+  } 
+  
+ 
+  .p-calendar .p-button {
+    background-color: white !important;
+    border-bottom-left-radius: 0;
+    color: black !important;
+    padding: 0.5rem;
+    border: none;
+  }
+  
+  .p-calendar .p-button:hover {
+    background-color: #f0f0f0 !important;
+  }
+  

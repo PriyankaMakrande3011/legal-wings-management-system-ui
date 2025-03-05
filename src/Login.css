@@ -55,19 +55,19 @@
 
 label {
     font-size: 14px;
-    color: #ff8800; /* Orange for labels */
+    color: #1f2345; /* Orange for labels */
     margin-bottom: 5px;
     display: block;
 }
 
-input {
+/* input {
     padding: 10px;
     width: 93%;
-    border: 1px solid #ff8800; /* Orange border */
+    border: 1px solid #ff8800; 
     border-radius: 5px;
-    background-color: #f8f5f5; /* Dark input background */
+    background-color: #f8f5f5; 
     color: #6b6767;
-}
+} */
 
 /* Button styling */
 .login-button {

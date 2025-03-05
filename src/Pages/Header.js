@@ -11,7 +11,7 @@ const Header = () => {
     "/calling-team": "Calling Team",
     "/executive-team": "Executive Team",
     "/backend-team": "Backend Team",
-    "/dashboard": "Dashboard",
+    "/dashboard": "Management System",
     "/account-team": "Account Team",
     "/marketing-team": "Marketing Team",
     "/clients": "Client",
@@ -27,12 +27,12 @@ const Header = () => {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      width: "50px",
-      height: "50px",
-      borderRadius: "50%",
+      width: "40px",
+      height: "40px",
+      borderRadius: "15%",
       backgroundColor: "orange",
       color: "#FFFFFF",
-      fontSize: "18px",
+      fontSize: "15px",
       fontWeight: "bold",
       textTransform: "uppercase",
       marginLeft: "10px",
@@ -45,8 +45,8 @@ const Header = () => {
     <header className="header">
      <div className="header-left">
       <h1>{pageName}</h1></div>
-      <div style={{display:"flex",alignItems:"center", font:"14px"}}>
-        <h5>Hii,{user.firstName}{user.lastName}</h5>
+      <div style={{display:"flex",alignItems:"center", font:"14px",color:"black"}}>
+        <h5>Hi,{user.firstName}  {user.lastName}</h5>
 <div className="header-right"style={styles.avatar}>
 {getInitials()}
 </div>
