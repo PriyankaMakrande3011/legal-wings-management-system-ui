@@ -1,76 +1,173 @@
+// import React, { useEffect, useState } from "react";
+// import Slider from "./Slider";
+// import Header from "./Header.js";
+// import "./ClientPage.css";
+// import axios from "axios";
+// import { Button } from "primereact/button";
+// import { Card } from "primereact/card";
+// import { Dialog } from "primereact/dialog";
+// import { FaPlus } from "react-icons/fa";
+// import AddDetails from "./AddDetails"; 
+
+// const Execative = () => {
+//   const [records, setRecords] = useState([]);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [activeTab, setActiveTab] = useState("owner");
+
+//   useEffect(() => {
+//     axios.get("http://localhost:3001/clients").then((res) => {
+//       setRecords(res.data);
+//     });
+//   }, []);
+
+//   const handleAddClient = () => {
+//     setIsModalOpen(true);
+//   };
+//   const handleCloseModal = () => {
+//     setIsModalOpen(false);
+//   };
+
+//   return (
+//     <div className="client-container">
+//       <Slider />
+//       <div className="client-page">
+//         <Header />
+//         <div className="client-content-box">
+          
+//           <div className="client-action">
+//             <Button icon={<FaPlus />} label="Add Client" onClick={handleAddClient} />
+//           </div>
+//           <div className="tab-buttons">
+//             <Button label="Owner Details" onClick={() => setActiveTab("owner")} className={activeTab === "owner" ? "active-tab" : ""} />
+//             <Button label="Tenant Details" onClick={() => setActiveTab("tenant")} className={activeTab === "tenant" ? "active-tab" : ""} />
+//           </div>
+//           <div className="client-card-container">
+//   {records.length > 0 && (
+//     <Card key={records[0].id} className="client-card">
+//       <h3>{records[0].FirstName} {records[0].LastName}</h3>
+      
+//       <div className="details-box">
+//         <div className="detail-item">
+//           <i className="pi pi-phone"></i> 
+//           <strong>Contact:</strong> {records[0].ContactNumber}
+//         </div>
+//         <div className="detail-item">
+//           <i className="pi pi-envelope"></i> 
+//           <strong>Email:</strong> {records[0].Email}
+//         </div>
+//         <div className="detail-item">
+//           <i className="pi pi-map-marker"></i> 
+//           <strong>City:</strong> {records[0].City}
+//         </div>
+//         <div className="detail-item">
+//           <i className="pi pi-map"></i> 
+//           <strong>Area:</strong> {records[0].Area}
+//         </div>
+
+//         {activeTab === "owner" && (
+//           <>
+//             <div className="detail-item">
+//               <i className="pi pi-id-card"></i> 
+//               <strong>Aadhar:</strong> {records[0].Aadhar_Number}
+//             </div>
+//             <div className="detail-item">
+//               <i className="pi pi-credit-card"></i> 
+//               <strong>PAN:</strong> {records[0].PAN_Number}
+//             </div>
+//             <div className="detail-item">
+//               <i className="pi pi-user"></i> 
+//               <strong>Client Type:</strong> {records[0].ClientType}
+//             </div>
+//           </>
+//         )}
+
+//         {activeTab === "tenant" && (
+//           <>
+//             <div className="detail-item">
+//               <i className="pi pi-user-edit"></i> 
+//               <strong>Created By:</strong> {records[0].CreatedBy}
+//             </div>
+//             <div className="detail-item">
+//               <i className="pi pi-calendar"></i> 
+//               <strong>Created Date:</strong> {records[0].Created_date}
+//             </div>
+//             <div className="detail-item">
+//               <i className="pi pi-user-edit"></i> 
+//               <strong>Updated By:</strong> {records[0].UpdatedBy}
+//             </div>
+//             <div className="detail-item">
+//               <i className="pi pi-calendar"></i> 
+//               <strong>Updated Date:</strong> {records[0].Updated_date}
+//             </div>
+//           </>
+//         )}
+//       </div>
+//     </Card>
+//   )}
+// </div>
+
+
+//         </div>
+//       </div>
+//      <Dialog
+// header="Add Client"
+// visible={isModalOpen}
+// onHide={handleCloseModal}
+// style={{ width: "50vw" }} // Adjust modal width
+// >
+// <AddDetails onClose={handleCloseModal} />
+// </Dialog>
+//     </div>
+//   );
+// };
+
+// export default Execative;
 
 import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./ClientPage.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import AddClient from "./AddClient";
-import { MdKeyboardArrowDown } from "react-icons/md";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { Dialog } from "primereact/dialog";
+import { FaPlus } from "react-icons/fa";
+import AddDetails from "./AddDetails";
 
 const Execative = () => {
-  const [columns, setColumns] = useState([]);
-  const [records, setRecords] = useState([]);
-  const [city, setCity] = useState("");
-  const [area, setArea] = useState("");
-  const [areas, setAreas] = useState([]);
-  const [clients, setClients] = useState([]);
+  const [records, setRecords] = useState([
+    {
+      id: 1,
+      FirstName: "Rahul",
+      LastName: "Sharma",
+      ContactNumber: "+91 9876543210",
+      Email: "rahul.sharma@example.com",
+      City: "Delhi",
+      Area: "MG Road",
+      ClientType: "Owner",
+      Remarks: "Interested in renting a 2BHK apartment",
+      CreatedBy: "Admin",
+      Created_date: "2025-03-06",
+      UpdatedBy: "Admin",
+      Updated_date: "2025-03-06",
+      LeadStatus: "In Progress",
+      TotalAmount: "₹50,000",
+      Aadhar_Number: "AAB123456",
+      PAN_Number: "ABCDE1234F",
+      TotalPayment: "₹50,000",
+      OwnerPayment: "₹45,000",
+      TenantPayment: "₹5,000",
+      PaymentMode: "UPI"
+    }
+  ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState("common");
 
-
-  // const handleAddClient = () => {
-  //   navigate("/addclients");
-  // };
   const handleAddClient = () => {
-    setIsModalOpen(true); 
+    setIsModalOpen(true);
   };
   const handleCloseModal = () => {
-    setIsModalOpen(false); 
-  };
-
-
-  useEffect(() => {
-    axios.get("http://localhost:3001/clients").then((res) => {
-      setColumns(Object.keys(res.data[0]));
-      setRecords(res.data);
-    });
-  }, []);
-
-  // Handle city change and update areas
-  const handleCityChange = (e) => {
-    const selectedCity = e.target.value;
-    setCity(selectedCity);
-    setArea(""); // Reset area
-    setClients([]); // Reset clients
-
-    const cityAreas = {
-      Mumbai: ["Andheri", "Borivali", "Dadar"],
-      Pune: ["Kothrud", "Viman Nagar", "Hinjewadi"],
-    };
-
-    setAreas(cityAreas[selectedCity] || []);
-  };
-
-  // Handle area change and fetch clients
-  const handleAreaChange = (e) => {
-    const selectedArea = e.target.value;
-    setArea(selectedArea);
-
-    // Fetch clients for the selected area
-    axios
-      .get(`http://localhost:3001/clients?area=${selectedArea}`)
-      .then((res) => {
-        setClients(res.data.map((client) => client.firstName)); // Assuming clients have `firstName`
-      })
-      .catch((err) => {
-        console.error("Error fetching clients:", err);
-      });
+    setIsModalOpen(false);
   };
 
   return (
@@ -79,69 +176,64 @@ const Execative = () => {
       <div className="client-page">
         <Header />
         <div className="client-content-box">
-        
-           <hr />
           <div className="client-action">
-            
-            <button onClick={handleAddClient}>
-              <FaPlus className="plus" />
-             Add Client
-            </button>
+            <Button icon={<FaPlus />} label="Add Client" onClick={handleAddClient} />
           </div>
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  {columns.map((c, i) => (
-                    <th key={i}>{c}</th>
-                  ))}
-                  <th>Action</th> 
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((d, i) => (
-                  <tr key={i}>
-                    <td>{d.id}</td>
-                    <td>{d.FirstName}</td>
-                    <td>{d.LastName}</td>
-                    <td>{d.ContactNumber}</td>
-                    <td>{d.Email}</td>
-                    <td>{d.Address}</td>
-                    <td>{d.City}</td>
-                    <td>{d.Area}</td>
-                    <td>{d.Aadhar_Number}</td>
-                    <td>{d.PAN_Number}</td>
-                    <td>{d.ClientType}</td>
-                    <td>{d.CreatedBy}</td>
-                    <td>{d.Created_date}</td>
-                    <td>{d.UpdatedBy}</td>
-                    <td>{d.Updated_date}</td>
-                    <td>
-                      <FaEye
-                        className="action-icon"
-                       
-                      />
-                      <FaEdit
-                        className="action-icon"
-                        
-                      />
-                      <FaTrash
-                        className="action-icon"
-                       
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="tab-buttons">
+            <Button label="Common Details" onClick={() => setActiveTab("common")} className={activeTab === "common" ? "active-tab" : ""} />
+            <Button label="Owner Details" onClick={() => setActiveTab("owner")} className={activeTab === "owner" ? "active-tab" : ""} />
+            <Button label="Tenant Details" onClick={() => setActiveTab("tenant")} className={activeTab === "tenant" ? "active-tab" : ""} />
+            <Button label="Payment Details" onClick={() => setActiveTab("payment")} className={activeTab === "payment" ? "active-tab" : ""} />
+          </div>
+          <div className="client-card-container">
+            {records.length > 0 && (
+              <Card key={records[0].id} className="client-card">
+                <h3>{records[0].FirstName} {records[0].LastName}</h3>
+                <div className="details-box">
+                  {activeTab === "common" && (
+                    <>
+                      <div className="detail-item"><strong>Client Type:</strong> {records[0].ClientType}</div>
+                      <div className="detail-item"><strong>Remarks:</strong> {records[0].Remarks}</div>
+                      <div className="detail-item"><strong>Lead Status:</strong> {records[0].LeadStatus}</div>
+                      <div className="detail-item"><strong>Total Amount:</strong> {records[0].TotalAmount}</div>
+                      <div className="detail-item"><strong>Created By:</strong> {records[0].CreatedBy}</div>
+                      <div className="detail-item"><strong>Created Date:</strong> {records[0].Created_date}</div>
+                      <div className="detail-item"><strong>Updated By:</strong> {records[0].UpdatedBy}</div>
+                      <div className="detail-item"><strong>Updated Date:</strong> {records[0].Updated_date}</div>
+                    </>
+                  )}
+                  {activeTab === "owner" && (
+                    <>
+                      <div className="detail-item"><strong>Aadhar:</strong> {records[0].Aadhar_Number}</div>
+                      <div className="detail-item"><strong>PAN:</strong> {records[0].PAN_Number}</div>
+                    </>
+                  )}
+                  {activeTab === "tenant" && (
+                    <>
+                      <div className="detail-item"><strong>Tenant Name:</strong> {records[0].CreatedBy}</div>
+                      <div className="detail-item"><strong>Contact No:</strong> {records[0].Created_date}</div>
+                      <div className="detail-item"><strong>Adhar No:</strong> {records[0].Aadhar_Number}</div>
+                      <div className="detail-item"><strong>PAN:</strong> {records[0].PAN_Number}</div>
+                      
+                    </>
+                  )}
+                  {activeTab === "payment" && (
+                    <>
+                      <div className="detail-item"><strong>Total Payment:</strong> {records[0].TotalPayment}</div>
+                      <div className="detail-item"><strong>Owner Payment:</strong> {records[0].OwnerPayment}</div>
+                      <div className="detail-item"><strong>Tenant Payment:</strong> {records[0].TenantPayment}</div>
+                      <div className="detail-item"><strong>Payment Mode:</strong> {records[0].PaymentMode}</div>
+                    </>
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       </div>
-      <AddClient
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        // onSubmit={handleClientSubmit}
-      />
+      <Dialog header="Add Details" visible={isModalOpen} onHide={handleCloseModal} style={{ width: "50vw" }}>
+        <AddDetails onClose={handleCloseModal} />
+      </Dialog>
     </div>
   );
 };

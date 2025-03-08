@@ -37,6 +37,7 @@ const teams = [
         <Route path="/addclients" element={<AddClient />} />
         <Route path="/calling-team" element={<CallingTeam />} />
         <Route path="/executive-team" element={<Execative />} />
+       
         {/* {teams.map((team, index) => (
           <Route
             key={index}

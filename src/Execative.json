@@ -1,0 +1,39 @@
+{
+    "commonDetails": {
+      "clientType": "Owner",
+      "clientName": "Rahul Sharma",
+      "clientNumber": "+91 9876543210",
+      "clientEmail": "rahul.sharma@example.com",
+      "clientAddress": "123, MG Road, Delhi, India",
+      "remarks": "Interested in renting a 2BHK apartment",
+      "createdBy": "Admin",
+      "createdDate": "2025-03-06",
+      "updatedBy": "Admin",
+      "updatedDate": "2025-03-06",
+      "tentativeAgreementDate": "2025-04-01",
+      "leadStatus": "In Progress",
+      "totalAmount": "₹50,000"
+    },
+    "ownerDetails": {
+      "ownerName": "Amit Verma",
+      "ownerNumber": "+91 9898989898",
+      "ownerEmail": "amit.verma@example.com",
+      "ownerAddress": "456, Sector 45, Gurugram, India",
+      "tokenID": "AAB123456"
+    },
+    "tenantDetails": {
+      "tenantName": "Priya Mehta",
+      "tenantNumber": "+91 9871234567",
+      "tenantEmail": "priya.mehta@example.com",
+      "tenantAddress": "789, JP Nagar, Bangalore, India",
+      "tokenID": "XYZ987654"
+    },
+    "paymentDetails": {
+      "totalPayment": "₹50,000",
+      "ownerPayment": "₹45,000",
+      "tenantPayment": "₹5,000",
+      "paymentDate": "2025-03-05",
+      "paymentMode": "UPI"
+    }
+  }
+  

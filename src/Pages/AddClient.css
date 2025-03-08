@@ -133,3 +133,115 @@ textarea {
   transform: scale(0.95);
 }
 
+
+
+/*  Add details*/
+/* Grid Layout */
+.p-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding: 2rem;
+  align-items: center;
+}
+
+/* Ensure all input fields take two-column alignment */
+.p-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Labels */
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Input Fields */
+input, .p-dropdown {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* Address and Biometric Full Width */
+.address-field, .biometric-container {
+  grid-column: span 2;
+}
+
+/* Biometric Section */
+.biometric-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Payment Section */
+.payment-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Ensure Token Number & Existing Client are aligned properly */
+.token-client-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Ensure Pending Payment is aligned properly */
+.pending-payment-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Submit Button */
+.p-mt-3 {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  grid-column: span 2;
+  padding: 10px;
+}
+
+.p-mt-3 button {
+  width: 50%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background-color: #007ad9;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.p-mt-3 button:hover {
+  background-color: #005fa3;
+}
+
+/* Add padding to .p-4 class */
+.p-4 {
+  padding: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .p-grid {
+    grid-template-columns: 1fr;
+  }
+  .payment-container, .token-client-container, .pending-payment-container {
+    grid-template-columns: 1fr;
+  }
+  .p-mt-3 button {
+    width: 100%;
+  }
+}
+

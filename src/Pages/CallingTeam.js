@@ -106,7 +106,7 @@ const CallingTeam = () => {
               Add New Lead
             </button>
           </div>
-          <div className="table-container">
+          <div className="client-table">
             <table className="table">
               <thead >
                 <tr>
