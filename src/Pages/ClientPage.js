@@ -5,7 +5,7 @@ import Header from "./Header.js";
 import "./ClientPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEye, FaEdit, FaTrash, FaArrowCircleRight } from "react-icons/fa";
 import AddClient from "./AddClient";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import DatePicker from "react-datepicker";
@@ -33,54 +33,53 @@ const ClientPage = ({id}) => {
   const handleCloseModal = () => {
     setIsModalOpen(false); 
   };
-
-
-  const fetchClients = async () => {
-    try {
-      const response = await axios.post(
-        "http://13.50.102.11:8080/legal-wings-management/clients/getClients",
-        {
-          fromDate: fromDate.toISOString().split("T")[0], // Format to YYYY-MM-DD
-          toDate: toDate.toISOString().split("T")[0],
-          clientType: "",
-          areaId: area ? areas.indexOf(area) + 1 : null,
-          cityId: city ? (city === "Mumbai" ? 2 : 1) : null,
-          searchText: "",
-          pageNumber: 0,
-          pageSize: 10,
-          sortField: "id",
-          sortOrder: "asc",
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
+ 
+  useEffect(() => {
+    const fetchAllClients = async () => {
+      try {
+        const response = await axios.post(
+          "http://13.50.102.11:8080/legal-wings-management/clients/all",
+          {
+            fromDate: fromDate.toISOString().split("T")[0],
+            toDate: toDate.toISOString().split("T")[0],
+            sortField: "id",
+            sortOrder: "",  
+            searchText: null,
+            pageNumber: 0,
+            pageSize: 10
           },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+  
+        console.log("All Clients:", response.data);
+  
+        // Ensure response contains expected data
+        if (response.data && Array.isArray(response.data.clients)) {
+          setRecords(response.data.clients);
+        } else {
+          console.warn("Unexpected API response format:", response.data);
+          setRecords([]); // Reset records if response is not as expected
         }
-      );
-  
-      if (response.data.clientPage) {
-        setColumns(response.data.clientPage.content.length > 0 ? Object.keys(response.data.clientPage.content[0]) : []);
-        setRecords(response.data.clientPage.content);
-      } else {
-        setColumns([]);
-        setRecords([]);
+      } catch (error) {
+        console.error("Error fetching all clients:", error.response?.data || error.message);
+        setRecords([]); // Ensure UI does not get stuck on a previous state
       }
-    } catch (error) {
-      console.error("Error fetching clients:", error);
-    }
-  };
+    };
   
-  useEffect(() => {
-    fetchClients();
-  }, []);
+    fetchAllClients();
+  }, [fromDate, toDate]);
   
-  useEffect(() => {
-    fetchClients();
-  }, []);
   
-  const handleSubmit = () => {
-    fetchClients();
-  };
+
+ 
+  
+ 
+  
+  
   
   // Handle city change and update areas
   const handleCityChange = (e) => {
@@ -99,20 +98,7 @@ const ClientPage = ({id}) => {
   };
 
   // Handle area change and fetch clients
-  const handleAreaChange = (e) => {
-    const selectedArea = e.target.value;
-    setArea(selectedArea);
-
-    // Fetch clients for the selected area
-    axios
-      .get(`http://localhost:3001/clients?area=${selectedArea}`)
-      .then((res) => {
-        setClients(res.data.map((client) => client.firstName)); // Assuming clients have `firstName`
-      })
-      .catch((err) => {
-        console.error("Error fetching clients:", err);
-      });
-  };
+ 
 
   return (
     <div className="client-container">
@@ -143,7 +129,7 @@ const ClientPage = ({id}) => {
           <div className="client-filter">
             
             {/* City Dropdown */}
-            <select value={city} onChange={handleCityChange}>
+            <select value={city} >
               <option value="" disabled>
                 Select City
               </option>
@@ -155,7 +141,7 @@ const ClientPage = ({id}) => {
             {/* Area Dropdown */}
             <select
               value={area}
-              onChange={handleAreaChange}
+             
               disabled={!areas.length}
             >
               <option value="" disabled>
@@ -177,7 +163,7 @@ const ClientPage = ({id}) => {
             </select>
             {/* Client Dropdown */}
             <input type="text" className="searchClient" placeholder="Search" />
-            <button onClick={handleSubmit}>Submit</button>
+            <button >Submit</button>
           </div>
 
           <hr />
@@ -199,45 +185,44 @@ const ClientPage = ({id}) => {
                 </tr>
               </thead>
               <tbody>
-                {records.map((d, i) => (
-                  <tr key={i}>
-                    <td>{d.id}</td>
-                    <td>{d.firstName}</td>
-                    <td>{d.lastName}</td>
-                    <td>{d.clientType}</td>
-                    <td>{d.email}</td>
-                    <td>{d.phoneNo}</td>
-                    <td>{d.address}</td>
-                    <td>{d.areaName}</td>
-                    <td>{d.areaId}</td>
-                    <td>{d.cityName}</td>
-                    <td>{d.cityId}</td>
-                    <td>{d.pinCode}</td>
-                    <td>{d.aadharNumber}</td>
-                    <td>{d.panNumber}</td>
-                    <td>{d.createDate}</td>
-                    <td>{d.createdByUserId}</td>
-                    <td>{d.createdByUserName}</td>
-                    <td>{d.updatedDate}</td>
-                    <td>{d.updatedByUserId}</td>
-                    <td>{d.updatedByUserName}</td>
-                    <td>
-                      <FaEye
-                        className="action-icon"
-                       
-                      />
-                      <FaEdit
-                        className="action-icon"
-                        
-                      />
-                      <FaTrash
-                        className="action-icon"
-                       
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+  {records.length > 0 ? (
+    records.map((d, i) => (
+      <tr key={i}>
+        <td>{d.id || "N/A"}</td>
+        <td>{d.firstName || "N/A"}</td>
+        <td>{d.lastName || "N/A"}</td>
+        <td>{d.clientType || "N/A"}</td>
+        <td>{d.email || "N/A"}</td>
+        <td>{d.phoneNo || "N/A"}</td>
+        <td>{d.address || "N/A"}</td>
+        <td>{d.areaName || "N/A"}</td>
+        <td>{d.areaId || "N/A"}</td>
+        <td>{d.cityName || "N/A"}</td>
+        <td>{d.cityId || "N/A"}</td>
+        <td>{d.pinCode || "N/A"}</td>
+        <td>{d.aadharNumber || "N/A"}</td>
+        <td>{d.panNumber || "N/A"}</td>
+        <td>{d.createDate || "N/A"}</td>
+        <td>{d.createdByUserId || "N/A"}</td>
+        <td>{d.createdByUserName || "N/A"}</td>
+        <td>{d.updatedDate || "N/A"}</td>
+        <td>{d.updatedByUserId || "N/A"}</td>
+        <td>{d.updatedByUserName || "N/A"}</td>
+        <td>
+          <FaEye className="action-icon" />
+          <FaEdit className="action-icon" />
+          <FaTrash className="action-icon" />
+          <FaArrowCircleRight className="action-icon" />
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="20">No clients found</td>
+    </tr>
+  )}
+</tbody>
+
             </table>
           </div>
         </div>

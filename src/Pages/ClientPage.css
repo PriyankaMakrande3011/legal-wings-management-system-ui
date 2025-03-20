@@ -145,7 +145,7 @@ html, body {
   transform: scale(1.05);
 }
 
-.table-container {
+.client-table {
   overflow-x: auto;
   overflow-y: auto;
   max-height: 412px;
@@ -156,17 +156,17 @@ html, body {
   background-color: #fff;
 }
 
-.client-table {
+/* .client-table {
   width: 100%;
   min-width: 1500px;
   border-collapse: collapse;
-}
+} */
 
 .client-table th,
 .client-table td {
   padding: 10px 15px;
   text-align: left;
-  border: 1px solid #ddd;
+ 
 }
 
 .client-table th {
@@ -184,9 +184,6 @@ html, body {
   color: #555;
 }
 
-body.no-scroll {
-  overflow: hidden;
-}
 
 .action-icon {
   cursor: pointer;
@@ -309,14 +306,14 @@ body.no-scroll {
   border: 1px solid rgb(172, 170, 170) !important;
   border-radius: 15px;
 }
-
+/* 
 .table thead {
   position: sticky;
   top: 0;
   background: #f8f9fa;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   z-index: 100;
-}
+} */
 
 
   /* Wrapper for DatePicker */
@@ -612,3 +609,63 @@ body.no-scroll {
   font-size: 16px;
   min-width: 20px;
 }
+
+
+/* table execative */
+.table-container {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-table th {
+  background-color: #c5c5c6;
+  color: rgb(16, 15, 15);
+  font-weight: bold;
+}
+
+.custom-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.custom-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.p-button-success {
+  background-color: #28a745;
+  border: none;
+  color: white;
+  padding: 10px;
+}
+
+.p-button-danger {
+  background-color: #dc3545;
+  border: none;
+  padding: 10px;
+  color: white;
+}
+
+.p-button-success:hover {
+  background-color: #218838;
+}
+
+.p-button-danger:hover {
+  background-color: #c82333;
+}
+

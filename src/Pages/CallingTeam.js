@@ -5,7 +5,11 @@ import "./ClientPage.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { MdKeyboardArrowDown } from "react-icons/md";
 import AddClient from "./AddLead";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 const CallingTeam = () => {
   const [columns, setColumns] = useState([]);
@@ -16,6 +20,8 @@ const CallingTeam = () => {
   const [clients, setClients] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [fromDate, setFromDate] = useState(new Date());
+  const [toDate, setToDate] = useState(new Date());
 
   // const handleAddClient = () => {
   //   navigate("/addclients");
@@ -26,7 +32,6 @@ const CallingTeam = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false); // Close the modal
   };
-
 
   useEffect(() => {
     axios.get("http://localhost:3031/Lead").then((res) => {
@@ -72,32 +77,80 @@ const CallingTeam = () => {
       <div className="client-page">
         <Header />
         <div className="client-content-box">
-<div className="card-Container">
-<div className="filter-section">
-            <input type="date" className="date-input" placeholder="From Date*" />
-            <input type="date" className="date-input" placeholder="To Date*" />
-            <select className="client-select">
-              <option>Select Client</option>
-            </select>
-            <input type="text" className="search-input" placeholder="Search" />
-            <button className="submit-button">
-        Submit
-      </button>
-          </div>
+          <div className="card-Container">
+            <div className="date-range-container">
+              <div className="date-field">
+                <label>From Date*</label>
+                <DatePicker
+                  selected={fromDate}
+                  onChange={(date) => setFromDate(date)}
+                  dateFormat="dd-MM-yyyy"
+                  className="custom-input"
+                />
+              </div>
+              <div className="date-field">
+                <label>To Date*</label>
+                <DatePicker
+                  selected={toDate}
+                  onChange={(date) => setToDate(date)}
+                  dateFormat="dd-MM-yyyy"
+                  className="custom-input"
+                />
+              </div>
+            </div>
+            <div className="client-filter">
 
-          {/* Stats Section */}
-          <div className="stats-section">
-            <div className="stat-card">Total <strong>46</strong></div>
-            <div className="stat-card">Pending <strong>08</strong></div>
-            <div className="stat-card">Cancelled <strong>02</strong></div>
-            <div className="stat-card">Approved <strong>36</strong></div>
-          </div>
+              {/* City Dropdown */}
+              <select value={city} >
+                <option value="" disabled>
+                  Select City
+                </option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Pune">Pune</option>
+                <MdKeyboardArrowDown />
+              </select>
 
-          {/* Add Leads Button */}
-          {/* <div className="button-section">
+              {/* Area Dropdown */}
+              <select
+                value={area}
+                onChange={handleAreaChange}
+                disabled={!areas.length}
+              >
+                <option value="" disabled>
+                  Select Area
+                </option>
+                {areas.map((area, index) => (
+                  <option key={index} value={area}>
+                    {area}
+                  </option>
+                ))}
+              </select>
+              <select>
+                <option >
+                  Select Client Type
+                </option>
+                <option value="Owner">Owner</option>
+                <option value="Tenant">Tenant</option>
+                <option value="Agent">Agent</option>
+              </select>
+              {/* Client Dropdown */}
+              <input type="text" className="searchClient" placeholder="Search" />
+              <button >Submit</button>
+            </div>
+
+            {/* Stats Section */}
+            <div className="stats-section">
+              <div className="stat-card">Total <strong>46</strong></div>
+              <div className="stat-card">Pending <strong>08</strong></div>
+              <div className="stat-card">Cancelled <strong>02</strong></div>
+              <div className="stat-card">Approved <strong>36</strong></div>
+            </div>
+
+            {/* Add Leads Button */}
+            {/* <div className="button-section">
             <button className="add-leads-btn">Add New Leads</button>
           </div> */}
-</div>
+          </div>
 
           <hr />
           <div className="client-action">
@@ -113,7 +166,7 @@ const CallingTeam = () => {
                   {columns.map((c, i) => (
                     <th key={i}>{c}</th>
                   ))}
-                  <th  className="action-column" > Action</th>
+                  <th className="action-column" > Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,20 +188,20 @@ const CallingTeam = () => {
                     <td>{d.Created_date}</td>
                     <td>{d.UpdatedBy}</td>
                     <td>{d.Updated_date}</td>
-                    <td  className="action-column" style={{ width: "150px" }}>
+                    <td className="action-column" style={{ width: "150px" }}>
                       <div>
-                      <FaEye
-                        className="action-icon"
+                        <FaEye
+                          className="action-icon"
 
-                      />
-                      <FaEdit
-                        className="action-icon"
+                        />
+                        <FaEdit
+                          className="action-icon"
 
-                      />
-                      <FaTrash
-                        className="action-icon"
+                        />
+                        <FaTrash
+                          className="action-icon"
 
-                      />
+                        />
                       </div>
                     </td>
                   </tr>

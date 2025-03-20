@@ -13,6 +13,7 @@ import Slider from './Pages/Slider';
 import { useState } from 'react';
 import AddClient from './Pages/AddClient';
 import Execative from './Pages/Execative';
+import BackendTeam from './Pages/BackendTeam';
 
 function App() {
 
@@ -37,6 +38,8 @@ const teams = [
         <Route path="/addclients" element={<AddClient />} />
         <Route path="/calling-team" element={<CallingTeam />} />
         <Route path="/executive-team" element={<Execative />} />
+        <Route path="/backend-team" element={<BackendTeam />} />
+
        
         {/* {teams.map((team, index) => (
           <Route
