@@ -31,8 +31,8 @@ const BackendTeam = () => {
 
   useEffect(() => {
     const requestData = {
-      fromDate: "2025-02-17",
-      toDate: "2025-03-18",
+      fromDate: fromDate.toISOString().split("T")[0],
+            toDate: toDate.toISOString().split("T")[0],
       sortField: "id",
       sortOrder: "",
       searchText: null,
@@ -145,7 +145,7 @@ const BackendTeam = () => {
               <tbody>
   {Array.isArray(records) && records.length > 0 ? (
     records.map((d, i) => (
-      <tr key={i}>
+      <tr key={i} onClick={() => navigate(`/lead/${d.id}`)} style={{ cursor: "pointer" }}>
         {columns.map((col, idx) => (
           <td key={idx}>{d[col]}</td> // Dynamically rendering values
         ))}

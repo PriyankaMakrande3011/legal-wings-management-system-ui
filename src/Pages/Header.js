@@ -7,6 +7,7 @@ const Header = () => {
   const location = useLocation();
   const { user } = useUser();
   // Map paths to page names
+  
   const pageNames = {
     "/calling-team": "Calling Team",
     "/executive-team": "Executive Team",
@@ -16,6 +17,7 @@ const Header = () => {
     "/marketing-team": "Marketing Team",
     "/clients": "Client",
     "/client-edit": "Client Edit Page",
+   
   };
   const getInitials = () => {
     const firstInitial = user?.firstName?.charAt(0).toUpperCase() || "";

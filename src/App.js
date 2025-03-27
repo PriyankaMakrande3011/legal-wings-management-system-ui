@@ -6,7 +6,6 @@ import Register from './Register';
 import Dashboard from './Dashboard';
 import ClientPage from './Pages/ClientPage';
 import CallingTeam from './Pages/CallingTeam';
-import ExecativeTeam from "./Pages/Execative"
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Slider from './Pages/Slider';
@@ -14,6 +13,8 @@ import { useState } from 'react';
 import AddClient from './Pages/AddClient';
 import Execative from './Pages/Execative';
 import BackendTeam from './Pages/BackendTeam';
+import BackendDetails from './Pages/BackendDetails';
+
 
 function App() {
 
@@ -39,6 +40,7 @@ const teams = [
         <Route path="/calling-team" element={<CallingTeam />} />
         <Route path="/executive-team" element={<Execative />} />
         <Route path="/backend-team" element={<BackendTeam />} />
+        <Route path="/lead/:id" element={<BackendDetails />} />
 
        
         {/* {teams.map((team, index) => (

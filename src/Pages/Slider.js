@@ -149,7 +149,7 @@ const showAnimation = {
 
     </motion.div>
     <motion.div
-                initial={{ left: "75px" }}
+                initial={{ left: "75 px" }}
                 animate={{ left: isSiderOpen ? "250px" : "80px" }}
                 transition={{ type: "spring", stiffness: 120, damping: 12 }}
                 className="sidebar-toggle"

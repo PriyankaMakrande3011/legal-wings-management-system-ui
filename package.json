@@ -25,6 +25,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
     "react-icons": "^4.2.0",
+    "react-paginate": "^8.3.0",
     "react-router-dom": "^7.0.1",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.6",

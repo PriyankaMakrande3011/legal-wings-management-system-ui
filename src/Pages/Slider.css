@@ -12,6 +12,7 @@ a{
 .sidebar{
   background: rgba(82, 82, 84, 0.804);
   color: #f1efef;
+  border-right: 5px solid orange;
   height: 100vh;
 
 }
@@ -34,8 +35,8 @@ a{
   
 }
 .sidebar-content{
-  display: flex
-;
+  display: flex;
+  padding: 1rem .5rem;
     flex-direction: column;
     justify-content: center;
    
