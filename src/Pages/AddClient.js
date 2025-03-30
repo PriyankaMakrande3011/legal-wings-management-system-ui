@@ -447,26 +447,9 @@ const AddClientModal = ({ isOpen, onClose }) => {
     fetchCities();
   }, [isOpen]);
 
-  const fetchAreas = async (cityId) => {
-    if (!cityId) return;
-    
-    try {
-      const response = await fetch(`http://13.50.102.11:8080/legal-wings-management/areas?cityId=${cityId}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setAreas(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Error fetching areas:", err);
-    }
-  };
-
   const onSubmit = async (data) => {
     try {
-      const response = await fetch("http://13.50.102.11:8080/legal-wings-management/clients", {
+      const response = await fetch("http://192.168.1.43:8080/legal-wings-management/clients", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -515,68 +498,79 @@ const AddClientModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Contact Number */}
+          {/* Contact Number and Email */}
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="contactNo">Contact Number:</label>
+              <label htmlFor="phoneNo">Contact Number:</label>
               <input
-                id="contactNo"
+                id="phoneNo"
                 type="tel"
-                {...register("contactNo", {
+                {...register("phoneNo", {
                   required: "Contact Number is required",
                   pattern: { value: /^[0-9]{10}$/, message: "Enter a valid 10-digit contact number" },
                 })}
                 placeholder="Enter contact number"
               />
-              {errors.contactNo && <p className="error-message">{errors.contactNo.message}</p>}
+              {errors.phoneNo && <p className="error-message">{errors.phoneNo.message}</p>}
             </div>
             <div className="form-group">
-              <label htmlFor="clientType">Client Type:</label>
-              <select id="clientType" {...register("clientType", { required: "Client Type is required" })}>
-                <option value="">Select client type</option>
-                <option value="owner">Owner</option>
-                <option value="client">Client</option>
-                <option value="tenant">Tenant</option>
-              </select>
-              {errors.clientType && <p className="error-message">{errors.clientType.message}</p>}
+              <label htmlFor="email">Email:</label>
+              <input
+                id="email"
+                type="email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: "Enter a valid email address" },
+                })}
+                placeholder="Enter email"
+              />
+              {errors.email && <p className="error-message">{errors.email.message}</p>}
             </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="city">City:</label>
-            <select
-              id="city"
-              {...register("city", { required: "City is required" })}
-              onChange={(e) => setSelectedCity(e.target.value)} // Update selected city
-            >
-              <option value="">Select a city</option>
-              {cities.length > 0 ? (
-                cities.map((city) => (
-                  <option key={city.id} value={city.name}>
-                    {city.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No cities available</option>
-              )}
-            </select>
-            {errors.city && <p className="error-message">{errors.city.message}</p>}
-          </div>
 
-          {/* Area Dropdown (Loads after selecting city) */}
-          <div className="form-group">
-            <label htmlFor="area">Area:</label>
-            <select id="area" {...register("area", { required: "Area is required" })} disabled={!areas.length}>
-              <option value="">Select an area</option>
-              {areas.map((area) => (
-                <option key={area.id} value={area.name}>
-                  {area.name}
-                </option>
-              ))}
-            </select>
-            {errors.area && <p className="error-message">{errors.area.message}</p>}
+          {/* Client Type */}
+         
+
+          {/* Aadhar Number and PAN Number */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="aadharNumber">Aadhar Number:</label>
+              <input
+                id="aadharNumber"
+                type="text"
+                {...register("aadharNumber", {
+                  required: "Aadhar Number is required",
+                  pattern: { value: /^[0-9]{12}$/, message: "Enter a valid 12-digit Aadhar Number" },
+                })}
+                placeholder="Enter Aadhar Number"
+              />
+              {errors.aadharNumber && <p className="error-message">{errors.aadharNumber.message}</p>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="panNumber">PAN Number:</label>
+              <input
+                id="panNumber"
+                type="text"
+                {...register("panNumber", {
+                  required: "PAN Number is required",
+                  pattern: { value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, message: "Enter a valid PAN Number" },
+                })}
+                placeholder="Enter PAN Number"
+              />
+              {errors.panNumber && <p className="error-message">{errors.panNumber.message}</p>}
+            </div>
+            
           </div>
-          {/* Other Fields */}
-          
+          <div className="form-group">
+            <label htmlFor="clientType">Client Type:</label>
+            <select id="clientType" {...register("clientType", { required: "Client Type is required" })}>
+              <option value="">Select client type</option>
+              <option value="OWNER">Owner</option>
+              <option value="AGENT">Agent</option>
+              <option value="TENANT">Tenant</option>
+            </select>
+            {errors.clientType && <p className="error-message">{errors.clientType.message}</p>}
+          </div>
           {/* Form Actions */}
           <div className="form-actions">
             <button type="submit">Submit</button>

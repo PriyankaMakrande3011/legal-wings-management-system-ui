@@ -61,10 +61,9 @@ const CallingTeam = () => {
     setArea(selectedArea);
 
     // Fetch clients for the selected area
-    axios
-      .get(`http://localhost:3001/clients?area=${selectedArea}`)
-      .then((res) => {
-        setClients(res.data.map((client) => client.firstName)); // Assuming clients have `firstName`
+    axios.get('http://localhost:3001/clients?area=${selectedArea}')
+        .then((res) => {
+        setClients(res.data.map((client) => client.firstName)); // Assuming clients have firstName
       })
       .catch((err) => {
         console.error("Error fetching clients:", err);

@@ -118,8 +118,7 @@ html, body {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  display: flex
-;
+  display: flex;
   align-items: center;
   gap: 10px;
   justify-content: center;
