@@ -719,3 +719,16 @@ td {
   background: orange;
   color: white;
 }
+
+.no-leads {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.no-leads-img {
+  width: 200px;
+  height: auto;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+

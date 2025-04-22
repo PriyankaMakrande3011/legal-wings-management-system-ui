@@ -1,73 +1,166 @@
 import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
-import "./ClientPage.css";
-import axios from "axios";
+import "./Calling.css";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import { MdKeyboardArrowDown } from "react-icons/md";
-import AddClient from "./AddLead";
+import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import Api from "./Api.js";
 
 const CallingTeam = () => {
-  const [columns, setColumns] = useState([]);
   const [records, setRecords] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [clientTypes, setClientTypes] = useState(["OWNER", "TENANT","AGENT"]);
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
-  const [areas, setAreas] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [clientType, setClientType] = useState("");
+  const [fromDate, setFromDate] = useState(new Date("2024-04-08"));
+  const [toDate, setToDate] = useState(new Date("2025-04-08"));
   const navigate = useNavigate();
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
 
-  // const handleAddClient = () => {
-  //   navigate("/addclients");
-  // };
-  const handleAddClient = () => {
-    setIsModalOpen(true); // Open the modal when the button is clicked
+  const handleAddNewLead = () => {
+    navigate("/add-lead");
   };
-  const handleCloseModal = () => {
-    setIsModalOpen(false); // Close the modal
+
+  const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
+    const requestBody = {
+      cityIdsUi: selectedCityId ? [parseInt(selectedCityId)] : [],
+      stateIdsUi: [],
+      zoneIdsUi: [],
+      areaIdsUi: selectedAreaId ? [parseInt(selectedAreaId)] : []
+    };
+
+    try {
+      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+      setCities(data?.cities || []);
+      setAreas(data?.areas || []);
+    } catch (error) {
+      console.error("Error fetching dropdown data:", error);
+    }
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3031/Lead").then((res) => {
-      setColumns(Object.keys(res.data[0]));
-      setRecords(res.data);
-    });
+    fetchDropdowns();
   }, []);
 
-  // Handle city change and update areas
   const handleCityChange = (e) => {
-    const selectedCity = e.target.value;
-    setCity(selectedCity);
-    setArea(""); // Reset area
-    setClients([]); // Reset clients
-
-    const cityAreas = {
-      Mumbai: ["Andheri", "Borivali", "Dadar"],
-      Pune: ["Kothrud", "Viman Nagar", "Hinjewadi"],
-    };
-
-    setAreas(cityAreas[selectedCity] || []);
+    const selectedCityId = e.target.value;
+    setCity(selectedCityId);
+    fetchDropdowns(selectedCityId, area);
   };
 
-  // Handle area change and fetch clients
   const handleAreaChange = (e) => {
-    const selectedArea = e.target.value;
-    setArea(selectedArea);
+    const selectedAreaId = e.target.value;
+    setArea(selectedAreaId);
+    fetchDropdowns(city, selectedAreaId);
+  };
 
-    // Fetch clients for the selected area
-    axios.get('http://localhost:3001/clients?area=${selectedArea}')
-        .then((res) => {
-        setClients(res.data.map((client) => client.firstName)); // Assuming clients have firstName
-      })
-      .catch((err) => {
-        console.error("Error fetching clients:", err);
+  const handleClearCity = () => {
+    setCity("");
+    fetchDropdowns("", area);
+  };
+
+  const handleClearArea = () => {
+    setArea("");
+    fetchDropdowns(city, "");
+  };
+
+  const handleClearClientType = () => {
+    setClientType("");
+  };
+
+  const handleSubmit = () => {
+    fetchLeads();
+  };
+
+  const fetchLeads = async () => {
+    const requestBody = {
+      fromDate: fromDate.toISOString().split("T")[0],
+      toDate: toDate.toISOString().split("T")[0],
+      clientType: clientType ? clientType.toUpperCase() : undefined,
+      cityIdsUi: city ? [parseInt(city)] : [],
+      areaIdsUi: area ? [parseInt(area)] : [],
+      pageNumber: 0,
+      pageSize: 1000,
+      sortField: "id",
+      sortOrder: "desc"
+    };
+
+    try {
+      const response = await fetch(`${Api.BASE_URL}leads/all`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
       });
+      let data = (await response.json())?.leadPage?.content || [];
+
+      if (searchText.trim()) {
+        const keyword = searchText.toLowerCase();
+        data = data.filter((record) => {
+          const firstName = record.client?.firstName?.toLowerCase() || "";
+          const lastName = record.client?.lastName?.toLowerCase() || "";
+          return firstName.includes(keyword) || lastName.includes(keyword);
+        });
+      }
+
+      setRecords(data);
+    } catch (error) {
+      console.error("Failed to fetch leads:", error);
+    }
+  };
+
+  
+  const fetchAllLeads = async () => {
+    const requestBody = {
+      fromDate: fromDate.toISOString().split("T")[0],
+      toDate: toDate.toISOString().split("T")[0],
+      sortField: "id",
+      sortOrder: "",
+      searchText: null,
+      pageNumber: 0,
+      pageSize: 10
+    };
+
+    try {
+      const response = await fetch(`${Api.BASE_URL}leads/all`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      let data = (await response.json())?.leadPage?.content || [];
+      
+      if (searchText.trim()) {
+        const keyword = searchText.toLowerCase();
+        data = data.filter((record) => {
+          const firstName = record.client?.firstName?.toLowerCase() || "";
+          const lastName = record.client?.lastName?.toLowerCase() || "";
+          return firstName.includes(keyword) || lastName.includes(keyword);
+        });
+      }
+
+      setRecords(data);
+    } catch (error) {
+      console.error("Failed to fetch leads:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllLeads();
+  }, []);  // Trigger fetchLeads when component is mounted
+
+
+  const handleViewClick = (leadId) => {
+    navigate(`/add-lead?mode=view&id=${leadId}`);
   };
 
   return (
@@ -77,144 +170,137 @@ const CallingTeam = () => {
         <Header />
         <div className="client-content-box">
           <div className="card-Container">
-            <div className="date-range-container">
-              <div className="date-field">
-                <label>From Date*</label>
-                <DatePicker
-                  selected={fromDate}
-                  onChange={(date) => setFromDate(date)}
-                  dateFormat="dd-MM-yyyy"
-                  className="custom-input"
-                />
+            <div className="filter-bar">
+              <div className="date-range">
+                <div className="date-field">
+                  <label>From Date*</label>
+                  <DatePicker
+                    selected={fromDate}
+                    onChange={(date) => setFromDate(date)}
+                    dateFormat="dd-MM-yyyy"
+                    className="custom-input"
+                  />
+                  <span className="calendar-icon"><FaRegCalendarAlt /></span>
+                </div>
+                <div className="date-field">
+                  <label>To Date*</label>
+                  <DatePicker
+                    selected={toDate}
+                    onChange={(date) => setToDate(date)}
+                    dateFormat="dd-MM-yyyy"
+                    className="custom-input"
+                  />
+                  <span className="calendar-icon"><FaRegCalendarAlt /></span>
+                </div>
               </div>
-              <div className="date-field">
-                <label>To Date*</label>
-                <DatePicker
-                  selected={toDate}
-                  onChange={(date) => setToDate(date)}
-                  dateFormat="dd-MM-yyyy"
-                  className="custom-input"
+
+              <div className="filters">
+                {/* City Dropdown */}
+                <div className="select-wrapper">
+                  <select value={city} onChange={handleCityChange}>
+                    <option value="">Select City</option>
+                    {cities.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  {city && <span className="clear-icon" onClick={handleClearCity}><FaTimes /></span>}
+                </div>
+
+                {/* Area Dropdown */}
+                <div className="select-wrapper">
+                  <select value={area} onChange={handleAreaChange}>
+                    <option value="">Select Area</option>
+                    {areas.map((a) => (
+                      <option key={a.id} value={a.id}>{a.name}</option>
+                    ))}
+                  </select>
+                  {area && <span className="clear-icon" onClick={handleClearArea}><FaTimes /></span>}
+                </div>
+
+                {/* Client Type Dropdown */}
+                <div className="select-wrapper">
+                  <select value={clientType} onChange={(e) => setClientType(e.target.value)}>
+                    <option value="">Select Client Type</option>
+                    {clientTypes.map((type, index) => (
+                      <option key={index} value={type}>{type}</option>
+                    ))}
+                  </select>
+                  {clientType && <span className="clear-icon" onClick={handleClearClientType}><FaTimes /></span>}
+                </div>
+
+                <input
+                  type="text"
+                  className="searchClient"
+                  placeholder="Search"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                 />
+                <button onClick={handleSubmit}>Submit</button>
               </div>
             </div>
-            <div className="client-filter">
 
-              {/* City Dropdown */}
-              <select value={city} >
-                <option value="" disabled>
-                  Select City
-                </option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Pune">Pune</option>
-                <MdKeyboardArrowDown />
-              </select>
-
-              {/* Area Dropdown */}
-              <select
-                value={area}
-                onChange={handleAreaChange}
-                disabled={!areas.length}
-              >
-                <option value="" disabled>
-                  Select Area
-                </option>
-                {areas.map((area, index) => (
-                  <option key={index} value={area}>
-                    {area}
-                  </option>
-                ))}
-              </select>
-              <select>
-                <option >
-                  Select Client Type
-                </option>
-                <option value="Owner">Owner</option>
-                <option value="Tenant">Tenant</option>
-                <option value="Agent">Agent</option>
-              </select>
-              {/* Client Dropdown */}
-              <input type="text" className="searchClient" placeholder="Search" />
-              <button >Submit</button>
-            </div>
-
-            {/* Stats Section */}
             <div className="stats-section">
-              <div className="stat-card">Total <strong>46</strong></div>
+              <div className="stat-card">Total <strong>{records.length}</strong></div>
               <div className="stat-card">Pending <strong>08</strong></div>
               <div className="stat-card">Cancelled <strong>02</strong></div>
               <div className="stat-card">Approved <strong>36</strong></div>
             </div>
-
-            {/* Add Leads Button */}
-            {/* <div className="button-section">
-            <button className="add-leads-btn">Add New Leads</button>
-          </div> */}
-          </div>
-
-          <hr />
+            <hr />
           <div className="client-action">
-            <button onClick={handleAddClient}>
+            <button onClick={handleAddNewLead}>
               <FaPlus className="plus" />
               Add New Lead
             </button>
           </div>
+
           <div className="client-table">
             <table className="table">
-              <thead >
+              <thead>
                 <tr>
-                  {columns.map((c, i) => (
-                    <th key={i}>{c}</th>
-                  ))}
-                  <th className="action-column" > Action</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Phone No</th>
+                  <th>Client Type</th>
+                  <th>Address</th>
+                  <th>Created Date</th>
+                  <th>Created By</th>
+                  <th>Updated By</th>
+                  <th>Tentative Date</th>
+                  <th>Status</th>
+                  <th className="action-column">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {records.map((d, i) => (
-                  <tr key={i}>
-                    <td>{d.id}</td>
-                    <td>{d.FirstName}</td>
-                    <td>{d.LastName}</td>
-                    <td>{d.ContactNumber}</td>
-                    <td>{d.Email}</td>
-                    <td>{d.Address}</td>
-                    <td>{d.City}</td>
-                    <td>{d.Area}</td>
-                    <td>{d.Pincode}</td>
-                    <td>{d.Aadhar_Number}</td>
-                    <td>{d.PAN_Number}</td>
-                    <td>{d.ClientType}</td>
-                    <td>{d.CreatedBy}</td>
-                    <td>{d.Created_date}</td>
-                    <td>{d.UpdatedBy}</td>
-                    <td>{d.Updated_date}</td>
-                    <td className="action-column" style={{ width: "150px" }}>
-                      <div>
-                        <FaEye
-                          className="action-icon"
-
-                        />
-                        <FaEdit
-                          className="action-icon"
-
-                        />
-                        <FaTrash
-                          className="action-icon"
-
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {records.map((record, index) => {
+                  const client = record.client || {};
+                  return (
+                    <tr key={index}>
+                      <td>{client.firstName || "-"}</td>
+                      <td>{client.lastName || "-"}</td>
+                      <td>{client.phoneNo || "-"}</td>
+                      <td>{client.clientType || "-"}</td>
+                      <td>{client.address || "-"}</td>
+                      <td>{new Date(record.createdDate).toLocaleDateString() || "-"}</td>
+                      <td>{client.createdByUserName || "-"}</td>
+                      <td>{client.updatedByUserName || "-"}</td>
+                      <td>{record.tentativeAgreementDate || "-"}</td>
+                      <td>{record.status || "-"}</td>
+                      <td className="action-column" style={{ width: "150px" }}>
+                        <div>
+                          <FaEye className="action-icon" onClick={() => handleViewClick(record.id)} />
+                          <FaEdit className="action-icon" />
+                          <FaTrash className="action-icon" />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
-      <AddClient
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-      // onSubmit={handleClientSubmit}
-      />
     </div>
   );
 };

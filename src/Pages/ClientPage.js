@@ -7,6 +7,7 @@ import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AddClient from "./AddClient";
 import axios from "axios";
 import Swal from "sweetalert2";
+import Api from "./Api.js";
 
 const ClientType = {
   OWNER: "OWNER",
@@ -46,7 +47,7 @@ const ClientPage = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://172.20.10.2:8080/legal-wings-management/clients/all",
+        `${Api.BASE_URL}clients/all`,
         {
           clientType: clientType || null,
           searchText: searchText || null,
@@ -113,7 +114,7 @@ const ClientPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://172.20.10.2:8080/legal-wings-management/clients/${id}`);
+          await axios.delete(`http://172.20.10.2:8080/legal-wings-management/clients//${id}`);
           Swal.fire("Deleted!", "Client has been removed.", "success");
           fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
         } catch (error) {

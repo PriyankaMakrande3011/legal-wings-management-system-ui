@@ -403,6 +403,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import "./AddClient.css";
+import Api from './Api.js';
 
 const AddClientModal = ({ isOpen, onClose }) => {
   const {
@@ -449,7 +450,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await fetch("http://192.168.1.43:8080/legal-wings-management/clients", {
+      const response = await fetch(`${Api.BASE_URL}clients`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

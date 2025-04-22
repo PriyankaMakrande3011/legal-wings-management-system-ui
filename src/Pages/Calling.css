@@ -1,102 +1,213 @@
-/* Container */
-.calling-container {
-    display: flex;
-  }
+.client-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.client-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.client-content-box {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.card-Container {
+  margin-bottom: 20px;
+}
+
+/* .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+} */
+
+.date-range {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-field label {
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.custom-input {
+  padding: 10px 10px;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  width: 190px;
+}
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.filters select,
+.filters input.searchClient {
+  padding: 10px 10px;
+  font-size: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid #ccc;
+  min-width: 190px;
+}
+
+.filters button {
+  background-color: #efcd52;
+  color: white;
+  border: none;
+  padding: 12px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.filters button:hover {
+  background-color: #e7c141;
+}
+
+.stats-section {
+  display: flex;
   
-  /* Page Layout */
-  .calling-page {
-    flex: 1;
-    padding: 20px;
-    background-color: #f4f7f9;
-  }
+  gap: 1rem;
   
-  /* Content Box */
-  .calling-content-box {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Filters Section */
-  .calling-filter {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .date-field {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .date-field label {
-    font-size: 14px;
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 5px;
-  }
-  
-  .custom-input {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-    background: #fff;
-    width: 100%;
-  }
-  
-  /* Search & Submit */
-  .search-section {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  
-  .search-section input {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-  }
-  
-  .submit-btn {
-    padding: 8px 15px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .submit-btn:hover {
-    background-color: #218838;
-  }
-  
-  /* Divider */
-  .divider {
-    margin: 20px 0;
-    border: 1px solid #ddd;
-  }
-  
-  /* Stats Section */
-  .stats-section {
-    display: flex;
-    gap: 15px;
-    justify-content: space-between;
-  }
-  
-  .stat-card {
-    background: #fff;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    text-align: center;
-    flex: 1;
-    font-weight: bold;
-  }
-  
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  background-color: #f1f1f1;
+  transform: translateY(-2px);
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 1.1rem;
+  color: #19191a91;
+}
+
+.client-action {
+  margin-bottom: 20px;
+}
+
+.client-action button {
+  background-color: #fbbe2f;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.client-action button:hover {
+  background-color: #218838;
+}
+
+.client-table .table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.client-table th,
+.client-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.client-table th {
+  background-color: #f1f1f1;
+}
+
+.action-column {
+  text-align: center;
+}
+
+.action-icon {
+  margin: 0 5px;
+  cursor: pointer;
+  color: #555;
+}
+
+.action-icon:hover {
+  color: #fabc37;
+}
+.date-picker-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 160px;
+}
+
+.date-input {
+  width: 100%;
+  padding: 8px 32px 8px 10px; /* Right padding for icon */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.calendar-icon {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+  font-size: 16px;
+}
+
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.select-wrapper select {
+  padding-right: 30px;
+}
+
+.clear-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  cursor: pointer;
+}
