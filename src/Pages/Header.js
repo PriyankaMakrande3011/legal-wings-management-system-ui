@@ -17,6 +17,7 @@ const Header = () => {
     "/marketing-team": "Marketing Team",
     "/clients": "Client",
     "/client-edit": "Client Edit Page",
+    "/add-lead": "Add Lead"
    
   };
   const getInitials = () => {

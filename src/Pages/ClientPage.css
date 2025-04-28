@@ -149,7 +149,6 @@ html, body {
   overflow-y: auto;
   max-height: 412px;
   width: 100%;
-  margin-top: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #fff;
@@ -660,7 +659,6 @@ html, body {
 th, td {
   padding: 12px 15px;
   text-align: left;
-  border: 1px solid #ddd;
   white-space: nowrap; /* Prevent text from wrapping */
 }
 

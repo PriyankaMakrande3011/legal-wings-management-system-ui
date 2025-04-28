@@ -19,6 +19,8 @@
   margin-bottom: 24px;
 }
 
+
+
 /* Tab buttons */
 .tab-buttons {
   display: flex;
@@ -113,5 +115,39 @@
 
 .client-dropdown{
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  border-radius: 13px;
 }
+
+.button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-wrapper button {
+  padding: 8px 16px;
+  background-color: #f8c82a; /* Bootstrap blue */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.button-wrapper button:hover {
+  background-color: #b9500b;
+}
+
+.agreement-heading {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  margin-top: 16px;
+  color: #af632db4;
+  padding-bottom: 6px;
+  
+}
+

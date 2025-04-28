@@ -3,10 +3,13 @@ import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
 import { useNavigate } from "react-router-dom";
+import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Api from "./Api.js";
+import AssignLead from "./AssingLead.js";
+import "./ClientPage.css"
 
 const CallingTeam = () => {
   const [records, setRecords] = useState([]);
@@ -19,7 +22,9 @@ const CallingTeam = () => {
   const [clientType, setClientType] = useState("");
   const [fromDate, setFromDate] = useState(new Date("2024-04-08"));
   const [toDate, setToDate] = useState(new Date("2025-04-08"));
+  const [isModalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [selectedLeadId, setSelectedLeadId] = useState(null);
 
   const handleAddNewLead = () => {
     navigate("/add-lead");
@@ -163,6 +168,18 @@ const CallingTeam = () => {
     navigate(`/add-lead?mode=view&id=${leadId}`);
   };
 
+  const handleEditClick = (leadId) => {
+    navigate(`/add-lead?mode=edit&id=${leadId}`);
+  };
+
+  const handleAssign = (lead) => {
+  
+    setModalOpen(false);
+    setSelectedLeadId(lead);
+  };
+  
+
+ 
   return (
     <div className="client-container">
       <Slider />
@@ -290,6 +307,12 @@ const CallingTeam = () => {
                           <FaEye className="action-icon" onClick={() => handleViewClick(record.id)} />
                           <FaEdit className="action-icon" />
                           <FaTrash className="action-icon" />
+                          <BsBoxArrowInRight
+                  className="action-icon edit"
+                  onClick={() => {setModalOpen(true)
+                    setSelectedLeadId(record.id)}
+                  }
+                />
                         </div>
                       </td>
                     </tr>
@@ -297,6 +320,12 @@ const CallingTeam = () => {
                 })}
               </tbody>
             </table>
+            <AssignLead
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onAssign={handleAssign}
+        leadId={selectedLeadId}
+      />
             </div>
           </div>
         </div>

@@ -15,7 +15,8 @@ import Execative from './Pages/Execative';
 import BackendTeam from './Pages/BackendTeam';
 import BackendDetails from './Pages/BackendDetails';
 import AddLeadPage from './Pages/AddLeadPage';
-
+import AssignLead from './Pages/AssingLead';
+import ExecativeAddDetails from './Pages/ExecativeAddDetails';
 
 function App() {
 
@@ -41,9 +42,9 @@ const teams = [
         <Route path="/calling-team" element={<CallingTeam />} />
         <Route path="/executive-team" element={<Execative />} />
         <Route path="/backend-team" element={<BackendTeam />} />
-        <Route path="/lead/:id" element={<BackendDetails />} />
-       
-
+        <Route path="/lead-details/" element={<BackendDetails />} />
+        <Route path="/assing-lead" element={<AssignLead />} />
+        <Route path="/add-execative-details" element={<ExecativeAddDetails/>} />
 <Route path="/add-lead" element={<AddLeadPage />} />
 
        
