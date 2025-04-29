@@ -165,7 +165,7 @@ const CallingTeam = () => {
 
 
   const handleViewClick = (leadId) => {
-    navigate(`/add-lead?mode=view&id=${leadId}`);
+    navigate(`/add-lead?mode=view&id=${leadId}&mode=view`);
   };
 
   const handleEditClick = (leadId) => {
