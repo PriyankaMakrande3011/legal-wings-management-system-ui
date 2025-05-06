@@ -4,10 +4,13 @@ import Slider from "./Slider";
 import Header from "./Header.js";
 import './AddLead.css';
 import AddClient from "./AddClient.js";
-import { FaPlus } from "react-icons/fa";
+
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaPlus,  FaRegCalendarAlt } from "react-icons/fa";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 
 import Api from './Api.js';
@@ -24,7 +27,8 @@ const AddLeadPage = ({
   const id = queryParams.get("id");
   const [leadId, setLeadId] = useState(null);
   const defaultTab = showLead ? 'lead' : showClient ? 'client' : 'payment';
-
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [formData, setFormData] = useState({});
   const [clients, setClients] = useState([]);
@@ -377,8 +381,32 @@ const AddLeadPage = ({
             <h3 className="agreement-heading">Agreement Details</h3>
             <div className="form-grid">
               {renderInput("Token Number", "tokenNumber")}
-              {renderInput("Agreement Start Date", "startDate")}
-              {renderInput("Agreement End Date", "endDate")}
+              <div className="date-field">
+    <label>Agreement Start Date</label>
+    <div className="input-wrapper">
+      <DatePicker
+        selected={startDate}
+        onChange={(date) => setStartDate(date)}
+        dateFormat="dd-MM-yyyy"
+        className="custom-input"
+      />
+      <FaRegCalendarAlt className="calendar-icon" />
+    </div>
+  </div>
+
+  <div className="date-field">
+    <label>Agreement End Date</label>
+    <div className="input-wrapper">
+      <DatePicker
+        selected={endDate}
+        onChange={(date) => setEndDate(date)}
+        dateFormat="dd-MM-yyyy"
+        className="custom-input"
+      />
+      <FaRegCalendarAlt className="calendar-icon" />
+    </div>
+  </div>
+
               {renderInput("Address Line 1", "addressLine1")}
               {renderInput("Address Line 2", "addressLine2")}
             </div>

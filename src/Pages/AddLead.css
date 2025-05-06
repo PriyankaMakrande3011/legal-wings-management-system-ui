@@ -150,4 +150,36 @@
   padding-bottom: 6px;
   
 }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Adjust to 2 or 4 based on layout needs */
+  gap: 20px;
+}
 
+.date-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.custom-input {
+  width: 100%;
+  padding-right: 35px; /* Makes room for the calendar icon */
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  pointer-events: none;
+  font-size: 16px;
+}

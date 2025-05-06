@@ -1,136 +1,162 @@
-/* General styling */
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    height: 100vh;
-    display: flex;
+  display: flex;
+  height: 100vh;
+  overflow-x: hidden;
 }
 
+.right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
 
-
-/* Main Content */
 .main-content {
-    padding: 20px;
-    flex: 1 1;
-    /* display: flex; */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgb(199, 196, 196);
-    border-radius: 10px; /* Rounded corners */
-    margin: 20px; /* Margin from all sides */
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid rgb(199, 196, 196);
+  border-radius: 10px;
+  margin: 20px;
 }
 
-.heading-grid{
-    background-color: #f5f1f1;
-    margin-bottom: 50px;
-    width: 100%;
-}
-.powered-heading h4{
-color: orange;
-padding-bottom: 20px;
+.powered-heading h4 {
+  color: orange;
+  padding-bottom: 20px;
 }
 
-.header-line{
-    width: 100%;
-}
-.heading-grid h1{
-    display: flex;
-    justify-content: center;
-    padding: 30px;
-    font-size: 21px;
-}
-.open-sider {
-    background: #2c3e50;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 18px;
-    margin-bottom: 20px;
-    border-radius: 5px;
+.heading-grid {
+  background-color: #f5f1f1;
+  margin-bottom: 50px;
+  width: 100%;
 }
 
-/* User Grid */
+.heading-grid h1 {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+  font-size: 21px;
+  text-align: center;
+}
+
 .user-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columns */
-    grid-auto-rows: 190px; /* Ensure uniform height */
-    gap: 20px; /* Space between cards */
-    justify-content: center; /* Center content horizontally */
-  }
-.user-grid > :nth-child(4),
-.user-grid > :nth-child(5) {
-  grid-column: span 1; /* Span one column */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  justify-items: center;
+  grid-auto-rows: 190px; 
+  width: 100%;
 }
-
-.user-grid > :nth-child(6) {
-  grid-column: 2 / 4; /* Centered for 2 cards in the last row */
-}
-.user-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: #e3dddd;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.user-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-}
-
-.user-card p {
-    margin: 0;
-    font-size: 16px;
-    font-weight: bold;
-}
-
 
 .team-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ddd;
-    padding: 20px;
-    cursor: pointer;
-    width: 350px;
-    transition: transform 0.2s ease-in-out;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
-    background-color: #ebe4e44a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  padding: 20px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 450px;
+  transition: transform 0.2s ease-in-out;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
+  background-color: #ebe4e44a;
 }
 
 .team-card:hover {
-    transform: scale(1.05); /* Slightly enlarge the card on hover */
-    box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.2); /* Increase shadow depth */
-    background-color: #fff; /* Optional: Lighten the background */
-    color: #e9bf07; /* Change text color on hover */
+  transform: scale(1.05);
+  box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  color: #e9bf07;
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-    .user-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.team-card p {
+  font-size: 20px;
+  margin-top: 10px;
+  font-weight: bold;
 }
-.sider:not(.open) {
-    width: 260px; /* Closed state width, showing only icons */
-    overflow: visible;
+
+/* Tablets and small laptops */
+@media (max-width: 1024px) {
+  .main-content {
+      margin: 10px;
+      padding: 15px;
   }
-  .sider:not(.open) li span {
-    display: none; /* Hide text when closed */
+
+  .team-card {
+      width: 100%;
   }
-  
+}
+
+/* General mobile responsiveness */
+@media (max-width: 768px) {
+ 
+  .right-section {
+      width: 100%;
+  }
+
+  .main-content {
+      margin: 10px;
+      padding: 10px;
+      border: none;
+  }
+
+  .heading-grid h1 {
+      font-size: 18px !important;
+      padding: 20px;
+      line-height: 1.4;
+  }
+
+  .powered-heading h4 {
+      font-size: 14px;
+      text-align: center;
+  }
+
+  .user-grid {
+      grid-template-columns: 1fr;
+      gap: 15px;
+      width: 100%;
+  }
+
+  .team-card {
+      max-width: 100%;
+      padding: 15px;
+  }
+
+  .team-card p {
+      font-size: 16px;
+  }
+}
+
+/* Ensure header content wraps nicely on mobile */
+@media (max-width: 500px) {
+  .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+  }
+
+  .user-info {
+      font-size: 14px;
+  }
+}
+
+
+/* Optional tweak for mid-sized tablets */
+@media (min-width: 935px) and (max-width: 1235px) {
+  .main-content {
+      margin: 10px;
+      padding: 15px;
+  }
+
+  .team-card {
+      width: 100%;
+  }
+}

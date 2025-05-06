@@ -188,28 +188,33 @@ const CallingTeam = () => {
         <div className="client-content-box">
           <div className="card-Container">
             <div className="filter-bar">
-              <div className="date-range">
-                <div className="date-field">
-                  <label>From Date*</label>
-                  <DatePicker
-                    selected={fromDate}
-                    onChange={(date) => setFromDate(date)}
-                    dateFormat="dd-MM-yyyy"
-                    className="custom-input"
-                  />
-                  <span className="calendar-icon"><FaRegCalendarAlt /></span>
-                </div>
-                <div className="date-field">
-                  <label>To Date*</label>
-                  <DatePicker
-                    selected={toDate}
-                    onChange={(date) => setToDate(date)}
-                    dateFormat="dd-MM-yyyy"
-                    className="custom-input"
-                  />
-                  <span className="calendar-icon"><FaRegCalendarAlt /></span>
-                </div>
-              </div>
+            <div className="date-range">
+  <div className="date-field">
+    <label>From Date*</label>
+    <div className="input-wrapper">
+      <DatePicker
+        selected={fromDate}
+        onChange={(date) => setFromDate(date)}
+        dateFormat="dd-MM-yyyy"
+        className="custom-input"
+      />
+      <FaRegCalendarAlt className="calendar-icon" />
+    </div>
+  </div>
+  <div className="date-field">
+    <label>To Date*</label>
+    <div className="input-wrapper">
+      <DatePicker
+        selected={toDate}
+        onChange={(date) => setToDate(date)}
+        dateFormat="dd-MM-yyyy"
+        className="custom-input"
+      />
+      <FaRegCalendarAlt className="calendar-icon" />
+    </div>
+  </div>
+</div>
+
 
               <div className="filters">
                 {/* City Dropdown */}
