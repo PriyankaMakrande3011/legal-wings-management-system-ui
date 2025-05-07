@@ -20,8 +20,8 @@ const CallingTeam = () => {
   const [area, setArea] = useState("");
   const [searchText, setSearchText] = useState("");
   const [clientType, setClientType] = useState("");
-  const [fromDate, setFromDate] = useState(new Date("2024-04-08"));
-  const [toDate, setToDate] = useState(new Date("2025-04-08"));
+  const [fromDate, setFromDate] = useState(new Date());
+  const [toDate, setToDate] = useState(new Date());
   const [isModalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
@@ -307,7 +307,7 @@ const CallingTeam = () => {
                       <td>{client.updatedByUserName || "-"}</td>
                       <td>{record.tentativeAgreementDate || "-"}</td>
                       <td>{record.status || "-"}</td>
-                      <td className="action-column" style={{ width: "150px" }}>
+                      <td className="action-column" >
                         <div>
                           <FaEye className="action-icon" onClick={() => handleViewClick(record.id)} />
                           <FaEdit className="action-icon" />

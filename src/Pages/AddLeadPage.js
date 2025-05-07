@@ -285,46 +285,80 @@ const AddLeadPage = ({
     />
   );
 
-  
   useEffect(() => {
     console.log("Mode:", mode, "ID:", id);
     const fetchLeadDetails = async () => {
       if (mode === "view" && id) {
         try {
-          const response = await axios.get(
-            `http://localhost:8080/legal-wings-management/leads/${id}`
-          );
+          const response = await axios.get(`http://localhost:8080/legal-wings-management/leads/${id}`);
           const data = response.data;
           console.log("Fetched data:", data);
-          const leadData = {
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
-            phoneNo: data.phoneNo || "",
-            email: data.email || "",
-
-            ownerFirstName: data.owner?.firstName || "",
-            ownerPhone: data.owner?.phoneNo || "",
-
-            tenantFirstName: data.tenant?.firstName || "",
-            tenantPhone: data.tenant?.phoneNo || "",
-
-            agreementStartDate: data.agreement?.startDate || "",
-            agreementEndDate: data.agreement?.endDate || "",
-
-            totalAmount: data.payment?.totalAmount || "",
-            ownerAmount: data.payment?.ownerAmount || "",
-            tenantAmount: data.payment?.tenantAmount || "",
-          };
-
-          setFormData(leadData);
-        } catch (error) {
-          console.error("Error fetching lead data", error);
+  
+          setFormData({
+            // Client
+            firstName: data.client?.firstName || "",
+            lastName: data.client?.lastName || "",
+            contactNumber: data.client?.phoneNo || "",
+            email: data.client?.email || "",
+            clientType: data.client?.clientType || "",
+            tentativeAgreementDate: data.client.tentativeAgreementDate || "",
+            area: data.client.area || "",
+            city: data.client.city || "",
+            tentativeAddress:data.client.tentativeAddress || "",
+  
+            // Owner
+            ownerFirstName: data.agreement?.owner?.firstName || "",
+            ownerLastName: data.agreement?.owner?.lastName || "",
+            ownerContact: data.agreement?.owner?.phoneNo || "",
+            ownerEmail: data.agreement?.owner?.email || "",
+            ownerAadhar: data.agreement?.owner?.aadharNumber || "",
+            ownerPan: data.agreement?.owner?.panNumber || "",
+  
+            // Tenant
+            tenantFirstName: data.agreement?.tenant?.firstName || "",
+            tenantLastName: data.agreement?.tenant?.lastName || "",
+            tenantContact: data.agreement?.tenant?.phoneNo || "",
+            tenantEmail: data.agreement?.tenant?.email || "",
+            tenantAadhar: data.agreement?.tenant?.aadharNumber || "",
+            tenantPan: data.agreement?.tenant?.panNumber || "",
+  
+            // Agreement
+            startDate: data.agreement?.agreementStartDate || "",
+            endDate: data.agreement?.agreementEndDate || "",
+            area: data.agreement?.area?.name || "",
+            addressLine1: data.agreement?.addressLine1 || "",
+            addressLine2: data.agreement?.addressLine2 || "",
+            city: data.agreement?.city || "",
+            pinCode: data.agreement?.pinCode || "",
+            tokenNumber: data.agreement?.tokenNo || "",
+  
+            // Payment
+            totalPayment: data.payment?.totalAmount || "",
+            ownerPayment: data.payment?.ownerAmount || "",
+            tenantPayment: data.payment?.tenantAmount || "",
+            remainingPayment: data.payment?.remainingAmount || "",
+            paymentMode: data.payment?.modeOfPayment || "",
+            paymentCalendar: data.payment?.paymentCalendar || ""
+          });
+  
+          // For datepicker values
+          if (data.agreement?.agreementStartDate) {
+            setStartDate(new Date(data.agreement.agreementStartDate));
+          }
+          if (data.agreement?.agreementEndDate) {
+            setEndDate(new Date(data.agreement.agreementEndDate));
+          }
+  
+        } catch (err) {
+          console.error("Error fetching lead details:", err);
         }
       }
     };
-
+  
     fetchLeadDetails();
   }, [mode, id]);
+  
+  
 
 
   const renderContent = () => {
@@ -341,7 +375,7 @@ const AddLeadPage = ({
               {renderInput("Client Type", "clientType")}
               {renderInput("Contact Number", "contactNumber")}
               {renderInput("Email", "email")}
-              {renderInput("Tentative Agreement Date", "date")}
+              {renderInput("Tentative Agreement Date", "tentativeAgreementDate")}
               {renderInput("Tentative Address", "address")}
               {renderInput("Area", "area")}
               {renderInput("City", "city")}
