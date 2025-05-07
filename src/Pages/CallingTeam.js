@@ -97,7 +97,8 @@ const CallingTeam = () => {
       pageNumber: 0,
       pageSize: 1000,
       sortField: "id",
-      sortOrder: "desc"
+      sortOrder: "desc",
+      transitLevel: "CALLING_TEAM"
     };
 
     try {

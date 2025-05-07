@@ -211,3 +211,29 @@
   color: #555;
   cursor: pointer;
 }
+
+
+/* execative */
+.action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  padding: 6px;
+ 
+  cursor: pointer;
+}
+
+.icon-view {
+  background-color: #e0e0e0; /* light gray */
+  color: #333;
+}
+
+.icon-edit {
+  background-color: #1976d2; /* blue */
+  color: white;
+}
+
+.icon-cancel {
+  background-color: red;
+  color: white;
+}
