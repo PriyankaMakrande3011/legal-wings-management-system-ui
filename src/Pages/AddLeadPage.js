@@ -45,7 +45,7 @@ const AddLeadPage = ({
   }, []);
 
   const handleAcceptLead = (lead) => {
-    navigate("/add-execative-details");   // navigate to AddLeadPage
+    navigate("/add-Executive-details");   // navigate to AddLeadPage
   };
   
 

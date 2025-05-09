@@ -17,7 +17,7 @@ import Swal from "sweetalert2";
 
 import "./ClientPage.css"
 
-const Execative = () => {
+const Executive = () => {
   const [records, setRecords] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -373,4 +373,4 @@ const Execative = () => {
 };
 
 
-export default Execative;
+export default Executive;

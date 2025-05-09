@@ -11,12 +11,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import Slider from './Pages/Slider';
 import { useState } from 'react';
 import AddClient from './Pages/AddClient';
-import Execative from './Pages/Execative';
+import Executive from './Pages/Executive';
 import BackendTeam from './Pages/BackendTeam';
 import BackendDetails from './Pages/BackendDetails';
 import AddLeadPage from './Pages/AddLeadPage';
 import AssignLead from './Pages/AssingLead';
-import ExecativeAddDetails from './Pages/ExecativeAddDetails';
+import ExecutiveAddDetails from './Pages/ExecutiveAddDetails';
 
 function App() {
 
@@ -40,11 +40,11 @@ const teams = [
         <Route path="/clients" element={<ClientPage />} />
         <Route path="/addclients" element={<AddClient />} />
         <Route path="/calling-team" element={<CallingTeam />} />
-        <Route path="/executive-team" element={<Execative />} />
+        <Route path="/executive-team" element={<Executive />} />
         <Route path="/backend-team" element={<BackendTeam />} />
         <Route path="/lead-details/" element={<BackendDetails />} />
         <Route path="/assing-lead" element={<AssignLead />} />
-        <Route path="/add-execative-details" element={<ExecativeAddDetails/>} />
+        <Route path="/add-Executive-details" element={<ExecutiveAddDetails/>} />
 <Route path="/add-lead" element={<AddLeadPage />} />
 
        

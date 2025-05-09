@@ -15,7 +15,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import Api from './Api.js';
 
-const ExecativeAddDetails = ({
+const ExecutiveAddDetails = ({
   showLead = true,
   showClient = true,
   showPayment = true,
@@ -45,7 +45,7 @@ const ExecativeAddDetails = ({
   }, []);
 
   const handleAcceptLead = (lead) => {
-    navigate("/add-execative-details");   // navigate to AddLeadPage
+    navigate("/add-Executive-details");   // navigate to AddLeadPage
   };
   
 
@@ -492,4 +492,4 @@ const ExecativeAddDetails = ({
   );
 };
 
-export default ExecativeAddDetails;
+export default ExecutiveAddDetails;
