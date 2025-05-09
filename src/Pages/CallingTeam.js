@@ -25,6 +25,9 @@ const CallingTeam = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [noData, setNoData] = useState(false);
+
 
   const handleAddNewLead = () => {
     navigate("/add-lead");
@@ -88,6 +91,8 @@ const CallingTeam = () => {
   };
 
   const fetchLeads = async () => {
+    setLoading(true);
+  setNoData(false);
     const requestBody = {
       fromDate: fromDate.toISOString().split("T")[0],
       toDate: toDate.toISOString().split("T")[0],
@@ -117,10 +122,15 @@ const CallingTeam = () => {
           return firstName.includes(keyword) || lastName.includes(keyword);
         });
       }
-
       setRecords(data);
+      setNoData(data.length === 0);
+     
     } catch (error) {
       console.error("Failed to fetch leads:", error);
+      setNoData(true);
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -277,6 +287,13 @@ const CallingTeam = () => {
           </div>
 
           <div className="client-table">
+          {loading ? (
+   <div className="loading-spinner">
+   <img src="https://la-solargroup.com/wp-content/uploads/2019/02/loading-icon.gif" alt="Loading..." />
+ </div>
+) : noData ? (
+  <p>No records found.</p>
+) : (
             <table className="table">
               <thead>
                 <tr>
@@ -322,10 +339,12 @@ const CallingTeam = () => {
                         </div>
                       </td>
                     </tr>
-                  );
+                  )
+                  
                 })}
               </tbody>
             </table>
+  )}
             <AssignLead
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
