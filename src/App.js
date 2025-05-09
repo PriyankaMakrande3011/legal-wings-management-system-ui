@@ -11,12 +11,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import Slider from './Pages/Slider';
 import { useState } from 'react';
 import AddClient from './Pages/AddClient';
-import Executive from './Pages/Executive';
+import Executive from './Pages/Execative';
 import BackendTeam from './Pages/BackendTeam';
 import BackendDetails from './Pages/BackendDetails';
 import AddLeadPage from './Pages/AddLeadPage';
 import AssignLead from './Pages/AssingLead';
-import ExecutiveAddDetails from './Pages/ExecutiveAddDetails';
+import ExecutiveAddDetails from './Pages/ExecativeAddDetails';
 
 function App() {
 
