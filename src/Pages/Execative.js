@@ -131,7 +131,7 @@ const Executive = () => {
       pageSize: 1000,
       sortField: "id",
       sortOrder: "desc",
-      transitLevel: "CALLING_TEAM"
+      transitLevel: "EXECUTIVE_TEAM"
     };
 
     try {

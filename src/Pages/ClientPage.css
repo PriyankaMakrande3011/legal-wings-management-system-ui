@@ -102,9 +102,7 @@ html, body {
 .client-action {
   display: flex;
   justify-content: end;
-  margin-bottom: 15px;
-  margin-top: 10px;
-  gap: 20px;
+
 }
 
 .client-filter button {
@@ -498,7 +496,7 @@ html, body {
 .client-action {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  
 }
 
 .client-action .p-button {

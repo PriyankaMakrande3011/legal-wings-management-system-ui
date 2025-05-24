@@ -143,7 +143,8 @@ const CallingTeam = () => {
       sortOrder: "",
       searchText: null,
       pageNumber: 0,
-      pageSize: 10
+      pageSize: 10,
+      transitLevel: "CALLING_TEAM"
     };
 
     try {
@@ -180,7 +181,7 @@ const CallingTeam = () => {
   };
 
   const handleEditClick = (leadId) => {
-    navigate(`/add-lead?mode=edit&id=${leadId}`);
+    navigate(`/edit?mode=edit&id=${leadId}`);
   };
 
   const handleAssign = (lead) => {
@@ -328,7 +329,7 @@ const CallingTeam = () => {
                       <td className="action-column" >
                         <div>
                           <FaEye className="action-icon" onClick={() => handleViewClick(record.id)} />
-                          <FaEdit className="action-icon" />
+                           <FaEdit onClick={() => handleEditClick(record.id)} title="Edit" />
                           <FaTrash className="action-icon" />
                           <BsBoxArrowInRight
                   className="action-icon edit"

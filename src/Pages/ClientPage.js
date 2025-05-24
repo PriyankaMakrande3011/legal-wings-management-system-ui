@@ -7,7 +7,9 @@ import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import AddClient from "./AddClient";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 import Api from "./Api.js";
+import EditClient from "./EditClient.js";
 
 const ClientType = {
   OWNER: "OWNER",
@@ -40,7 +42,11 @@ const ClientPage = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [showEditClientModal, setShowEditClientModal] = useState(false);
+
   const recordsPerPage = 10;
+  const navigate = useNavigate();
+
 
   // Fetch client data
   const fetchClients = async (clientType = "", searchText = "", pageNumber = 0) => {
@@ -124,7 +130,9 @@ const ClientPage = () => {
       }
     });
   };
-
+const handleEditClick = () => {
+  setShowEditClientModal(true);
+};
   return (
     <div className="client-container">
       <Slider />
@@ -183,7 +191,8 @@ const ClientPage = () => {
                         <td key={i}>{client[col] || "N/A"}</td>
                       ))}
                       <td>
-                        <FaEdit className="action-icon" />
+                        <FaEdit className="action-icon" onClick={() => handleEditClick(client.id)} />
+                        
                         <FaTrash className="action-icon delete-icon" onClick={() => handleDelete(client.id)} />
                       </td>
                     </tr>
@@ -210,6 +219,7 @@ const ClientPage = () => {
 
       {/* Add Client Modal */}
       <AddClient isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <EditClient isOpen={showEditClientModal} onClose={() => setShowEditClientModal(false)} />
     </div>
   );
 };

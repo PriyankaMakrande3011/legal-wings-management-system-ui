@@ -17,6 +17,8 @@ import BackendDetails from './Pages/BackendDetails';
 import AddLeadPage from './Pages/AddLeadPage';
 import AssignLead from './Pages/AssingLead';
 import ExecutiveAddDetails from './Pages/ExecativeAddDetails';
+import Edit from './Pages/Edit';
+import EditClient from './Pages/EditClient';
 
 function App() {
 
@@ -46,6 +48,8 @@ const teams = [
         <Route path="/assing-lead" element={<AssignLead />} />
         <Route path="/add-Executive-details" element={<ExecutiveAddDetails/>} />
 <Route path="/add-lead" element={<AddLeadPage />} />
+   <Route path="/edit" element={<Edit />} />
+    <Route path="/edit-client" element={<EditClient />} />
 
        
         {/* {teams.map((team, index) => (

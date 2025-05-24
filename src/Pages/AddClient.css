@@ -154,9 +154,25 @@ textarea {
 
 /* Labels */
 label {
-  font-weight: bold;
+  font-weight: 500;
   display: block;
   margin-bottom: 0.5rem;
+}
+input::placeholder {
+  color: #444;             /* Darker color for better visibility */
+  opacity: 1;              /* Ensure it's fully visible */
+  font-size: 14px;         /* Increase size slightly */
+  font-weight: 500;        /* Optional: makes it bolder */
+}
+
+input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #000;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Input Fields */

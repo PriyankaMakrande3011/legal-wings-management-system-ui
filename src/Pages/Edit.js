@@ -15,7 +15,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import Api from './Api.js';
 
-const AddLeadPage = ({
+const Edit = ({
   showLead = true,
   showClient = true,
   showPayment = true,
@@ -247,22 +247,11 @@ const AddLeadPage = ({
       .catch(err => console.error("Failed to fetch client data", err));
   };
 
-  // const renderClientDropdown = (type) => (
-  //   <select
-  //     onChange={(e) => fetchAndAutofillClient(e.target.value, type)}
-  //     defaultValue=""
-  //     className='client-dropdown'
-  //   >
-  //     <option value="">Select Existing Client</option>
-  //     {clients.map(client => (
-  //       <option key={client.id} value={client.id}>{client.name}</option>
-  //     ))}
-  //   </select>
-  // );
+  
 
   const renderClientDropdown = (type) => {
     // Return null if mode is "view" to hide the dropdown
-    if (mode === "view") {
+    if (mode === "edit") {
       return null;
     }
 
@@ -288,7 +277,7 @@ const AddLeadPage = ({
       <select
         value={formData[field] || ''}
         onChange={(e) => handleInputChange(field, e.target.value)}
-        disabled={mode === 'view'}
+        // disabled={mode === 'edit'}
         className="client-dropdown"
       >
         <option value="">Select {label}</option>
@@ -302,14 +291,15 @@ const AddLeadPage = ({
   );
 
 
-  const renderInput = (label, placeholder, field) => (
+  const renderInput = (label, placeholder, field, extraProps = {}) => (
     <div>
       <label htmlFor={field}>{label}</label>
       <input
         placeholder={placeholder}
         value={formData[field] || ''}
-        readOnly={mode === 'view'}
+
         onChange={e => handleInputChange(field, e.target.value)}
+           {...extraProps}
       />
     </div>
   );
@@ -317,7 +307,7 @@ const AddLeadPage = ({
   useEffect(() => {
     console.log("Mode:", mode, "ID:", id);
     const fetchLeadDetails = async () => {
-      if (mode === "view" && id) {
+      if (mode === "edit" && id) {
         try {
           const response = await axios.get(`http://localhost:8080/legal-wings-management/leads/${id}`);
           const data = response.data;
@@ -403,17 +393,17 @@ const AddLeadPage = ({
               {renderClientDropdown('lead')}
             </div>
             <div className="form-grid">
-              {renderInput("First Name","First Name","firstName")}
-              {renderInput("Last Name","Last Name", "lastName")}
+              {renderInput("First Name","First Name","firstName",{ readOnly: mode === 'edit' })}
+              {renderInput("Last Name","Last Name", "lastName",{ readOnly: mode === 'edit' })}
               {renderDropdown("Client Type", "clientType", clientTypeOptions)}
-              {renderInput("Contact Number","Contact Number", "contactNumber")}
-              {renderInput("Email","Email" ,"email")}
-              {renderInput("Tentative Agreement Date","Tentative Agreement Date", "tentativeAgreementDate")}
-              {renderInput("Tentative Address","Tentative Address", "address")}
-              {renderInput("Area","Area", "area")}
-              {renderInput("City","City", "city")}
+              {renderInput("Contact Number","Contact Number", "contactNumber",{ readOnly: mode === 'edit' })}
+              {renderInput("Email","Email" ,"email",{ readOnly: mode === 'edit' })}
+              {renderInput("Tentative Agreement Date","Tentative Agreement Date", "tentativeAgreementDate",{ readOnly: false })}
+              {renderInput("Tentative Address","Tentative Address", "address",{ readOnly: false })}
+              {renderInput("Area","Area", "area",{ readOnly: false })}
+              {renderInput("City","City", "city", { readOnly: false })}
             </div>
-            {mode !== 'view' && (
+            {mode == 'edit' && (
               <div className="button-wrapper">
                 <button onClick={handleSaveLead}>Save</button>
                 <button onClick={() => handleNext('client')}>Next</button>
@@ -428,32 +418,32 @@ const AddLeadPage = ({
             <h3 className="agreement-heading">Owner</h3>
             {renderClientDropdown('owner')}
             <div className="form-grid">
-              {renderInput("Owner Firstname","Owner Firstname", "ownerFirstName")}
-              {renderInput("Tenant LastName","Tenant LastName", "ownerLastName")}
-              {renderInput("Owner Email","Owner Email", "ownerEmail")}
-              {renderInput("Owner Contact","Owner Contact", "ownerContact")}
-              {renderInput("Owner Aadhar Number","Owner Aadhar Number", "ownerAadhar")}
-              {renderInput("Owner PAN Number","Owner PAN Number", "ownerPan")}
+              {renderInput("Owner Firstname","Owner Firstname", "ownerFirstName",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant LastName","Tenant LastName", "ownerLastName",{ readOnly: mode === 'edit' })}
+              {renderInput("Owner Email","Owner Email", "ownerEmail",{ readOnly: mode === 'edit' })}
+              {renderInput("Owner Contact","Owner Contact", "ownerContact",{ readOnly: mode === 'edit' })}
+              {renderInput("Owner Aadhar Number","Owner Aadhar Number", "ownerAadhar",{ readOnly: mode === 'edit' })}
+              {renderInput("Owner PAN Number","Owner PAN Number", "ownerPan",{ readOnly: mode === 'edit' })}
             </div>
             <h3 className="agreement-heading">Tenant</h3>
             {renderClientDropdown('tenant')}
             <div className="form-grid">
-              {renderInput("Tenant FirstName","Tenant FirstName", "tenantFirstName")}
-              {renderInput("Tenant LastName","Tenant LastName", "tenantLastName")}
-              {renderInput("Tenant Email","Tenant Email" ,"tenantEmail")}
-              {renderInput("Tenant Contact","Tenant Contact", "tenantContact")}
-              {renderInput("Tenant Aadhar Number","Tenant Aadhar Number", "tenantAadhar")}
-              {renderInput("Tenant PAN Number","Tenant PAN Number", "tenantPan")}
+              {renderInput("Tenant FirstName","Tenant FirstName", "tenantFirstName",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant LastName","Tenant LastName", "tenantLastName",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant Email","Tenant Email" ,"tenantEmail",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant Contact","Tenant Contact", "tenantContact",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant Aadhar Number","Tenant Aadhar Number", "tenantAadhar",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant PAN Number","Tenant PAN Number", "tenantPan",{ readOnly: mode === 'edit' })}
             </div>
             <h3 className="agreement-heading">Agreement Details</h3>
             <div className="form-grid">
-              {renderInput("Token Number","Token Number", "tokenNumber")}
-              {renderInput("Agreement Start Date","Agreement Start Date", "startDate")}
-              {renderInput("Agreement End Date","Agreement End Date", "endDate")}
-              {renderInput("Address Line 1","Address Line 1", "addressLine1")}
-              {renderInput("Address Line 2","Address Line 2" ,"addressLine2")}
+              {renderInput("Token Number","Token Number", "tokenNumber",{ readOnly: mode === 'edit' })}
+              {renderInput("Agreement Start Date","Agreement Start Date", "startDate",{ readOnly: false })}
+              {renderInput("Agreement End Date","Agreement End Date", "endDate",{ readOnly: false })}
+              {renderInput("Address Line 1","Address Line 1", "addressLine1",{ readOnly: false })}
+              {renderInput("Address Line 2","Address Line 2" ,"addressLine2",{ readOnly: false })}
             </div>
-            {mode !== 'view' && (
+            {mode == 'edit' && (
               <div className="button-wrapper">
                 <button onClick={handleSaveAgreement}>Save Agreement</button>
                 <button onClick={() => handleNext('payment')}>Next</button>
@@ -466,19 +456,19 @@ const AddLeadPage = ({
         return (
           <>
             <div className="form-grid">
-              {renderInput("Owner Payment Amount","Owner Payment Amount", "ownerPayment")}
-              {renderInput(" Owner Payment Date ","Owner Payment Date", "ownerPaymentDate")}
-              {renderInput("Tenant Payment Amount","Tenant Payment Amount" ,"tenantPayment")}
-              {renderInput(" Tenant Payment Date ","Tenant Payment Date", "tenantPaymentDate")}
-              {renderInput("Total Payment","Total Payment", "totalPayment")}
-              {renderInput("Remaining Payment","Remaining Payment", "remainingPayment")}
-              {renderInput("Mode of Payment","Mode of Payment", "paymentMode")}
-              {renderInput("GRN Number","GRN Number", "grnNumber")}
-              {renderInput("Govt GRN Date","Govt GRN Date", "govtGrnDate")}
-              {renderInput("DHC Date","DHC Date", "dhcDate")}
+              {renderInput("Owner Payment Amount","Owner Payment Amount", "ownerPayment",{ readOnly: mode === 'edit' })}
+              {renderInput(" Owner Payment Date ","Owner Payment Date", "ownerPaymentDate",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant Payment Amount","Tenant Payment Amount" ,"tenantPayment",{ readOnly: mode === 'edit' })}
+              {renderInput(" Tenant Payment Date ","Tenant Payment Date", "tenantPaymentDate",{ readOnly: mode === 'edit' })}
+              {renderInput("Total Payment","Total Payment", "totalPayment",{ readOnly: mode === 'edit' })}
+              {renderInput("Remaining Payment","Remaining Payment", "remainingPayment",{ readOnly: mode === 'edit' })}
+              {renderInput("Mode of Payment","Mode of Payment", "paymentMode",{ readOnly: mode === 'edit' })}
+              {renderInput("GRN Number","GRN Number", "grnNumber",{ readOnly: mode === 'edit' })}
+              {renderInput("Govt GRN Date","Govt GRN Date", "govtGrnDate",{ readOnly: mode === 'edit' })}
+              {renderInput("DHC Date","DHC Date", "dhcDate",{ readOnly: mode === 'edit' })}
 
             </div>
-            {mode !== 'view' && (
+            {mode == 'edit' && (
               <div className="button-wrapper">
                 <button onClick={handleSavePayment}>Save </button>
 
@@ -508,4 +498,4 @@ const AddLeadPage = ({
   );
 };
 
-export default AddLeadPage;
+export default Edit;

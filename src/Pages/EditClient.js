@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import "./AddClient.css";
 
-const AddLead = ({ isOpen, onClose }) => {
+const EditClient = ({ isOpen, onClose }) => {
   const {
     register,
     handleSubmit,
@@ -243,5 +243,4 @@ const AddLead = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
-export default AddLead;
+export default EditClient;
