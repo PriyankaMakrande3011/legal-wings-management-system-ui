@@ -43,6 +43,7 @@ const ClientPage = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [showEditClientModal, setShowEditClientModal] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState(null);
 
   const recordsPerPage = 10;
   const navigate = useNavigate();
@@ -130,7 +131,8 @@ const ClientPage = () => {
       }
     });
   };
-const handleEditClick = () => {
+const handleEditClick = (id) => {
+    setSelectedLeadId(id);  
   setShowEditClientModal(true);
 };
   return (
@@ -219,7 +221,7 @@ const handleEditClick = () => {
 
       {/* Add Client Modal */}
       <AddClient isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-        <EditClient isOpen={showEditClientModal} onClose={() => setShowEditClientModal(false)} />
+        <EditClient isOpen={showEditClientModal} onClose={() => setShowEditClientModal(false)}  leadId={selectedLeadId}   />
     </div>
   );
 };

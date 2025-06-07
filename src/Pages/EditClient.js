@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import "./AddClient.css";
 
-const EditClient = ({ isOpen, onClose }) => {
+const EditClient = ({ isOpen, onClose, leadId }) => {
   const {
     register,
     handleSubmit,
@@ -11,6 +11,7 @@ const EditClient = ({ isOpen, onClose }) => {
     reset,
     formState: { errors },
   } = useForm();
+
 
   const [existingClients, setExistingClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(null); // Track selected client
@@ -20,7 +21,7 @@ const EditClient = ({ isOpen, onClose }) => {
     pune: ["Kothrud", "Shivajinagar", "Hinjewadi", "Baner"],
     mumbai: ["Andheri", "Bandra", "Dadar", "Borivali"],
   };
-
+ 
   // Fetch existing clients from JSON link
   useEffect(() => {
     const fetchClients = async () => {
@@ -39,6 +40,30 @@ const EditClient = ({ isOpen, onClose }) => {
     fetchClients();
   }, []);
 
+  useEffect(() => {
+    if (leadId) {
+      const fetchLead = async () => {
+        try {
+          const response = await fetch(`http://localhost:3031/Lead/${leadId}`);
+          const data = await response.json();
+
+          // Autofill form values
+          Object.entries(data).forEach(([key, value]) => {
+            setValue(key, value);
+          });
+
+          // Set areas based on city
+          setAreas(cityToAreas[data.city] || []);
+        } catch (error) {
+          console.error("Failed to fetch lead data:", error);
+        }
+      };
+
+      fetchLead();
+    } else {
+      reset(); // Reset form if no leadId
+    }
+  }, [leadId, setValue, reset]);
   // Handle city selection and update areas
   const onCityChange = (city) => {
     setAreas(city ? cityToAreas[city] || [] : []);
@@ -78,23 +103,10 @@ const EditClient = ({ isOpen, onClose }) => {
         <h2>Add Lead</h2>
 
         {/* Select Existing Client or Create New Client */}
-        <div className="client-selection">
-          <select
-            id="clientName"
-            onChange={(e) => onClientSelect(Number(e.target.value))}
-          >
-            <option value="">Select Existing Client</option>
-            {existingClients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.FirstName} {client.LastName}
-              </option>
-            ))}
-          </select>
-          <button onClick={handleNewClient}>Create New Client</button>
-        </div>
+        
 
         {/* Form Section (Initially Hidden) */}
-        {showForm && (
+        
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* First Name and Last Name */}
             <div className="form-row">
@@ -238,7 +250,7 @@ const EditClient = ({ isOpen, onClose }) => {
               </button>
             </div>
           </form>
-        )}
+        
       </div>
     </div>
   );
