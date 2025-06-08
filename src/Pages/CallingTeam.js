@@ -9,12 +9,17 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Api from "./Api.js";
 import AssignLead from "./AssingLead.js";
+import axios from "axios";
+import Swal from "sweetalert2";
+import ReactPaginate from "react-paginate";
 import "./ClientPage.css"
 
 const CallingTeam = () => {
   const [records, setRecords] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
+   
+    const [selectedClientType, setSelectedClientType] = useState("");
   const [clientTypes, setClientTypes] = useState(["OWNER", "TENANT","AGENT"]);
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
@@ -27,34 +32,38 @@ const CallingTeam = () => {
   const [selectedLeadId, setSelectedLeadId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [noData, setNoData] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+const recordsPerPage = 5;
+
 
 
   const handleAddNewLead = () => {
     navigate("/add-lead");
   };
 
-  const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
-    const requestBody = {
-      cityIdsUi: selectedCityId ? [parseInt(selectedCityId)] : [],
-      stateIdsUi: [],
-      zoneIdsUi: [],
-      areaIdsUi: selectedAreaId ? [parseInt(selectedAreaId)] : []
-    };
+  // const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
+  //   const requestBody = {
+  //     cityIdsUi: selectedCityId ? [parseInt(selectedCityId)] : [],
+  //     stateIdsUi: [],
+  //     zoneIdsUi: [],
+  //     areaIdsUi: selectedAreaId ? [parseInt(selectedAreaId)] : []
+  //   };
 
-    try {
-      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+  //   try {
+  //     const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(requestBody),
+  //     });
 
-      const data = await response.json();
-      setCities(data?.cities || []);
-      setAreas(data?.areas || []);
-    } catch (error) {
-      console.error("Error fetching dropdown data:", error);
-    }
-  };
+  //     const data = await response.json();
+  //     setCities(data?.cities || []);
+  //     setAreas(data?.areas || []);
+  //   } catch (error) {
+  //     console.error("Error fetching dropdown data:", error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchDropdowns();
@@ -90,49 +99,58 @@ const CallingTeam = () => {
     fetchLeads();
   };
 
-  const fetchLeads = async () => {
-    setLoading(true);
-  setNoData(false);
-    const requestBody = {
-      fromDate: fromDate.toISOString().split("T")[0],
-      toDate: toDate.toISOString().split("T")[0],
-      clientType: clientType ? clientType.toUpperCase() : undefined,
-      cityIdsUi: city ? [parseInt(city)] : [],
-      areaIdsUi: area ? [parseInt(area)] : [],
-      pageNumber: 0,
-      pageSize: 1000,
-      sortField: "id",
-      sortOrder: "desc",
-      transitLevel: "CALLING_TEAM"
-    };
+  // const fetchLeads = async () => {
+  //   setLoading(true);
+  // setNoData(false);
+  //   const requestBody = {
+  //     fromDate: fromDate.toISOString().split("T")[0],
+  //     toDate: toDate.toISOString().split("T")[0],
+  //     clientType: clientType ? clientType.toUpperCase() : undefined,
+  //     cityIdsUi: city ? [parseInt(city)] : [],
+  //     areaIdsUi: area ? [parseInt(area)] : [],
+  //      pageNumber: page,
+  //       pageSize: recordsPerPage,
+  //     sortField: "id",
+  //     sortOrder: "desc",
+  //     transitLevel: "CALLING_TEAM"
+  //   }; 
+  //   if (response.data?.leadPage?.content) {
+  //       setRecords(response.data.leadPage.content);
+  //       setTotalPages(response.data.leadPage.totalPages || 1);
+  //       setNoData(false);
+  //     } else {
+  //       setRecords([]);
+  //       setNoData(true);
+  //       setTotalPages(1);
+  //     }
 
-    try {
-      const response = await fetch(`${Api.BASE_URL}leads/all`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-      let data = (await response.json())?.leadPage?.content || [];
+  //   try {
+  //     const response = await fetch(`${Api.BASE_URL}leads/all`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(requestBody),
+  //     });
+  //     let data = (await response.json())?.leadPage?.content || [];
 
-      if (searchText.trim()) {
-        const keyword = searchText.toLowerCase();
-        data = data.filter((record) => {
-          const firstName = record.client?.firstName?.toLowerCase() || "";
-          const lastName = record.client?.lastName?.toLowerCase() || "";
-          return firstName.includes(keyword) || lastName.includes(keyword);
-        });
-      }
-      setRecords(data);
-      setNoData(data.length === 0);
+  //     if (searchText.trim()) {
+  //       const keyword = searchText.toLowerCase();
+  //       data = data.filter((record) => {
+  //         const firstName = record.client?.firstName?.toLowerCase() || "";
+  //         const lastName = record.client?.lastName?.toLowerCase() || "";
+  //         return firstName.includes(keyword) || lastName.includes(keyword);
+  //       });
+  //     }
+  //     setRecords(data);
+  //     setNoData(data.length === 0);
      
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
-      setNoData(true);
-    }
-    finally {
-      setLoading(false);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Failed to fetch leads:", error);
+  //     setNoData(true);
+  //   }
+  //   finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   
   const fetchAllLeads = async () => {
@@ -174,7 +192,28 @@ const CallingTeam = () => {
   useEffect(() => {
     fetchAllLeads();
   }, []);  // Trigger fetchLeads when component is mounted
-
+ const handleDelete = async (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.put(`http://localhost:8080/legal-wings-management/lead/${id}/cancel+`);
+          Swal.fire("Deleted!", "Client has been removed.", "success");
+          // fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
+        } catch (error) {
+          console.error("Error deleting client:", error.response?.data || error.message);
+          Swal.fire("Error!", "Failed to delete the client. Please try again.", "error");
+        }
+      }
+    });
+  };
 
   const handleViewClick = (leadId) => {
     navigate(`/add-lead?mode=view&id=${leadId}&mode=view`);
@@ -190,7 +229,74 @@ const CallingTeam = () => {
     setSelectedLeadId(lead);
   };
   
+ const fetchDropdowns = async () => {
+    const requestBody = {
+      cityIdsUi: city ? [parseInt(city)] : [],
+      stateIdsUi: [],
+      zoneIdsUi: [],
+      areaIdsUi: area ? [parseInt(area)] : []
+    };
 
+    try {
+      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setCities(data?.cityList || []);
+        setAreas(data?.areaList || []);
+      }
+    } catch (error) {
+      console.error("Error fetching dropdowns:", error);
+    }
+  };
+
+  const fetchLeads = async (page = 0) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${Api.BASE_URL}leads/all`, {
+        clientType: selectedClientType || null,
+        searchText: searchText || null,
+        cityId: city || null,
+        areaId: area || null,
+        fromDate,
+        toDate,
+        pageNumber: page,
+        pageSize: recordsPerPage,
+        sortField: "id",
+        sortOrder: "desc",
+      });
+
+      if (response.data?.leadPage?.content?.length > 0) {
+        setRecords(response.data.leadPage.content);
+        setTotalPages(response.data.leadPage.totalPages || 1);
+        setNoData(false);
+      } else {
+        setRecords([]);
+        setNoData(true);
+      }
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      setNoData(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+  const handlePageClick = (event) => {
+  const selectedPage = event.selected;
+  setCurrentPage(selectedPage);
+  fetchLeads(selectedPage);
+};
+
+  useEffect(() => {
+    fetchDropdowns();
+    fetchLeads(0);
+  }, []);
  
   return (
     <div className="client-container">
@@ -295,6 +401,7 @@ const CallingTeam = () => {
 ) : noData ? (
   <p>No records found.</p>
 ) : (
+  <>
             <table className="table">
               <thead>
                 <tr>
@@ -329,8 +436,8 @@ const CallingTeam = () => {
                       <td className="action-column" >
                         <div>
                           <FaEye className="action-icon" onClick={() => handleViewClick(record.id)} />
-                           <FaEdit onClick={() => handleEditClick(record.id)} title="Edit" />
-                          <FaTrash className="action-icon" />
+                           <FaEdit className="action-icon" onClick={() => handleEditClick(record.id)} title="Edit" />
+                          <FaTrash className="action-icon" onClick={() => handleDelete(record.id)} />
                           <BsBoxArrowInRight
                   className="action-icon edit"
                   onClick={() => {setModalOpen(true)
@@ -345,6 +452,20 @@ const CallingTeam = () => {
                 })}
               </tbody>
             </table>
+           
+             <ReactPaginate
+  previousLabel={"Prev"}
+  nextLabel={"Next"}
+  breakLabel={"..."}
+  pageCount={totalPages}
+  marginPagesDisplayed={2}
+  pageRangeDisplayed={2}
+  onPageChange={handlePageClick}
+  containerClassName={"pagination"}
+  activeClassName={"active"}
+  forcePage={currentPage}
+/>
+</>
   )}
             <AssignLead
         isOpen={isModalOpen}

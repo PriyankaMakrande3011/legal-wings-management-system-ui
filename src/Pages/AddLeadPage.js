@@ -36,6 +36,8 @@ const AddLeadPage = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const clientTypeOptions = ["Owner", "Tenant", "Agent"];
+   const [isSubmitting, setIsSubmitting] = useState(false);
+
 
 
 
@@ -160,6 +162,8 @@ const AddLeadPage = ({
   };
 
   const handleSavePayment = () => {
+    if (isSubmitting) return; // prevent multiple submissions
+  setIsSubmitting(true);    
     const paymentData = {
       leadId,
       ownerAmount: formData.ownerPayment,
@@ -194,7 +198,12 @@ const AddLeadPage = ({
       .catch(err => {
         console.error("Payment Save Error:", err);
         alert("Error saving payment. Please try again.");
-      });
+      })
+      .finally(() => {
+      setIsSubmitting(false); // re-enable button after request
+    });
+      
+      
   };
 
   const handleNext = (nextTab) => {
