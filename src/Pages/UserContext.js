@@ -8,7 +8,7 @@ export const UserProvider = ({ children }) => {
   const { keycloak, initialized } = useKeycloak();
 
   // Define your Keycloak client name (as it appears in Keycloak)
-  const CLIENT_ID = "legal-wing-ui"; // <-- Update this to your actual client name
+  const CLIENT_ID = "legal-wing"; // <-- Update this to your actual client name
 
   const user = initialized && keycloak.authenticated
     ? {
