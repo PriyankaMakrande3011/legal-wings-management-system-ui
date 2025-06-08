@@ -11,6 +11,7 @@ import axios from "axios";
 import { FaPlus, FaRegCalendarAlt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useKeycloak } from "@react-keycloak/web";
 
 
 import Api from './Api.js';
@@ -36,6 +37,7 @@ const Edit = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const clientTypeOptions = ["Owner", "Tenant", "Agent"];
+   const { keycloak } = useKeycloak();
 
 
 
@@ -73,7 +75,8 @@ const Edit = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(requestBody)
     })
@@ -137,7 +140,8 @@ const Edit = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(agreementData)
     })
@@ -175,7 +179,8 @@ const Edit = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(paymentData)
     })

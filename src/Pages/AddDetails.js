@@ -4,8 +4,10 @@ import { Dropdown } from "primereact/dropdown";
 import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
 import "./AddClient.css"
+import { useKeycloak } from "@react-keycloak/web";
 
 const AddDetails = () => {
+   const { keycloak } = useKeycloak();
   const [formData, setFormData] = useState({
     tokenNo: "",
     existingClient: null,

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import "./AddClient.css";
+import { useKeycloak } from "@react-keycloak/web";
 
 const EditClient = ({ isOpen, onClose, leadId }) => {
   const {
@@ -17,6 +18,7 @@ const EditClient = ({ isOpen, onClose, leadId }) => {
   const [selectedClientId, setSelectedClientId] = useState(null); // Track selected client
   const [showForm, setShowForm] = useState(false); // Toggle form visibility
   const [areas, setAreas] = useState([]);
+   const { keycloak } = useKeycloak();
   const cityToAreas = {
     pune: ["Kothrud", "Shivajinagar", "Hinjewadi", "Baner"],
     mumbai: ["Andheri", "Bandra", "Dadar", "Borivali"],
@@ -39,31 +41,66 @@ const EditClient = ({ isOpen, onClose, leadId }) => {
 
     fetchClients();
   }, []);
+useEffect(() => {
+  if (leadId) {
+    const fetchLead = async () => {
+      try {
+        const response = await fetch(`http://localhost:3031/Lead/${leadId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${keycloak.token}`,
+          },
+        });
 
-  useEffect(() => {
-    if (leadId) {
-      const fetchLead = async () => {
-        try {
-          const response = await fetch(`http://localhost:3031/Lead/${leadId}`);
-          const data = await response.json();
-
-          // Autofill form values
-          Object.entries(data).forEach(([key, value]) => {
-            setValue(key, value);
-          });
-
-          // Set areas based on city
-          setAreas(cityToAreas[data.city] || []);
-        } catch (error) {
-          console.error("Failed to fetch lead data:", error);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      };
 
-      fetchLead();
-    } else {
-      reset(); // Reset form if no leadId
-    }
-  }, [leadId, setValue, reset]);
+        const data = await response.json();
+
+        // Autofill form values
+        Object.entries(data).forEach(([key, value]) => {
+          setValue(key, value);
+        });
+
+        // Set areas based on city
+        setAreas(cityToAreas[data.city] || []);
+      } catch (error) {
+        console.error("Failed to fetch lead data:", error);
+      }
+    };
+
+    fetchLead();
+  } else {
+    reset(); // Reset form if no leadId
+  }
+}, [leadId, setValue, reset]);
+
+  // useEffect(() => {
+  //   if (leadId) {
+  //     const fetchLead = async () => {
+  //       try {
+  //         const response = await fetch(`http://localhost:3031/Lead/${leadId}`);
+  //         const data = await response.json();
+
+  //         // Autofill form values
+  //         Object.entries(data).forEach(([key, value]) => {
+  //           setValue(key, value);
+  //         });
+
+  //         // Set areas based on city
+  //         setAreas(cityToAreas[data.city] || []);
+  //       } catch (error) {
+  //         console.error("Failed to fetch lead data:", error);
+  //       }
+  //     };
+
+  //     fetchLead();
+  //   } else {
+  //     reset(); // Reset form if no leadId
+  //   }
+  // }, [leadId, setValue, reset]);
   // Handle city selection and update areas
   const onCityChange = (city) => {
     setAreas(city ? cityToAreas[city] || [] : []);

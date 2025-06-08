@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import Api from "./Api.js";
 import EditClient from "./EditClient.js";
+import { useKeycloak } from "@react-keycloak/web";
 
 const ClientType = {
   OWNER: "OWNER",
@@ -44,9 +45,9 @@ const ClientPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [showEditClientModal, setShowEditClientModal] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState(null);
-
   const recordsPerPage = 10;
   const navigate = useNavigate();
+   const { keycloak } = useKeycloak();
 
 
   // Fetch client data
@@ -66,6 +67,7 @@ const ClientPage = () => {
         {
           headers: {
             "Content-Type": "application/json",
+             "Authorization": `Bearer ${keycloak.token}`
           },
         }
       );
@@ -109,28 +111,60 @@ const ClientPage = () => {
   };
 
   // Handle delete client with SweetAlert2
+  // const handleDelete = async (id) => {
+  //   Swal.fire({
+  //     title: "Are you sure?",
+  //     text: "This action cannot be undone!",
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#d33",
+  //     cancelButtonColor: "#3085d6",
+  //     confirmButtonText: "Yes, delete it!",
+  //   }).then(async (result) => {
+  //     if (result.isConfirmed) {
+  //       try {
+  //         await axios.delete(`http://localhost:8081/legal-wings-management/clients/${id}`);
+  //         Swal.fire("Deleted!", "Client has been removed.", "success");
+  //         fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
+  //       } catch (error) {
+  //         console.error("Error deleting client:", error.response?.data || error.message);
+  //         Swal.fire("Error!", "Failed to delete the client. Please try again.", "error");
+  //       }
+  //     }
+  //   });
+  // };
+
   const handleDelete = async (id) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await axios.delete(`http://localhost:8081/legal-wings-management/clients/${id}`);
-          Swal.fire("Deleted!", "Client has been removed.", "success");
-          fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
-        } catch (error) {
-          console.error("Error deleting client:", error.response?.data || error.message);
-          Swal.fire("Error!", "Failed to delete the client. Please try again.", "error");
-        }
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This action cannot be undone!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(
+          `http://localhost:8081/legal-wings-management/clients/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`,
+            },
+          }
+        );
+
+        Swal.fire("Deleted!", "Client has been removed.", "success");
+        fetchClients(selectedClientType, searchText, currentPage);
+      } catch (error) {
+        console.error("Error deleting client:", error.response?.data || error.message);
+        Swal.fire("Error!", "Failed to delete the client. Please try again.", "error");
       }
-    });
-  };
+    }
+  });
+};
+
 const handleEditClick = (id) => {
     setSelectedLeadId(id);  
   setShowEditClientModal(true);

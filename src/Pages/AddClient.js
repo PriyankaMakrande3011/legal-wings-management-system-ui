@@ -407,6 +407,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import "./AddClient.css";
 import Api from './Api.js';
+import { useKeycloak } from "@react-keycloak/web";
 
 const AddClientModal = ({ isOpen, onClose }) => {
   const {
@@ -420,34 +421,39 @@ const AddClientModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCity, setSelectedCity] = useState("");
-
+ const { keycloak } = useKeycloak();
   useEffect(() => {
     if (!isOpen) return; // Fetch only when modal opens
 
-    const fetchCities = async () => {
-      setLoading(true);
-      setError(null);
+  const fetchCities = async () => {
+  setLoading(true);
+  setError(null);
 
-      try {
-        const response = await fetch("http://13.50.102.11:8080/legal-wings-management/cities");
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-  
-        const data = await response.json();
-        console.log("Fetched Cities Data:", data);
-  
-        setCities(Array.isArray(data) ? data : []);
-  
-      } catch (err) {
-        console.error("Error fetching cities:", err);
-        setError("Failed to fetch cities. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
+  try {
+    const response = await fetch("http://13.50.102.11:8080/legal-wings-management/cities", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${keycloak.token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Fetched Cities Data:", data);
+
+    setCities(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Error fetching cities:", err);
+    setError("Failed to fetch cities. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
     fetchCities();
   }, [isOpen]);
 
@@ -457,6 +463,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+           "Authorization": `Bearer ${keycloak.token}`
         },
         body: JSON.stringify(data),
       });

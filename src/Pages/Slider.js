@@ -197,6 +197,7 @@ import { FaRegUser, FaBars } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { AiOutlineDown, AiOutlineRight, AiOutlineLeft } from "react-icons/ai";
 import '../Pages/Slider.css';
+import { useKeycloak } from "@react-keycloak/web";
 
 const Slider = ({ child }) => {
   const [isSiderOpen, setIsSiderOpen] = useState(false);
@@ -204,7 +205,7 @@ const Slider = ({ child }) => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
-
+ const { keycloak } = useKeycloak();
   const handleResize = () => {
     setIsMobile(window.innerWidth <= 768);
     if (window.innerWidth > 768) {

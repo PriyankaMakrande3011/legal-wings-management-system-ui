@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useKeycloak } from "@react-keycloak/web";
 import "./AddClient.css";
 
 const AddLead = ({ isOpen, onClose }) => {
@@ -16,28 +17,54 @@ const AddLead = ({ isOpen, onClose }) => {
   const [selectedClientId, setSelectedClientId] = useState(null); // Track selected client
   const [showForm, setShowForm] = useState(false); // Toggle form visibility
   const [areas, setAreas] = useState([]);
+   const { keycloak } = useKeycloak();
   const cityToAreas = {
     pune: ["Kothrud", "Shivajinagar", "Hinjewadi", "Baner"],
     mumbai: ["Andheri", "Bandra", "Dadar", "Borivali"],
   };
 
   // Fetch existing clients from JSON link
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await fetch("http://localhost:3031/Lead"); // Replace with your JSON link
-        if (!response.ok) {
-          throw new Error("Failed to fetch clients");
-        }
-        const data = await response.json();
-        setExistingClients(data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchClients = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:3031/Lead"); // Replace with your JSON link
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch clients");
+  //       }
+  //       const data = await response.json();
+  //       setExistingClients(data);
+  //     } catch (error) {
+  //       console.error("Error fetching clients:", error);
+  //     }
+  //   };
 
-    fetchClients();
-  }, []);
+  //   fetchClients();
+  // }, []);
+  useEffect(() => {
+  const fetchClients = async () => {
+    try {
+      const response = await fetch("http://localhost:3031/Lead", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}`, // Add your token here
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch clients");
+      }
+
+      const data = await response.json();
+      setExistingClients(data);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  };
+
+  fetchClients();
+}, []);
+
 
   // Handle city selection and update areas
   const onCityChange = (city) => {

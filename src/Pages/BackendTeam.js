@@ -9,6 +9,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import AddClient from "./AddLead";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useKeycloak } from "@react-keycloak/web";
 
 const BackendTeam = () => {
   const [columns, setColumns] = useState([]);
@@ -21,7 +22,7 @@ const BackendTeam = () => {
   const navigate = useNavigate();
   const [fromDate, setFromDate] = useState(new Date());
   const [toDate, setToDate] = useState(new Date());
-
+ const { keycloak } = useKeycloak();
   const handleAddClient = () => {
     setIsModalOpen(true);
   };
@@ -29,26 +30,83 @@ const BackendTeam = () => {
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
-    const requestData = {
-      fromDate: fromDate.toISOString().split("T")[0],
-      toDate: toDate.toISOString().split("T")[0],
-      sortField: "id",
-      sortOrder: "",
-      searchText: null,
-      pageNumber: 0,
-      pageSize: 10,
-    };
+  // useEffect(() => {
+  //   const requestData = {
+  //     fromDate: fromDate.toISOString().split("T")[0],
+  //     toDate: toDate.toISOString().split("T")[0],
+  //     sortField: "id",
+  //     sortOrder: "",
+  //     searchText: null,
+  //     pageNumber: 0,
+  //     pageSize: 10,
+  //   };
 
-    axios
-      .post("http://13.50.102.11:8080/legal-wings-management/clients/all", requestData)
-      .then((res) => {
-        console.log("API Response:", res.data);
+  //   axios
+  //     .post("http://13.50.102.11:8080/legal-wings-management/clients/all", requestData)
+  //     .then((res) => {
+  //       console.log("API Response:", res.data);
 
-        let data = res.data?.clientPage?.content || [];
+  //       let data = res.data?.clientPage?.content || [];
 
-        // 🔹 Select only specific fields from API response
-        let filteredData = data.map(({ id, firstName, lastName, clientType, email, phoneNo, address, aadharNumber, panNumber }) => ({
+  //       // 🔹 Select only specific fields from API response
+  //       let filteredData = data.map(({ id, firstName, lastName, clientType, email, phoneNo, address, aadharNumber, panNumber }) => ({
+  //         id,
+  //         firstName,
+  //         lastName,
+  //         clientType,
+  //         email,
+  //         phoneNo,
+  //         address,
+  //         aadharNumber,
+  //         panNumber,
+  //       }));
+
+  //       if (filteredData.length > 0) {
+  //         setColumns(Object.keys(filteredData[0])); // Extract column names
+  //         setRecords(filteredData); // Update records state
+  //       } else {
+  //         console.warn("No valid data received.");
+  //         setColumns([]);
+  //         setRecords([]);
+  //       }
+
+  //       console.log("Filtered Records:", filteredData); // Debugging
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching data:", error);
+  //       setColumns([]);
+  //       setRecords([]);
+  //     });
+  // }, []);
+useEffect(() => {
+  const requestData = {
+    fromDate: fromDate.toISOString().split("T")[0],
+    toDate: toDate.toISOString().split("T")[0],
+    sortField: "id",
+    sortOrder: "",
+    searchText: null,
+    pageNumber: 0,
+    pageSize: 10,
+  };
+
+  axios
+    .post(
+      "http://13.50.102.11:8080/legal-wings-management/clients/all",
+      requestData,
+      {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+          "Content-Type": "application/json", // Optional, but good practice
+        },
+      }
+    )
+    .then((res) => {
+      console.log("API Response:", res.data);
+
+      let data = res.data?.clientPage?.content || [];
+
+      let filteredData = data.map(
+        ({ id, firstName, lastName, clientType, email, phoneNo, address, aadharNumber, panNumber }) => ({
           id,
           firstName,
           lastName,
@@ -58,25 +116,26 @@ const BackendTeam = () => {
           address,
           aadharNumber,
           panNumber,
-        }));
+        })
+      );
 
-        if (filteredData.length > 0) {
-          setColumns(Object.keys(filteredData[0])); // Extract column names
-          setRecords(filteredData); // Update records state
-        } else {
-          console.warn("No valid data received.");
-          setColumns([]);
-          setRecords([]);
-        }
-
-        console.log("Filtered Records:", filteredData); // Debugging
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
+      if (filteredData.length > 0) {
+        setColumns(Object.keys(filteredData[0]));
+        setRecords(filteredData);
+      } else {
+        console.warn("No valid data received.");
         setColumns([]);
         setRecords([]);
-      });
-  }, []);
+      }
+
+      console.log("Filtered Records:", filteredData);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+      setColumns([]);
+      setRecords([]);
+    });
+}, []);
 
 
   return (

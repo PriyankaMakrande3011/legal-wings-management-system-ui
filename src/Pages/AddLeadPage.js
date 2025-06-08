@@ -4,7 +4,7 @@ import Slider from "./Slider";
 import Header from "./Header.js";
 import './AddLead.css';
 import AddClient from "./AddClient.js";
-
+import { useKeycloak } from "@react-keycloak/web";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -37,7 +37,7 @@ const AddLeadPage = ({
   const navigate = useNavigate();
   const clientTypeOptions = ["Owner", "Tenant", "Agent"];
    const [isSubmitting, setIsSubmitting] = useState(false);
-
+ const { keycloak } = useKeycloak();
 
 
 
@@ -78,7 +78,8 @@ const AddLeadPage = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(requestBody)
     })
@@ -142,7 +143,8 @@ const AddLeadPage = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(agreementData)
     })
@@ -182,7 +184,8 @@ const AddLeadPage = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(paymentData)
     })

@@ -11,6 +11,7 @@ import axios from "axios";
 import { FaPlus,  FaRegCalendarAlt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useKeycloak } from "@react-keycloak/web";
 
 
 import Api from './Api.js';
@@ -35,7 +36,7 @@ const ExecutiveAddDetails = ({
   const [selectedClientId, setSelectedClientId] = useState(null); // <--- New
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-
+ const { keycloak } = useKeycloak();
 
   useEffect(() => {
     fetch(Api.CLIENT_DROPDOWN)
@@ -70,7 +71,8 @@ const ExecutiveAddDetails = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(requestBody)
     })
@@ -134,7 +136,8 @@ const ExecutiveAddDetails = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(agreementData)
     })
@@ -168,7 +171,8 @@ const ExecutiveAddDetails = ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*"
+        "accept": "*/*",
+         "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(paymentData)
     })

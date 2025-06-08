@@ -14,7 +14,7 @@ import Api from "./Api.js";
 import AssignLead from "./AssingLead.js";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import { useKeycloak } from "@react-keycloak/web";
 import "./ClientPage.css"
 
 const Executive = () => {
@@ -33,35 +33,67 @@ const Executive = () => {
   const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
   const recordsPerPage = 10; 
-  
+   const { keycloak } = useKeycloak();
   const handleAddNewLead = () => {
     navigate("/add-lead");
   };
-  const handleCancel = async (id) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This action will cancel the lead!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, cancel it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
+  // const handleCancel = async (id) => {
+  //   Swal.fire({
+  //     title: "Are you sure?",
+  //     text: "This action will cancel the lead!",
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#d33",
+  //     cancelButtonColor: "#3085d6",
+  //     confirmButtonText: "Yes, cancel it!",
+  //   }).then(async (result) => {
+  //     if (result.isConfirmed) {
+  //       try {
          
-          await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
-          Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
+  //         await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
+  //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
   
-          fetchLeads(); 
-        } catch (error) {
-          console.error("Error canceling lead:", error.response?.data || error.message);
-          Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
-        }
+  //         fetchLeads(); 
+  //       } catch (error) {
+  //         console.error("Error canceling lead:", error.response?.data || error.message);
+  //         Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
+  //       }
+  //     }
+  //   });
+  // };
+  const handleCancel = async (id) => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This action will cancel the lead!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, cancel it!",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await axios.put(
+          `http://localhost:8081/legal-wings-management/leads/${id}/cancel`,
+          {}, // empty body
+          {
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`,
+            },
+          }
+        );
+
+        Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
+
+        fetchLeads(); 
+      } catch (error) {
+        console.error("Error canceling lead:", error.response?.data || error.message);
+        Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
       }
-    });
-  };
-  
+    }
+  });
+};
+
 
   const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
     const requestBody = {
@@ -76,6 +108,7 @@ const Executive = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
+         "Authorization": `Bearer ${keycloak.token}`
       });
 
       const data = await response.json();
@@ -139,6 +172,7 @@ const Executive = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
+         "Authorization": `Bearer ${keycloak.token}`
       });
       let data = (await response.json())?.leadPage?.content || [];
 
@@ -174,6 +208,7 @@ const Executive = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
+         "Authorization": `Bearer ${keycloak.token}`
       });
 
       let data = (await response.json())?.leadPage?.content || [];

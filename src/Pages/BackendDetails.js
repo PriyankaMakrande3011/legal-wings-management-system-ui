@@ -132,10 +132,11 @@ import { useParams } from "react-router-dom";
 import Header from "./Header";
 import Slider from "./Slider";
 import "./BackendDetails.css";
+import { useKeycloak } from "@react-keycloak/web";
 
 const BackendDetails = () => {
   const { id } = useParams(); // Get Lead ID from URL
-
+ const { keycloak } = useKeycloak();
   // Manual Lead Data
   const [lead] = useState({
     FirstName: "Rahul",

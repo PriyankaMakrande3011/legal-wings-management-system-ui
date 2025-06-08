@@ -3,12 +3,13 @@ import { useLocation } from "react-router-dom";
 import { useUser } from "./UserContext";
 import "./Header.css";
 import { FiLogOut } from "react-icons/fi"; // Logout icon
+import { useKeycloak } from "@react-keycloak/web";
 
 const Header = () => {
   const location = useLocation();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
-
+ const { keycloak } = useKeycloak();
   const pageNames = {
     "/calling-team": "Calling Team",
     "/executive-team": "Executive Team",

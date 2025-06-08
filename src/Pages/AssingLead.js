@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AssingLead.css";
 import { useParams } from 'react-router-dom';
+import { useKeycloak } from "@react-keycloak/web";
 
 const AssignLead = ({ isOpen, onClose, onAssignSuccess,leadId }) => {
   const [executives, setExecutives] = useState([]);
   const [loading, setLoading] = useState(false);
-   
+    const { keycloak } = useKeycloak();
   const [executivesLoaded, setExecutivesLoaded] = useState(false);
   useEffect(() => {
     if (isOpen && !executivesLoaded) {
@@ -15,47 +16,100 @@ const AssignLead = ({ isOpen, onClose, onAssignSuccess,leadId }) => {
   }, [isOpen, executivesLoaded]); // depend on both isOpen and executivesLoaded
 
 
-  const fetchExecutives = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        "http://localhost:8081/legal-wings-management/users/dropDown?userType=EXECUTIVE"
-      );
-      setExecutives(response.data || []);
-      setExecutivesLoaded(true); // ✅ mark as loaded
-    } catch (error) {
-      console.error("Error fetching executives:", error);
-      alert("Failed to load executives.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchExecutives = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await axios.get(
+  //       "http://localhost:8081/legal-wings-management/users/dropDown?userType=EXECUTIVE"
+  //     );
+  //     setExecutives(response.data || []);
+  //     setExecutivesLoaded(true); // ✅ mark as loaded
+  //   } catch (error) {
+  //     console.error("Error fetching executives:", error);
+  //     alert("Failed to load executives.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+const fetchExecutives = async () => {
+  try {
+    setLoading(true);
+    const response = await axios.get(
+      "http://localhost:8081/legal-wings-management/users/dropDown?userType=EXECUTIVE",
+      {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      }
+    );
+    setExecutives(response.data || []);
+    setExecutivesLoaded(true);
+  } catch (error) {
+    console.error("Error fetching executives:", error);
+    alert("Failed to load executives.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // const handleAssign = async (executive) => {
+  //   console.log("leadId:", leadId);
+  //   console.log("executive:", executive);
+    
+  //   let userId = executive?.userId || executive?.id || executive;
+  //   console.log("Final userId used:", userId);
+  
+  //   if (!userId) {
+  //     console.error("userId is missing!");
+  //     alert("Executive userId is missing!");
+  //     return;
+  //   }
+  
+  //   try {
+  //     await axios.put(
+  //       `http://localhost:8081/legal-wings-management/leads/${leadId}/assign?userId=${userId}`
+  //     );
+  //     alert(`Lead assigned successfully!`);
+  //     if (onAssignSuccess) onAssignSuccess();
+  //     onClose();
+  //   } catch (error) {
+  //     console.error("Error assigning lead:", error);
+  //     alert("Failed to assign lead. Please try again.");
+  //   }
+  // };
 
   const handleAssign = async (executive) => {
-    console.log("leadId:", leadId);
-    console.log("executive:", executive);
-    
-    let userId = executive?.userId || executive?.id || executive;
-    console.log("Final userId used:", userId);
-  
-    if (!userId) {
-      console.error("userId is missing!");
-      alert("Executive userId is missing!");
-      return;
-    }
-  
-    try {
-      await axios.put(
-        `http://localhost:8081/legal-wings-management/leads/${leadId}/assign?userId=${userId}`
-      );
-      alert(`Lead assigned successfully!`);
-      if (onAssignSuccess) onAssignSuccess();
-      onClose();
-    } catch (error) {
-      console.error("Error assigning lead:", error);
-      alert("Failed to assign lead. Please try again.");
-    }
-  };
+  console.log("leadId:", leadId);
+  console.log("executive:", executive);
+
+  let userId = executive?.userId || executive?.id || executive;
+  console.log("Final userId used:", userId);
+
+  if (!userId) {
+    console.error("userId is missing!");
+    alert("Executive userId is missing!");
+    return;
+  }
+
+  try {
+    await axios.put(
+      `http://localhost:8081/legal-wings-management/leads/${leadId}/assign?userId=${userId}`,
+      {},
+      {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      }
+    );
+    alert(`Lead assigned successfully!`);
+    if (onAssignSuccess) onAssignSuccess();
+    onClose();
+  } catch (error) {
+    console.error("Error assigning lead:", error);
+    alert("Failed to assign lead. Please try again.");
+  }
+};
+
   
   
 
