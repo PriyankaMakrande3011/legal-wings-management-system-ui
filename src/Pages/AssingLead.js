@@ -19,7 +19,7 @@ const AssignLead = ({ isOpen, onClose, onAssignSuccess,leadId }) => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:8080/legal-wings-management/users/dropDown?userType=EXECUTIVE"
+        "http://localhost:8081/legal-wings-management/users/dropDown?userType=EXECUTIVE"
       );
       setExecutives(response.data || []);
       setExecutivesLoaded(true); // ✅ mark as loaded
@@ -46,7 +46,7 @@ const AssignLead = ({ isOpen, onClose, onAssignSuccess,leadId }) => {
   
     try {
       await axios.put(
-        `http://localhost:8080/legal-wings-management/leads/${leadId}/assign?userId=${userId}`
+        `http://localhost:8081/legal-wings-management/leads/${leadId}/assign?userId=${userId}`
       );
       alert(`Lead assigned successfully!`);
       if (onAssignSuccess) onAssignSuccess();

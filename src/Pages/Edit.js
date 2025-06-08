@@ -69,7 +69,7 @@ const Edit = ({
       }
     };
 
-    fetch("http://localhost:8080/legal-wings-management/leads", {
+    fetch("http://localhost:8081/legal-wings-management/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +133,7 @@ const Edit = ({
       }
     };
 
-    fetch("http://localhost:8080/legal-wings-management/agreements", {
+    fetch("http://localhost:8081/legal-wings-management/agreements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -171,7 +171,7 @@ const Edit = ({
       dhcDate: formData.dhcDate,
     };
 
-    fetch("http://localhost:8080/legal-wings-management/payments", {
+    fetch("http://localhost:8081/legal-wings-management/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -309,7 +309,7 @@ const Edit = ({
     const fetchLeadDetails = async () => {
       if (mode === "edit" && id) {
         try {
-          const response = await axios.get(`http://localhost:8080/legal-wings-management/leads/${id}`);
+          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`);
           const data = response.data;
           console.log("Fetched data:", data);
 

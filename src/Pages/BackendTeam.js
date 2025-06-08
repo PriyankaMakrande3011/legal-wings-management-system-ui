@@ -11,8 +11,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const BackendTeam = () => {
-    const [columns, setColumns] = useState([]);
-    const [records, setRecords] = useState([]);
+  const [columns, setColumns] = useState([]);
+  const [records, setRecords] = useState([]);
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
   const [areas, setAreas] = useState([]);
@@ -32,23 +32,23 @@ const BackendTeam = () => {
   useEffect(() => {
     const requestData = {
       fromDate: fromDate.toISOString().split("T")[0],
-            toDate: toDate.toISOString().split("T")[0],
+      toDate: toDate.toISOString().split("T")[0],
       sortField: "id",
       sortOrder: "",
       searchText: null,
       pageNumber: 0,
       pageSize: 10,
     };
-  
+
     axios
       .post("http://13.50.102.11:8080/legal-wings-management/clients/all", requestData)
       .then((res) => {
         console.log("API Response:", res.data);
-  
+
         let data = res.data?.clientPage?.content || [];
-  
+
         // 🔹 Select only specific fields from API response
-        let filteredData = data.map(({ id, firstName, lastName, clientType, email, phoneNo,address,aadharNumber,panNumber }) => ({
+        let filteredData = data.map(({ id, firstName, lastName, clientType, email, phoneNo, address, aadharNumber, panNumber }) => ({
           id,
           firstName,
           lastName,
@@ -59,7 +59,7 @@ const BackendTeam = () => {
           aadharNumber,
           panNumber,
         }));
-  
+
         if (filteredData.length > 0) {
           setColumns(Object.keys(filteredData[0])); // Extract column names
           setRecords(filteredData); // Update records state
@@ -68,7 +68,7 @@ const BackendTeam = () => {
           setColumns([]);
           setRecords([]);
         }
-  
+
         console.log("Filtered Records:", filteredData); // Debugging
       })
       .catch((error) => {
@@ -77,8 +77,8 @@ const BackendTeam = () => {
         setRecords([]);
       });
   }, []);
-  
-  
+
+
   return (
     <div className="client-container">
       <Slider />
@@ -103,7 +103,7 @@ const BackendTeam = () => {
                 <option value="Pune">Pune</option>
                 <MdKeyboardArrowDown />
               </select>
-              <select value={area} onChange={() => {}} disabled={!areas.length}>
+              <select value={area} onChange={() => { }} disabled={!areas.length}>
                 <option value="" disabled>Select Area</option>
                 {areas.map((area, index) => (
                   <option key={index} value={area}>{area}</option>
@@ -111,19 +111,19 @@ const BackendTeam = () => {
               </select>
               <select>
                 <option>Select Client Type</option>
-                <option value="Owner">Owner</option>
-                <option value="Tenant">Tenant</option>
-                <option value="Agent">Agent</option>
+                <option value="OWNER">Owner</option>
+                <option value="AGENT">Agent</option>
+                <option value="TENANT">Tenant</option>
               </select>
               <select>
                 <option>Select Client </option>
                 <option value="Owner">Select Client</option>
-               
+
               </select>
               <input type="text" className="searchClient" placeholder="Search" />
               <button>Submit</button>
             </div>
-           
+
           </div>
           <hr />
           {/* <div className="client-action">
@@ -143,27 +143,27 @@ const BackendTeam = () => {
                 </tr>
               </thead>
               <tbody>
-  {Array.isArray(records) && records.length > 0 ? (
-    records.map((d, i) => (
-      <tr key={i} onClick={() => navigate(`/lead/${d.id}`)} style={{ cursor: "pointer" }}>
-        {columns.map((col, idx) => (
-          <td key={idx}>{d[col]}</td> // Dynamically rendering values
-        ))}
-        <td className="action-column" style={{ width: "150px" }}>
-          <div>
-            <FaEye className="action-icon" />
-            <FaEdit className="action-icon" />
-            <FaTrash className="action-icon" />
-          </div>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan={columns.length + 1}>No records found</td>
-    </tr>
-  )}
-</tbody>
+                {Array.isArray(records) && records.length > 0 ? (
+                  records.map((d, i) => (
+                    <tr key={i} onClick={() => navigate(`/lead/${d.id}`)} style={{ cursor: "pointer" }}>
+                      {columns.map((col, idx) => (
+                        <td key={idx}>{d[col]}</td> // Dynamically rendering values
+                      ))}
+                      <td className="action-column" style={{ width: "150px" }}>
+                        <div>
+                          <FaEye className="action-icon" />
+                          <FaEdit className="action-icon" />
+                          <FaTrash className="action-icon" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={columns.length + 1}>No records found</td>
+                  </tr>
+                )}
+              </tbody>
 
             </table>
           </div>

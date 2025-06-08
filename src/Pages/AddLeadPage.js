@@ -57,19 +57,22 @@ const AddLeadPage = ({
 
   const handleSaveLead = () => {
     const requestBody = {
-
+      tentativeAgreementDate: formData.tentativeAgreementDate,
+      visitAddress: formData.visitAddress,
+      id: leadId,
       client: {
         ...(selectedClientId ? { id: selectedClientId } : {
           firstName: formData.firstName || "",
           lastName: formData.lastName || "",
           email: formData.email || "",
           phoneNo: formData.contactNumber || "",
+          clientType: formData.clientType || "",
         }
         )
       }
     };
 
-    fetch("http://localhost:8080/legal-wings-management/leads", {
+    fetch("http://localhost:8081/legal-wings-management/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +136,7 @@ const AddLeadPage = ({
       }
     };
 
-    fetch("http://localhost:8080/legal-wings-management/agreements", {
+    fetch("http://localhost:8081/legal-wings-management/agreements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -171,7 +174,7 @@ const AddLeadPage = ({
       dhcDate: formData.dhcDate,
     };
 
-    fetch("http://localhost:8080/legal-wings-management/payments", {
+    fetch("http://localhost:8081/legal-wings-management/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -319,7 +322,7 @@ const AddLeadPage = ({
     const fetchLeadDetails = async () => {
       if (mode === "view" && id) {
         try {
-          const response = await axios.get(`http://localhost:8080/legal-wings-management/leads/${id}`);
+          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`);
           const data = response.data;
           console.log("Fetched data:", data);
 
@@ -403,15 +406,15 @@ const AddLeadPage = ({
               {renderClientDropdown('lead')}
             </div>
             <div className="form-grid">
-              {renderInput("First Name","First Name","firstName")}
-              {renderInput("Last Name","Last Name", "lastName")}
+              {renderInput("First Name", "First Name", "firstName")}
+              {renderInput("Last Name", "Last Name", "lastName")}
               {renderDropdown("Client Type", "clientType", clientTypeOptions)}
-              {renderInput("Contact Number","Contact Number", "contactNumber")}
-              {renderInput("Email","Email" ,"email")}
-              {renderInput("Tentative Agreement Date","Tentative Agreement Date", "tentativeAgreementDate")}
-              {renderInput("Tentative Address","Tentative Address", "address")}
-              {renderInput("Area","Area", "area")}
-              {renderInput("City","City", "city")}
+              {renderInput("Contact Number", "Contact Number", "contactNumber")}
+              {renderInput("Email", "Email", "email")}
+              {renderInput("Tentative Agreement Date", "Tentative Agreement Date", "tentativeAgreementDate")}
+              {renderInput("Tentative Address", "Tentative Address", "address")}
+              {renderInput("Area", "Area", "area")}
+              {renderInput("City", "City", "city")}
             </div>
             {mode !== 'view' && (
               <div className="button-wrapper">
@@ -428,30 +431,30 @@ const AddLeadPage = ({
             <h3 className="agreement-heading">Owner</h3>
             {renderClientDropdown('owner')}
             <div className="form-grid">
-              {renderInput("Owner Firstname","Owner Firstname", "ownerFirstName")}
-              {renderInput("Tenant LastName","Tenant LastName", "ownerLastName")}
-              {renderInput("Owner Email","Owner Email", "ownerEmail")}
-              {renderInput("Owner Contact","Owner Contact", "ownerContact")}
-              {renderInput("Owner Aadhar Number","Owner Aadhar Number", "ownerAadhar")}
-              {renderInput("Owner PAN Number","Owner PAN Number", "ownerPan")}
+              {renderInput("Owner Firstname", "Owner Firstname", "ownerFirstName")}
+              {renderInput("Tenant LastName", "Tenant LastName", "ownerLastName")}
+              {renderInput("Owner Email", "Owner Email", "ownerEmail")}
+              {renderInput("Owner Contact", "Owner Contact", "ownerContact")}
+              {renderInput("Owner Aadhar Number", "Owner Aadhar Number", "ownerAadhar")}
+              {renderInput("Owner PAN Number", "Owner PAN Number", "ownerPan")}
             </div>
             <h3 className="agreement-heading">Tenant</h3>
             {renderClientDropdown('tenant')}
             <div className="form-grid">
-              {renderInput("Tenant FirstName","Tenant FirstName", "tenantFirstName")}
-              {renderInput("Tenant LastName","Tenant LastName", "tenantLastName")}
-              {renderInput("Tenant Email","Tenant Email" ,"tenantEmail")}
-              {renderInput("Tenant Contact","Tenant Contact", "tenantContact")}
-              {renderInput("Tenant Aadhar Number","Tenant Aadhar Number", "tenantAadhar")}
-              {renderInput("Tenant PAN Number","Tenant PAN Number", "tenantPan")}
+              {renderInput("Tenant FirstName", "Tenant FirstName", "tenantFirstName")}
+              {renderInput("Tenant LastName", "Tenant LastName", "tenantLastName")}
+              {renderInput("Tenant Email", "Tenant Email", "tenantEmail")}
+              {renderInput("Tenant Contact", "Tenant Contact", "tenantContact")}
+              {renderInput("Tenant Aadhar Number", "Tenant Aadhar Number", "tenantAadhar")}
+              {renderInput("Tenant PAN Number", "Tenant PAN Number", "tenantPan")}
             </div>
             <h3 className="agreement-heading">Agreement Details</h3>
             <div className="form-grid">
-              {renderInput("Token Number","Token Number", "tokenNumber")}
-              {renderInput("Agreement Start Date","Agreement Start Date", "startDate")}
-              {renderInput("Agreement End Date","Agreement End Date", "endDate")}
-              {renderInput("Address Line 1","Address Line 1", "addressLine1")}
-              {renderInput("Address Line 2","Address Line 2" ,"addressLine2")}
+              {renderInput("Token Number", "Token Number", "tokenNumber")}
+              {renderInput("Agreement Start Date", "Agreement Start Date", "startDate")}
+              {renderInput("Agreement End Date", "Agreement End Date", "endDate")}
+              {renderInput("Address Line 1", "Address Line 1", "addressLine1")}
+              {renderInput("Address Line 2", "Address Line 2", "addressLine2")}
             </div>
             {mode !== 'view' && (
               <div className="button-wrapper">
@@ -466,16 +469,16 @@ const AddLeadPage = ({
         return (
           <>
             <div className="form-grid">
-              {renderInput("Owner Payment Amount","Owner Payment Amount", "ownerPayment")}
-              {renderInput(" Owner Payment Date ","Owner Payment Date", "ownerPaymentDate")}
-              {renderInput("Tenant Payment Amount","Tenant Payment Amount" ,"tenantPayment")}
-              {renderInput(" Tenant Payment Date ","Tenant Payment Date", "tenantPaymentDate")}
-              {renderInput("Total Payment","Total Payment", "totalPayment")}
-              {renderInput("Remaining Payment","Remaining Payment", "remainingPayment")}
-              {renderInput("Mode of Payment","Mode of Payment", "paymentMode")}
-              {renderInput("GRN Number","GRN Number", "grnNumber")}
-              {renderInput("Govt GRN Date","Govt GRN Date", "govtGrnDate")}
-              {renderInput("DHC Date","DHC Date", "dhcDate")}
+              {renderInput("Owner Payment Amount", "Owner Payment Amount", "ownerPayment")}
+              {renderInput(" Owner Payment Date ", "Owner Payment Date", "ownerPaymentDate")}
+              {renderInput("Tenant Payment Amount", "Tenant Payment Amount", "tenantPayment")}
+              {renderInput(" Tenant Payment Date ", "Tenant Payment Date", "tenantPaymentDate")}
+              {renderInput("Total Payment", "Total Payment", "totalPayment")}
+              {renderInput("Remaining Payment", "Remaining Payment", "remainingPayment")}
+              {renderInput("Mode of Payment", "Mode of Payment", "paymentMode")}
+              {renderInput("GRN Number", "GRN Number", "grnNumber")}
+              {renderInput("Govt GRN Date", "Govt GRN Date", "govtGrnDate")}
+              {renderInput("DHC Date", "DHC Date", "dhcDate")}
 
             </div>
             {mode !== 'view' && (
