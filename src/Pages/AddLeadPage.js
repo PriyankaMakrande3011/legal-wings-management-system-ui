@@ -13,7 +13,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 
+
 import Api from './Api.js';
+
 
 const AddLeadPage = ({
   showLead = true,
@@ -35,18 +37,26 @@ const AddLeadPage = ({
   const [selectedClientId, setSelectedClientId] = useState(null); // <--- New
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  const clientTypeOptions = ["Owner", "Tenant", "Agent"];
-   const [isSubmitting, setIsSubmitting] = useState(false);
- const { keycloak } = useKeycloak();
+  const clientTypeOptions = ["OWNER", "TENANT", "AGENT"];
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { keycloak } = useKeycloak();
+  const transitLevel = location.state?.transitLevel;
 
 
 
   useEffect(() => {
-    fetch(Api.CLIENT_DROPDOWN)
-      .then(res => res.json())
-      .then(data => setClients(data))
-      .catch(err => console.error("Failed to fetch clients", err));
-  }, []);
+    if (keycloak?.token) {
+      fetch(Api.CLIENT_DROPDOWN, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+          "Content-Type": "application/json"
+        }
+      })
+        .then(res => res.json())
+        .then(data => setClients(data))
+        .catch(err => console.error("Failed to fetch clients", err));
+    }
+  }, [keycloak?.token]);
 
   const handleAcceptLead = (lead) => {
     navigate("/add-Executive-details");   // navigate to AddLeadPage
@@ -62,6 +72,7 @@ const AddLeadPage = ({
       tentativeAgreementDate: formData.tentativeAgreementDate,
       visitAddress: formData.visitAddress,
       id: leadId,
+      transitLevel: transitLevel,
       client: {
         ...(selectedClientId ? { id: selectedClientId } : {
           firstName: formData.firstName || "",
@@ -79,7 +90,7 @@ const AddLeadPage = ({
       headers: {
         "Content-Type": "application/json",
         "accept": "*/*",
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(requestBody)
     })
@@ -144,7 +155,7 @@ const AddLeadPage = ({
       headers: {
         "Content-Type": "application/json",
         "accept": "*/*",
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(agreementData)
     })
@@ -165,7 +176,7 @@ const AddLeadPage = ({
 
   const handleSavePayment = () => {
     if (isSubmitting) return; // prevent multiple submissions
-  setIsSubmitting(true);    
+    setIsSubmitting(true);
     const paymentData = {
       leadId,
       ownerAmount: formData.ownerPayment,
@@ -185,7 +196,7 @@ const AddLeadPage = ({
       headers: {
         "Content-Type": "application/json",
         "accept": "*/*",
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(paymentData)
     })
@@ -203,10 +214,10 @@ const AddLeadPage = ({
         alert("Error saving payment. Please try again.");
       })
       .finally(() => {
-      setIsSubmitting(false); // re-enable button after request
-    });
-      
-      
+        setIsSubmitting(false); // re-enable button after request
+      });
+
+
   };
 
   const handleNext = (nextTab) => {
@@ -218,7 +229,12 @@ const AddLeadPage = ({
 
     setSelectedClientId(clientId); // <--- New
 
-    fetch(`${Api.BASE_URL}clients/${clientId}`)
+        fetch(`${Api.BASE_URL}clients/${clientId}`, {
+      headers: {
+        Authorization: `Bearer ${keycloak.token}`,
+        "Content-Type": "application/json"
+      }
+    })
       .then(res => res.json())
       .then(client => {
         const baseFields = {
@@ -334,8 +350,11 @@ const AddLeadPage = ({
     const fetchLeadDetails = async () => {
       if (mode === "view" && id) {
         try {
-          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`);
-          const data = response.data;
+          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`, {
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`
+            }
+          }); const data = response.data;
           console.log("Fetched data:", data);
 
           setFormData({

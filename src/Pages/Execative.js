@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
-import { useNavigate ,useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -32,10 +32,14 @@ const Executive = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
-  const recordsPerPage = 10; 
-   const { keycloak } = useKeycloak();
+  const recordsPerPage = 10;
+  const { keycloak } = useKeycloak();
   const handleAddNewLead = () => {
-    navigate("/add-lead");
+    navigate("/add-lead", {
+      state: {
+        transitLevel: "EXECUTIVE_TEAM"
+      }
+    });
   };
   // const handleCancel = async (id) => {
   //   Swal.fire({
@@ -49,10 +53,10 @@ const Executive = () => {
   //   }).then(async (result) => {
   //     if (result.isConfirmed) {
   //       try {
-         
+
   //         await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
   //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
-  
+
   //         fetchLeads(); 
   //       } catch (error) {
   //         console.error("Error canceling lead:", error.response?.data || error.message);
@@ -62,37 +66,37 @@ const Executive = () => {
   //   });
   // };
   const handleCancel = async (id) => {
-  Swal.fire({
-    title: "Are you sure?",
-    text: "This action will cancel the lead!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, cancel it!",
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await axios.put(
-          `http://localhost:8081/legal-wings-management/leads/${id}/cancel`,
-          {}, // empty body
-          {
-            headers: {
-              Authorization: `Bearer ${keycloak.token}`,
-            },
-          }
-        );
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action will cancel the lead!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, cancel it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.put(
+            `http://localhost:8081/legal-wings-management/leads/${id}/cancel`,
+            {}, // empty body
+            {
+              headers: {
+                Authorization: `Bearer ${keycloak.token}`,
+              },
+            }
+          );
 
-        Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
+          Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
 
-        fetchLeads(); 
-      } catch (error) {
-        console.error("Error canceling lead:", error.response?.data || error.message);
-        Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
+          fetchLeads();
+        } catch (error) {
+          console.error("Error canceling lead:", error.response?.data || error.message);
+          Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
+        }
       }
-    }
-  });
-};
+    });
+  };
 
 
   const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
@@ -108,7 +112,7 @@ const Executive = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       });
 
       const data = await response.json();
@@ -168,11 +172,14 @@ const Executive = () => {
     };
 
     try {
-      const response = await fetch(`${Api.BASE_URL}leads/all`, {
+      const response = await fetch(`${Api.BASE_URL}leads/byAssignedUser`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}`
+        },
         body: JSON.stringify(requestBody),
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       });
       let data = (await response.json())?.leadPage?.content || [];
 
@@ -204,11 +211,13 @@ const Executive = () => {
     };
 
     try {
-      const response = await fetch(`${Api.BASE_URL}leads/all`, {
+      const response = await fetch(`${Api.BASE_URL}leads/byAssignedUser`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}`
+         },
         body: JSON.stringify(requestBody),
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       });
 
       let data = (await response.json())?.leadPage?.content || [];
@@ -340,65 +349,65 @@ const Executive = () => {
             </div>
 
             <div className="client-table">
-            {loading ? (
-    <div className="loading-spinner">
-      <img src="https://la-solargroup.com/wp-content/uploads/2019/02/loading-icon.gif" alt="Loading..." />
-    </div>
-  ) : (
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Phone No</th>
-                    <th>Client Type</th>
-                    <th>Address</th>
-                    <th>Created Date</th>
-                    <th>Created By</th>
-                    <th>Updated By</th>
-                    <th>Tentative Date</th>
-                    <th>Status</th>
-                    <th className="action-column">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {records.map((record, index) => {
-                    const client = record.client || {};
-                    return (
-                      <tr key={index}>
-                        <td>{client.firstName || "-"}</td>
-                        <td>{client.lastName || "-"}</td>
-                        <td>{client.phoneNo || "-"}</td>
-                        <td>{client.clientType || "-"}</td>
-                        <td>{client.address || "-"}</td>
-                        <td>{new Date(record.createdDate).toLocaleDateString() || "-"}</td>
-                        <td>{client.createdByUserName || "-"}</td>
-                        <td>{client.updatedByUserName || "-"}</td>
-                        <td>{record.tentativeAgreementDate || "-"}</td>
-                        <td>{record.status || "-"}</td>
-                        <td className="action-column" >
-                          <div>
-                            <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />
+              {loading ? (
+                <div className="loading-spinner">
+                  <img src="https://la-solargroup.com/wp-content/uploads/2019/02/loading-icon.gif" alt="Loading..." />
+                </div>
+              ) : (
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>First Name</th>
+                      <th>Last Name</th>
+                      <th>Phone No</th>
+                      <th>Client Type</th>
+                      <th>Address</th>
+                      <th>Created Date</th>
+                      <th>Created By</th>
+                      <th>Updated By</th>
+                      <th>Tentative Date</th>
+                      <th>Status</th>
+                      <th className="action-column">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {records.map((record, index) => {
+                      const client = record.client || {};
+                      return (
+                        <tr key={index}>
+                          <td>{client.firstName || "-"}</td>
+                          <td>{client.lastName || "-"}</td>
+                          <td>{client.phoneNo || "-"}</td>
+                          <td>{client.clientType || "-"}</td>
+                          <td>{client.address || "-"}</td>
+                          <td>{new Date(record.createdDate).toLocaleDateString() || "-"}</td>
+                          <td>{client.createdByUserName || "-"}</td>
+                          <td>{client.updatedByUserName || "-"}</td>
+                          <td>{record.tentativeAgreementDate || "-"}</td>
+                          <td>{record.status || "-"}</td>
+                          <td className="action-column" >
+                            <div>
+                              <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />
 
-                            <BsBoxArrowInRight
-                              className="action-icon icon-edit"
-                              onClick={() => {
-                                setModalOpen(true)
-                                setSelectedLeadId(record.id)
-                              }
-                              }
-                            />
-                            <MdCancel className="action-icon icon-cancel"  
-                            onClick={() => handleCancel(record.id)} />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  
-                </tbody>
-              </table>
-  )}
+                              <BsBoxArrowInRight
+                                className="action-icon icon-edit"
+                                onClick={() => {
+                                  setModalOpen(true)
+                                  setSelectedLeadId(record.id)
+                                }
+                                }
+                              />
+                              <MdCancel className="action-icon icon-cancel"
+                                onClick={() => handleCancel(record.id)} />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
