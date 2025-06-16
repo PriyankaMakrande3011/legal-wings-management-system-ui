@@ -110,7 +110,9 @@ const Executive = () => {
     try {
       const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" ,
+          "Authorization": `Bearer ${keycloak.token}` 
+        },
         body: JSON.stringify(requestBody),
         "Authorization": `Bearer ${keycloak.token}`
       });
@@ -247,7 +249,7 @@ const Executive = () => {
   };
 
   const handleEditClick = (leadId) => {
-    navigate(`/add-lead?mode=edit&id=${leadId}`);
+    navigate(`/edit?mode=edit&id=${leadId}`);
   };
 
   const handleAssign = (lead) => {
@@ -394,6 +396,7 @@ const Executive = () => {
                                 onClick={() => {
                                   setModalOpen(true)
                                   setSelectedLeadId(record.id)
+                                  handleEditClick(record.id)
                                 }
                                 }
                               />

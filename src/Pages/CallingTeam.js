@@ -50,28 +50,29 @@ const CallingTeam = () => {
   };
 
 
-  // const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
-  //   const requestBody = {
-  //     cityIdsUi: selectedCityId ? [parseInt(selectedCityId)] : [],
-  //     stateIdsUi: [],
-  //     zoneIdsUi: [],
-  //     areaIdsUi: selectedAreaId ? [parseInt(selectedAreaId)] : []
-  //   };
+  const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
+    const requestBody = {
+      cityIdsUi: selectedCityId ? [parseInt(selectedCityId)] : [],
+      stateIdsUi: [],
+      zoneIdsUi: [],
+      areaIdsUi: selectedAreaId ? [parseInt(selectedAreaId)] : []
+    };
 
-  //   try {
-  //     const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(requestBody),
-  //     });
+    try {
+      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}` },
+        body: JSON.stringify(requestBody),
+      });
 
-  //     const data = await response.json();
-  //     setCities(data?.cities || []);
-  //     setAreas(data?.areas || []);
-  //   } catch (error) {
-  //     console.error("Error fetching dropdown data:", error);
-  //   }
-  // };
+      const data = await response.json();
+      setCities(data?.cities || []);
+      setAreas(data?.areas || []);
+    } catch (error) {
+      console.error("Error fetching dropdown data:", error);
+    }
+  };
 
   useEffect(() => {
     fetchDropdowns();
@@ -240,33 +241,31 @@ const CallingTeam = () => {
     setSelectedLeadId(lead);
   };
 
-  const fetchDropdowns = async () => {
-    const requestBody = {
-      cityIdsUi: city ? [parseInt(city)] : [],
-      stateIdsUi: [],
-      zoneIdsUi: [],
-      areaIdsUi: area ? [parseInt(area)] : []
-    };
+  // const fetchDropdowns = async () => {
+  //   const requestBody = {
+  //     cityIdsUi: city ? [parseInt(city)] : [],
+  //     stateIdsUi: [],
+  //     zoneIdsUi: [],
+  //     areaIdsUi: area ? [parseInt(area)] : []
+  //   };
 
-    try {
-      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${keycloak.token}`
-        },
-        body: JSON.stringify(requestBody),
-      });
+  //   try {
+  //     const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${keycloak.token}`
+  //       },
+  //       body: JSON.stringify(requestBody),
+  //     });
 
-      const data = await response.json();
-      if (data.success) {
-        setCities(data?.cityList || []);
-        setAreas(data?.areaList || []);
-      }
-    } catch (error) {
-      console.error("Error fetching dropdowns:", error);
-    }
-  };
+  //     const data = await response.json();
+  //     setCities(data.cities || []);
+  //     setAreas(data.areas || []);
+  //   } catch (error) {
+  //     console.error("Error fetching dropdowns:", error);
+  //   }
+  // };
 
   const fetchLeads = async (page = 0) => {
     setLoading(true);
@@ -397,12 +396,12 @@ const CallingTeam = () => {
               </div>
             </div>
 
-            <div className="stats-section">
+            {/* <div className="stats-section">
               <div className="stat-card">Total <strong>{records.length}</strong></div>
               <div className="stat-card">Pending <strong>08</strong></div>
               <div className="stat-card">Cancelled <strong>02</strong></div>
               <div className="stat-card">Approved <strong>36</strong></div>
-            </div>
+            </div> */}
             <hr />
             <div className="client-action">
               <button onClick={handleAddNewLead}>

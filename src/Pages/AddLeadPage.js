@@ -11,6 +11,9 @@ import axios from "axios";
 import { FaPlus, FaRegCalendarAlt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { format } from 'date-fns';
+import CustomDatePicker from '../common/CustomDatePicker.js';
+
 
 
 
@@ -41,6 +44,8 @@ const AddLeadPage = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { keycloak } = useKeycloak();
   const transitLevel = location.state?.transitLevel;
+  const [cityOptions, setCityOptions] = useState([]);
+  const [areaOptions, setAreaOptions] = useState([]);
 
 
 
@@ -229,7 +234,7 @@ const AddLeadPage = ({
 
     setSelectedClientId(clientId); // <--- New
 
-        fetch(`${Api.BASE_URL}clients/${clientId}`, {
+    fetch(`${Api.BASE_URL}clients/${clientId}`, {
       headers: {
         Authorization: `Bearer ${keycloak.token}`,
         "Content-Type": "application/json"
@@ -313,7 +318,42 @@ const AddLeadPage = ({
     );
   };
 
-  const renderDropdown = (label, field, options) => (
+
+  const fetchDropdowns = async () => {
+    const requestBody = {
+      cityIdsUi: null,
+
+      areaIdsUi: []
+    };
+
+    try {
+      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}`
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+
+      setCityOptions(data.cities || []);
+      setAreaOptions(data.areas || []);
+
+      console.log("City Options:", data.cityList);
+      console.log("Area Options:", data.areaList);
+
+    } catch (error) {
+      console.error("Error fetching dropdowns:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDropdowns(); // Fetch cities initially
+  }, []);
+
+  const renderDropdown = (label, field, options = []) => (
     <div>
       <label>{label}</label>
       <select
@@ -324,8 +364,11 @@ const AddLeadPage = ({
       >
         <option value="">Select {label}</option>
         {options.map((opt, idx) => (
-          <option key={idx} value={opt}>
-            {opt}
+          <option
+            key={opt.id || idx}
+            value={opt.id || opt}
+          >
+            {opt.name || opt}
           </option>
         ))}
       </select>
@@ -442,10 +485,16 @@ const AddLeadPage = ({
               {renderDropdown("Client Type", "clientType", clientTypeOptions)}
               {renderInput("Contact Number", "Contact Number", "contactNumber")}
               {renderInput("Email", "Email", "email")}
-              {renderInput("Tentative Agreement Date", "Tentative Agreement Date", "tentativeAgreementDate")}
+              <CustomDatePicker
+                label="Tentative Agreement Date"
+                placeholder="Tentative Agreement Date"
+                value={formData.tentativeAgreementDate}
+                onChange={(date) => handleInputChange('tentativeAgreementDate', date)}
+                dateFormat="yyyy-MM-dd"
+              />
               {renderInput("Tentative Address", "Tentative Address", "address")}
-              {renderInput("Area", "Area", "area")}
-              {renderInput("City", "City", "city")}
+              {renderDropdown("Area", "Area", areaOptions)}
+              {renderDropdown("City", "City", cityOptions)}
             </div>
             {mode !== 'view' && (
               <div className="button-wrapper">

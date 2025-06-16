@@ -37,12 +37,21 @@ const Edit = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const clientTypeOptions = ["Owner", "Tenant", "Agent"];
-   const { keycloak } = useKeycloak();
+  const { keycloak } = useKeycloak();
+  const [cityOptions, setCityOptions] = useState([]);
+  const [areaOptions, setAreaOptions] = useState([]);
 
 
 
   useEffect(() => {
-    fetch(Api.CLIENT_DROPDOWN)
+    fetch(Api.CLIENT_DROPDOWN,
+      {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}` // or localStorage.getItem("token")
+        }
+      }
+
+    )
       .then(res => res.json())
       .then(data => setClients(data))
       .catch(err => console.error("Failed to fetch clients", err));
@@ -76,7 +85,7 @@ const Edit = ({
       headers: {
         "Content-Type": "application/json",
         "accept": "*/*",
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(requestBody)
     })
@@ -141,7 +150,7 @@ const Edit = ({
       headers: {
         "Content-Type": "application/json",
         "accept": "*/*",
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(agreementData)
     })
@@ -180,7 +189,7 @@ const Edit = ({
       headers: {
         "Content-Type": "application/json",
         "accept": "*/*",
-         "Authorization": `Bearer ${keycloak.token}`
+        "Authorization": `Bearer ${keycloak.token}`
       },
       body: JSON.stringify(paymentData)
     })
@@ -252,7 +261,7 @@ const Edit = ({
       .catch(err => console.error("Failed to fetch client data", err));
   };
 
-  
+
 
   const renderClientDropdown = (type) => {
     // Return null if mode is "view" to hide the dropdown
@@ -276,24 +285,59 @@ const Edit = ({
     );
   };
 
-  const renderDropdown = (label, field, options) => (
-    <div>
-      <label>{label}</label>
-      <select
-        value={formData[field] || ''}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-        // disabled={mode === 'edit'}
-        className="client-dropdown"
-      >
-        <option value="">Select {label}</option>
-        {options.map((opt, idx) => (
-          <option key={idx} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
+  const fetchDropdowns = async () => {
+    const requestBody = {
+     cityIdsUi:null,
+
+      areaIdsUi: []
+    };
+
+     try {
+      const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
+        method: "POST",
+         headers: { "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}` },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+     
+        setCityOptions(data.cities || []);
+    setAreaOptions(data.areas || []);
+      
+      console.log("City Options:", data.cityList);
+console.log("Area Options:", data.areaList);
+
+    } catch (error) {
+      console.error("Error fetching dropdowns:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDropdowns(); // Fetch cities initially
+  }, []);
+
+   const renderDropdown = (label, field, options = []) => (
+  <div>
+    <label>{label}</label>
+    <select
+      value={formData[field] || ''}
+      onChange={(e) => handleInputChange(field, e.target.value)}
+      disabled={mode === 'view'}
+      className="client-dropdown"
+    >
+      <option value="">Select {label}</option>
+      {options.map((opt, idx) => (
+        <option
+          key={opt.id || idx}
+          value={opt.id || opt}
+        >
+          {opt.name || opt}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 
   const renderInput = (label, placeholder, field, extraProps = {}) => (
@@ -304,7 +348,7 @@ const Edit = ({
         value={formData[field] || ''}
 
         onChange={e => handleInputChange(field, e.target.value)}
-           {...extraProps}
+        {...extraProps}
       />
     </div>
   );
@@ -314,9 +358,15 @@ const Edit = ({
     const fetchLeadDetails = async () => {
       if (mode === "edit" && id) {
         try {
-          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`);
+          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${keycloak.token}`
+              }
+            }
+
+          );
           const data = response.data;
-          console.log("Fetched data:", data);
 
           setFormData({
             // Client
@@ -398,15 +448,15 @@ const Edit = ({
               {renderClientDropdown('lead')}
             </div>
             <div className="form-grid">
-              {renderInput("First Name","First Name","firstName",{ readOnly: mode === 'edit' })}
-              {renderInput("Last Name","Last Name", "lastName",{ readOnly: mode === 'edit' })}
+              {renderInput("First Name", "First Name", "firstName", { readOnly: mode === 'edit' })}
+              {renderInput("Last Name", "Last Name", "lastName", { readOnly: mode === 'edit' })}
               {renderDropdown("Client Type", "clientType", clientTypeOptions)}
-              {renderInput("Contact Number","Contact Number", "contactNumber",{ readOnly: mode === 'edit' })}
-              {renderInput("Email","Email" ,"email",{ readOnly: mode === 'edit' })}
-              {renderInput("Tentative Agreement Date","Tentative Agreement Date", "tentativeAgreementDate",{ readOnly: false })}
-              {renderInput("Tentative Address","Tentative Address", "address",{ readOnly: false })}
-              {renderInput("Area","Area", "area",{ readOnly: false })}
-              {renderInput("City","City", "city", { readOnly: false })}
+              {renderInput("Contact Number", "Contact Number", "contactNumber", { readOnly: mode === 'edit' })}
+              {renderInput("Email", "Email", "email", { readOnly: mode === 'edit' })}
+              {renderInput("Tentative Agreement Date", "Tentative Agreement Date", "tentativeAgreementDate", { readOnly: false })}
+              {renderInput("Tentative Address", "Tentative Address", "address", { readOnly: false })}
+             {renderDropdown("Area","Area", areaOptions,{ readOnly: false })}
+              {renderDropdown("City","City", cityOptions, { readOnly: false })}
             </div>
             {mode == 'edit' && (
               <div className="button-wrapper">
@@ -423,30 +473,30 @@ const Edit = ({
             <h3 className="agreement-heading">Owner</h3>
             {renderClientDropdown('owner')}
             <div className="form-grid">
-              {renderInput("Owner Firstname","Owner Firstname", "ownerFirstName",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant LastName","Tenant LastName", "ownerLastName",{ readOnly: mode === 'edit' })}
-              {renderInput("Owner Email","Owner Email", "ownerEmail",{ readOnly: mode === 'edit' })}
-              {renderInput("Owner Contact","Owner Contact", "ownerContact",{ readOnly: mode === 'edit' })}
-              {renderInput("Owner Aadhar Number","Owner Aadhar Number", "ownerAadhar",{ readOnly: mode === 'edit' })}
-              {renderInput("Owner PAN Number","Owner PAN Number", "ownerPan",{ readOnly: mode === 'edit' })}
+              {renderInput("Owner Firstname", "Owner Firstname", "ownerFirstName", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant LastName", "Tenant LastName", "ownerLastName", { readOnly: mode === 'edit' })}
+              {renderInput("Owner Email", "Owner Email", "ownerEmail", { readOnly: mode === 'edit' })}
+              {renderInput("Owner Contact", "Owner Contact", "ownerContact", { readOnly: mode === 'edit' })}
+              {renderInput("Owner Aadhar Number", "Owner Aadhar Number", "ownerAadhar", { readOnly: mode === 'edit' })}
+              {renderInput("Owner PAN Number", "Owner PAN Number", "ownerPan", { readOnly: mode === 'edit' })}
             </div>
             <h3 className="agreement-heading">Tenant</h3>
             {renderClientDropdown('tenant')}
             <div className="form-grid">
-              {renderInput("Tenant FirstName","Tenant FirstName", "tenantFirstName",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant LastName","Tenant LastName", "tenantLastName",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant Email","Tenant Email" ,"tenantEmail",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant Contact","Tenant Contact", "tenantContact",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant Aadhar Number","Tenant Aadhar Number", "tenantAadhar",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant PAN Number","Tenant PAN Number", "tenantPan",{ readOnly: mode === 'edit' })}
+              {renderInput("Tenant FirstName", "Tenant FirstName", "tenantFirstName", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant LastName", "Tenant LastName", "tenantLastName", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant Email", "Tenant Email", "tenantEmail", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant Contact", "Tenant Contact", "tenantContact", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant Aadhar Number", "Tenant Aadhar Number", "tenantAadhar", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant PAN Number", "Tenant PAN Number", "tenantPan", { readOnly: mode === 'edit' })}
             </div>
             <h3 className="agreement-heading">Agreement Details</h3>
             <div className="form-grid">
-              {renderInput("Token Number","Token Number", "tokenNumber",{ readOnly: mode === 'edit' })}
-              {renderInput("Agreement Start Date","Agreement Start Date", "startDate",{ readOnly: false })}
-              {renderInput("Agreement End Date","Agreement End Date", "endDate",{ readOnly: false })}
-              {renderInput("Address Line 1","Address Line 1", "addressLine1",{ readOnly: false })}
-              {renderInput("Address Line 2","Address Line 2" ,"addressLine2",{ readOnly: false })}
+              {renderInput("Token Number", "Token Number", "tokenNumber", { readOnly: mode === 'edit' })}
+              {renderInput("Agreement Start Date", "Agreement Start Date", "startDate", { readOnly: false })}
+              {renderInput("Agreement End Date", "Agreement End Date", "endDate", { readOnly: false })}
+              {renderInput("Address Line 1", "Address Line 1", "addressLine1", { readOnly: false })}
+              {renderInput("Address Line 2", "Address Line 2", "addressLine2", { readOnly: false })}
             </div>
             {mode == 'edit' && (
               <div className="button-wrapper">
@@ -461,16 +511,16 @@ const Edit = ({
         return (
           <>
             <div className="form-grid">
-              {renderInput("Owner Payment Amount","Owner Payment Amount", "ownerPayment",{ readOnly: mode === 'edit' })}
-              {renderInput(" Owner Payment Date ","Owner Payment Date", "ownerPaymentDate",{ readOnly: mode === 'edit' })}
-              {renderInput("Tenant Payment Amount","Tenant Payment Amount" ,"tenantPayment",{ readOnly: mode === 'edit' })}
-              {renderInput(" Tenant Payment Date ","Tenant Payment Date", "tenantPaymentDate",{ readOnly: mode === 'edit' })}
-              {renderInput("Total Payment","Total Payment", "totalPayment",{ readOnly: mode === 'edit' })}
-              {renderInput("Remaining Payment","Remaining Payment", "remainingPayment",{ readOnly: mode === 'edit' })}
-              {renderInput("Mode of Payment","Mode of Payment", "paymentMode",{ readOnly: mode === 'edit' })}
-              {renderInput("GRN Number","GRN Number", "grnNumber",{ readOnly: mode === 'edit' })}
-              {renderInput("Govt GRN Date","Govt GRN Date", "govtGrnDate",{ readOnly: mode === 'edit' })}
-              {renderInput("DHC Date","DHC Date", "dhcDate",{ readOnly: mode === 'edit' })}
+              {renderInput("Owner Payment Amount", "Owner Payment Amount", "ownerPayment", { readOnly: mode === 'edit' })}
+              {renderInput(" Owner Payment Date ", "Owner Payment Date", "ownerPaymentDate", { readOnly: mode === 'edit' })}
+              {renderInput("Tenant Payment Amount", "Tenant Payment Amount", "tenantPayment", { readOnly: mode === 'edit' })}
+              {renderInput(" Tenant Payment Date ", "Tenant Payment Date", "tenantPaymentDate", { readOnly: mode === 'edit' })}
+              {renderInput("Total Payment", "Total Payment", "totalPayment", { readOnly: mode === 'edit' })}
+              {renderInput("Remaining Payment", "Remaining Payment", "remainingPayment", { readOnly: mode === 'edit' })}
+              {renderInput("Mode of Payment", "Mode of Payment", "paymentMode", { readOnly: mode === 'edit' })}
+              {renderInput("GRN Number", "GRN Number", "grnNumber", { readOnly: mode === 'edit' })}
+              {renderInput("Govt GRN Date", "Govt GRN Date", "govtGrnDate", { readOnly: mode === 'edit' })}
+              {renderInput("DHC Date", "DHC Date", "dhcDate", { readOnly: mode === 'edit' })}
 
             </div>
             {mode == 'edit' && (

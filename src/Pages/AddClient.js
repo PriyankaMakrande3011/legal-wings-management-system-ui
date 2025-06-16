@@ -91,7 +91,7 @@
 //               <p className="error-message">{errors.clientType.message}</p>
 //             )}
 //           </div>
-         
+
 //           </div>
 
 //           {/* Address */}
@@ -107,7 +107,7 @@
 //             {errors.address && (
 //               <p className="error-message">{errors.address.message}</p>
 //             )}
-           
+
 //           </div>
 
 //           {/* City and Area */}
@@ -148,7 +148,7 @@
 //           </div>
 
 //           {/* Client Type Dropdown */}
-          
+
 
 //           {/* Aadhar and PAN Number */}
 //           <div className="form-row">
@@ -218,27 +218,27 @@
 //   const [loading, setLoading] = useState(false);
 //   const [error, setError] = useState(null);
 
-  
+
 //   useEffect(() => {
 //     if (!isOpen) return; // Fetch only when modal opens
-  
+
 //     const fetchCities = async () => {
 //       setLoading(true);
 //       setError(null);
-  
+
 //       try {
 //         const response = await fetch("http://13.50.102.11:8080/legal-wings-management/clients");
-        
+
 //         if (!response.ok) {
 //           throw new Error(`HTTP error! Status: ${response.status}`);
 //         }
-  
+
 //         const data = await response.json();
 //         console.log("Fetched Cities Data:", data); // Debugging log
-  
+
 //         // Ensure response is an array
 //         setCities(Array.isArray(data) ? data : []);
-  
+
 //       } catch (err) {
 //         console.error("Error fetching cities:", err);
 //         setError("Failed to fetch cities. Please try again.");
@@ -246,10 +246,10 @@
 //         setLoading(false);
 //       }
 //     };
-  
+
 //     fetchCities();
 //   }, [isOpen]);
-  
+
 
 
 //   const onSubmit = (data) => {
@@ -421,64 +421,76 @@ const AddClientModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCity, setSelectedCity] = useState("");
- const { keycloak } = useKeycloak();
+  const { keycloak } = useKeycloak();
   useEffect(() => {
     if (!isOpen) return; // Fetch only when modal opens
 
-  const fetchCities = async () => {
-  setLoading(true);
-  setError(null);
+    const fetchCities = async () => {
+      setLoading(true);
+      setError(null);
 
-  try {
-    const response = await fetch("http://13.50.102.11:8080/legal-wings-management/cities", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${keycloak.token}`,
-      },
-    });
+      try {
+        const response = await fetch("http://13.50.102.11:8080/legal-wings-management/cities", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${keycloak.token}`,
+          },
+        });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-    const data = await response.json();
-    console.log("Fetched Cities Data:", data);
+        const data = await response.json();
+        console.log("Fetched Cities Data:", data);
 
-    setCities(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("Error fetching cities:", err);
-    setError("Failed to fetch cities. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+        setCities(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching cities:", err);
+        setError("Failed to fetch cities. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchCities();
   }, [isOpen]);
 
-  const onSubmit = async (data) => {
-    try {
-      const response = await fetch(`${Api.BASE_URL}clients`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-           "Authorization": `Bearer ${keycloak.token}`
-        },
-        body: JSON.stringify(data),
-      });
+  {error && <p className="error-message">{error}</p>}
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
 
-      const result = await response.json();
-      console.log("Form submitted successfully:", result);
-      onClose();
-    } catch (err) {
-      console.error("Error submitting form:", err);
+const onSubmit = async (data) => {
+  setError(null); // Reset previous errors
+  try {
+    const response = await fetch(`${Api.BASE_URL}clients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${keycloak.token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const contentType = response.headers.get("content-type");
+    const isJson = contentType && contentType.includes("application/json");
+    const result = isJson ? await response.json() : null;
+
+    if (!response.ok) {
+      // Handle backend JSON error or fallback message
+      const errorMessage = result?.error || result?.message || "Something went wrong!";
+      throw new Error(errorMessage);
     }
-  };
+
+    console.log("Form submitted successfully:", result);
+    onClose();
+  } catch (err) {
+    console.error("Error submitting form:", err);
+    setError(err.message || "Unexpected error occurred.");
+  }
+};
+
+
 
   if (!isOpen) return null;
 
@@ -486,6 +498,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
     <div className="addclient-container">
       <div className="addclient-modal">
         <h2>Add Client</h2>
+        {error && <p className="error-message" style={{ color: "red" }}>{error}</p>}
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* First Name and Last Name */}
           <div className="form-row">
@@ -540,7 +553,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Client Type */}
-         
+
 
           {/* Aadhar Number and PAN Number */}
           <div className="form-row">
@@ -570,7 +583,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
               />
               {errors.panNumber && <p className="error-message">{errors.panNumber.message}</p>}
             </div>
-            
+
           </div>
           <div className="form-group">
             <label htmlFor="clientType">Client Type:</label>
