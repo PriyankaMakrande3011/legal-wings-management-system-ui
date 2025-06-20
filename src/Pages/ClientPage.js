@@ -123,7 +123,7 @@ const ClientPage = () => {
   //   }).then(async (result) => {
   //     if (result.isConfirmed) {
   //       try {
-  //         await axios.delete(`http://13.204.9.221:8081/legal-wings-management/clients/${id}`);
+  //         await axios.delete(`http://localhost:8081/legal-wings-management/clients/${id}`);
   //         Swal.fire("Deleted!", "Client has been removed.", "success");
   //         fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
   //       } catch (error) {
@@ -147,7 +147,7 @@ const ClientPage = () => {
     if (result.isConfirmed) {
       try {
         await axios.delete(
-          `http://13.204.9.221:8081/legal-wings-management/clients/${id}`,
+          `http://localhost:8081/legal-wings-management/clients/${id}`,
           {
             headers: {
               Authorization: `Bearer ${keycloak.token}`,

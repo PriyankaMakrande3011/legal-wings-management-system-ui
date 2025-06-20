@@ -216,7 +216,7 @@ const CallingTeam = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.put(`http://13.204.9.221:8080/legal-wings-management/lead/${id}/cancel+`);
+          await axios.put(`http://localhost:8080/legal-wings-management/lead/${id}/cancel+`);
           Swal.fire("Deleted!", "Client has been removed.", "success");
           // fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
         } catch (error) {

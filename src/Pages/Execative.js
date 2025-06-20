@@ -54,7 +54,7 @@ const Executive = () => {
   //     if (result.isConfirmed) {
   //       try {
 
-  //         await axios.put(`http://13.204.9.221:8081/legal-wings-management/leads/${id}/cancel`);
+  //         await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
   //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
 
   //         fetchLeads(); 
@@ -78,7 +78,7 @@ const Executive = () => {
       if (result.isConfirmed) {
         try {
           await axios.put(
-            `http://13.204.9.221:8081/legal-wings-management/leads/${id}/cancel`,
+            `http://localhost:8081/legal-wings-management/leads/${id}/cancel`,
             {}, // empty body
             {
               headers: {

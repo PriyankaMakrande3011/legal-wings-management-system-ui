@@ -28,7 +28,7 @@ const EditClient = ({ isOpen, onClose, leadId }) => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch("http://13.204.9.221:3031/Lead"); // Replace with your JSON link
+        const response = await fetch("http://localhost:3031/Lead"); // Replace with your JSON link
         if (!response.ok) {
           throw new Error("Failed to fetch clients");
         }
@@ -45,7 +45,7 @@ useEffect(() => {
   if (leadId) {
     const fetchLead = async () => {
       try {
-        const response = await fetch(`http://13.204.9.221:3031/Lead/${leadId}`, {
+        const response = await fetch(`http://localhost:3031/Lead/${leadId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -81,7 +81,7 @@ useEffect(() => {
   //   if (leadId) {
   //     const fetchLead = async () => {
   //       try {
-  //         const response = await fetch(`http://13.204.9.221:3031/Lead/${leadId}`);
+  //         const response = await fetch(`http://localhost:3031/Lead/${leadId}`);
   //         const data = await response.json();
 
   //         // Autofill form values

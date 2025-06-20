@@ -1,5 +1,5 @@
 
-const BASE_URL='http://13.204.9.221:8081/legal-wings-management/'
+const BASE_URL='http://localhost:8081/legal-wings-management/'
 
 const Api = {
     BASE_URL,

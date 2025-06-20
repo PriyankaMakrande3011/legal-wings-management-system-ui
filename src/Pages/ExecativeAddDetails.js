@@ -67,7 +67,7 @@
 //      ) }
 //     };
 
-//     fetch("http://13.204.9.221:8081/legal-wings-management/leads", {
+//     fetch("http://localhost:8081/legal-wings-management/leads", {
 //       method: "POST",
 //       headers: {
 //         "Content-Type": "application/json",
@@ -132,7 +132,7 @@
 //       }
 //     };
 
-//     fetch("http://13.204.9.221:8081/legal-wings-management/agreements", {
+//     fetch("http://localhost:8081/legal-wings-management/agreements", {
 //       method: "POST",
 //       headers: {
 //         "Content-Type": "application/json",
@@ -167,7 +167,7 @@
 //       paymentCalendar: formData.paymentCalendar
 //     };
   
-//     fetch("http://13.204.9.221:8081/legal-wings-management/payments", {
+//     fetch("http://localhost:8081/legal-wings-management/payments", {
 //       method: "POST",
 //       headers: {
 //         "Content-Type": "application/json",
@@ -294,7 +294,7 @@
 //     const fetchLeadDetails = async () => {
 //       if (mode === "view" && id) {
 //         try {
-//           const response = await axios.get(`http://13.204.9.221:8081/legal-wings-management/leads/${id}`);
+//           const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`);
 //           const data = response.data;
 //           console.log("Fetched data:", data);
   
