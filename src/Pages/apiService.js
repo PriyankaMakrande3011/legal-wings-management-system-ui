@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8081";
+const BASE_URL = "http://13.204.9.221:8081";
 
 export const fetchDropdownData = async () => {
   try {

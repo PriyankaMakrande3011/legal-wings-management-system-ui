@@ -90,7 +90,7 @@ const AddLeadPage = ({
       }
     };
 
-    fetch("http://localhost:8081/legal-wings-management/leads", {
+    fetch("http://13.204.9.221:8081/legal-wings-management/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -155,7 +155,7 @@ const AddLeadPage = ({
       }
     };
 
-    fetch("http://localhost:8081/legal-wings-management/agreements", {
+    fetch("http://13.204.9.221:8081/legal-wings-management/agreements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -196,7 +196,7 @@ const AddLeadPage = ({
       dhcDate: formData.dhcDate,
     };
 
-    fetch("http://localhost:8081/legal-wings-management/payments", {
+    fetch("http://13.204.9.221:8081/legal-wings-management/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -393,7 +393,7 @@ const AddLeadPage = ({
     const fetchLeadDetails = async () => {
       if (mode === "view" && id) {
         try {
-          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`, {
+          const response = await axios.get(`http://13.204.9.221:8081/legal-wings-management/leads/${id}`, {
             headers: {
               Authorization: `Bearer ${keycloak.token}`
             }
