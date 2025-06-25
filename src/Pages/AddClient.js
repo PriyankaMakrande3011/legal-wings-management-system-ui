@@ -227,7 +227,7 @@
 //       setError(null);
 
 //       try {
-//         const response = await fetch("http://13.50.102.11:8080/legal-wings-management/clients");
+//         const response = await fetch("http://13.50.102.11:8443/legal-wings-management/clients");
 
 //         if (!response.ok) {
 //           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -430,7 +430,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
       setError(null);
 
       try {
-        const response = await fetch("http://13.50.102.11:8080/legal-wings-management/cities", {
+        const response = await fetch("http://13.50.102.11:8443/legal-wings-management/cities", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

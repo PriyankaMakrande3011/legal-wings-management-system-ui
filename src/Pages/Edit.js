@@ -80,7 +80,7 @@ const Edit = ({
       }
     };
 
-    fetch("http://localhost:8081/legal-wings-management/leads", {
+    fetch("https://legalwingcrm.in:8081/legal-wings-management/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +145,7 @@ const Edit = ({
       }
     };
 
-    fetch("http://localhost:8081/legal-wings-management/agreements", {
+    fetch("https://legalwingcrm.in:8081/legal-wings-management/agreements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -184,7 +184,7 @@ const Edit = ({
       dhcDate: formData.dhcDate,
     };
 
-    fetch("http://localhost:8081/legal-wings-management/payments", {
+    fetch("https://legalwingcrm.in:8081/legal-wings-management/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -358,7 +358,7 @@ console.log("Area Options:", data.areaList);
     const fetchLeadDetails = async () => {
       if (mode === "edit" && id) {
         try {
-          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`,
+          const response = await axios.get(`https://legalwingcrm.in:8081/legal-wings-management/leads/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${keycloak.token}`

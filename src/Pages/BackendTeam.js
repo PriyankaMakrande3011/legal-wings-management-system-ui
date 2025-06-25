@@ -42,7 +42,7 @@ const BackendTeam = () => {
   //   };
 
   //   axios
-  //     .post("http://13.50.102.11:8080/legal-wings-management/clients/all", requestData)
+  //     .post("http://13.50.102.11:8443/legal-wings-management/clients/all", requestData)
   //     .then((res) => {
   //       console.log("API Response:", res.data);
 
@@ -91,7 +91,7 @@ useEffect(() => {
 
   axios
     .post(
-      "http://13.50.102.11:8080/legal-wings-management/clients/all",
+      "http://13.50.102.11:8443/legal-wings-management/clients/all",
       requestData,
       {
         headers: {
