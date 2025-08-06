@@ -422,40 +422,40 @@ const AddClientModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState(null);
   const [selectedCity, setSelectedCity] = useState("");
   const { keycloak } = useKeycloak();
-  useEffect(() => {
-    if (!isOpen) return; // Fetch only when modal opens
+  // useEffect(() => {
+  //   if (!isOpen) return; // Fetch only when modal opens
 
-    const fetchCities = async () => {
-      setLoading(true);
-      setError(null);
+  //   const fetchCities = async () => {
+  //     setLoading(true);
+  //     setError(null);
 
-      try {
-        const response = await fetch("http://13.50.102.11:8443/legal-wings-management/cities", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${keycloak.token}`,
-          },
-        });
+  //     try {
+  //       const response = await fetch("http://13.50.102.11:8443/legal-wings-management/cities", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           "Authorization": `Bearer ${keycloak.token}`,
+  //         },
+  //       });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
 
-        const data = await response.json();
-        console.log("Fetched Cities Data:", data);
+  //       const data = await response.json();
+  //       console.log("Fetched Cities Data:", data);
 
-        setCities(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Error fetching cities:", err);
-        setError("Failed to fetch cities. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setCities(Array.isArray(data) ? data : []);
+  //     } catch (err) {
+  //       console.error("Error fetching cities:", err);
+  //       setError("Failed to fetch cities. Please try again.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchCities();
-  }, [isOpen]);
+  //   fetchCities();
+  // }, [isOpen]);
 
   {error && <p className="error-message">{error}</p>}
 

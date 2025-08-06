@@ -35,7 +35,8 @@ const AddLeadPage = ({
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ cityId: "",
+  areaId: "",});
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(null); // <--- New
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,12 +73,36 @@ const AddLeadPage = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleCityInputChange = (field, value) => {
+  setFormData(prev => {
+    const updated = { ...prev, [field]: value };
+    console.log("Updated formData:", updated);
+    return updated;
+  });
+
+
+  if (field === "cityId") {
+    fetchDropdowns(value);
+  }
+};
+
   const handleSaveLead = () => {
+    console.log("formData before save:", formData);
+    console.log("Accessing areaId directly:", formData.areaId);
     const requestBody = {
       tentativeAgreementDate: formData.tentativeAgreementDate,
       visitAddress: formData.visitAddress,
       id: leadId,
       transitLevel: transitLevel,
+      
+   city: {
+      id: formData.cityId || null  
+    },
+
+    area: {
+      id: formData.areaId|| null
+  
+    },
       client: {
         ...(selectedClientId ? { id: selectedClientId } : {
           firstName: formData.firstName || "",
@@ -88,6 +113,7 @@ const AddLeadPage = ({
         }
         )
       }
+      
     };
 
     fetch("https://legalwingcrm.in:8081/legal-wings-management/leads", {
@@ -113,6 +139,7 @@ const AddLeadPage = ({
         console.error("Lead Save Error:", err);
         alert("Error saving lead. Please try again.");
       });
+       console.log("Final payload:", requestBody); 
   };
 
   const handleSaveAgreement = () => {
@@ -122,9 +149,9 @@ const AddLeadPage = ({
       agreementStartDate: formData.startDate,
       agreementEndDate: formData.endDate,
       area: {
-        id: 1, // Replace with correct area ID
-        name: formData.area || "",
-      },
+      id: formData.areaId|| null
+  
+    },
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
       tenant: {
@@ -319,11 +346,10 @@ const AddLeadPage = ({
   };
 
 
-  const fetchDropdowns = async () => {
+  const fetchDropdowns = async (selectedCityId = null, selectedAreaId = null) => {
     const requestBody = {
-      cityIdsUi: null,
-
-      areaIdsUi: []
+      cityIdsUi: selectedCityId ? [selectedCityId] : [],
+    areaIdsUi: selectedAreaId ? [selectedAreaId] : [],
     };
 
     try {
@@ -353,28 +379,26 @@ const AddLeadPage = ({
     fetchDropdowns(); // Fetch cities initially
   }, []);
 
-  const renderDropdown = (label, field, options = []) => (
-    <div>
-      <label>{label}</label>
-      <select
-        value={formData[field] || ''}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-        disabled={mode === 'view'}
-        className="client-dropdown"
-      >
-        <option value="">Select {label}</option>
-        {options.map((opt, idx) => (
-          <option
-            key={opt.id || idx}
-            value={opt.id || opt}
-          >
-            {opt.name || opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-
+const renderDropdown = (label, field, options = []) => (
+  <div>
+    <label>{label}</label>
+    <select
+      name={field}
+      value={formData[field] || ''}
+      onChange={(e) => handleCityInputChange(field, e.target.value)}
+      className="client-dropdown"
+    disabled={mode === 'view'}
+    >
+      <option value="">Select {label}</option>
+      readOnly={mode === 'view'}
+      {options.map((opt, idx) => (
+        <option key={opt.id || idx} value={opt.id}>
+          {opt.name || opt}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
   const renderInput = (label, placeholder, field) => (
     <div>
@@ -407,11 +431,10 @@ const AddLeadPage = ({
             contactNumber: data.client?.phoneNo || "",
             email: data.client?.email || "",
             clientType: data.client?.clientType || "",
-            tentativeAgreementDate: data.client.tentativeAgreementDate || "",
-            area: data.client.area || "",
-            city: data.client.city || "",
-            tentativeAddress: data.client.tentativeAddress || "",
-
+             tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
+  visitAddress: data.visitAddress || "",
+  cityId: data.client?.city?.id || "",          
+    areaId : data.area?.id || "",
             // Owner
             ownerFirstName: data.agreement?.owner?.firstName || "",
             ownerLastName: data.agreement?.owner?.lastName || "",
@@ -450,7 +473,7 @@ const AddLeadPage = ({
             govtGrnDate: data.payment?.govtGrnDate || "",
             dhcDate: data.payment?.dhcDate || ""
           });
-
+await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
           // For datepicker values
           if (data.agreement?.agreementStartDate) {
             setStartDate(new Date(data.agreement.agreementStartDate));
@@ -492,9 +515,10 @@ const AddLeadPage = ({
                 onChange={(date) => handleInputChange('tentativeAgreementDate', date)}
                 dateFormat="yyyy-MM-dd"
               />
-              {renderInput("Tentative Address", "Tentative Address", "address")}
-              {renderDropdown("Area", "Area", areaOptions)}
-              {renderDropdown("City", "City", cityOptions)}
+              {renderInput("Visit Address", "Visit Address", "visitAddress")}
+             {renderDropdown("City", "cityId", cityOptions)}
+{renderDropdown("Area", "areaId", areaOptions)}
+
             </div>
             {mode !== 'view' && (
               <div className="button-wrapper">

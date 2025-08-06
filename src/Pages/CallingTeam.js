@@ -108,60 +108,6 @@ const CallingTeam = () => {
     fetchLeads();
   };
 
-  // const fetchLeads = async () => {
-  //   setLoading(true);
-  // setNoData(false);
-  //   const requestBody = {
-  //     fromDate: fromDate.toISOString().split("T")[0],
-  //     toDate: toDate.toISOString().split("T")[0],
-  //     clientType: clientType ? clientType.toUpperCase() : undefined,
-  //     cityIdsUi: city ? [parseInt(city)] : [],
-  //     areaIdsUi: area ? [parseInt(area)] : [],
-  //      pageNumber: page,
-  //       pageSize: recordsPerPage,
-  //     sortField: "id",
-  //     sortOrder: "desc",
-  //     transitLevel: "CALLING_TEAM"
-  //   }; 
-  //   if (response.data?.leadPage?.content) {
-  //       setRecords(response.data.leadPage.content);
-  //       setTotalPages(response.data.leadPage.totalPages || 1);
-  //       setNoData(false);
-  //     } else {
-  //       setRecords([]);
-  //       setNoData(true);
-  //       setTotalPages(1);
-  //     }
-
-  //   try {
-  //     const response = await fetch(`${Api.BASE_URL}leads/all`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(requestBody),
-  //     });
-  //     let data = (await response.json())?.leadPage?.content || [];
-
-  //     if (searchText.trim()) {
-  //       const keyword = searchText.toLowerCase();
-  //       data = data.filter((record) => {
-  //         const firstName = record.client?.firstName?.toLowerCase() || "";
-  //         const lastName = record.client?.lastName?.toLowerCase() || "";
-  //         return firstName.includes(keyword) || lastName.includes(keyword);
-  //       });
-  //     }
-  //     setRecords(data);
-  //     setNoData(data.length === 0);
-
-  //   } catch (error) {
-  //     console.error("Failed to fetch leads:", error);
-  //     setNoData(true);
-  //   }
-  //   finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
   const fetchAllLeads = async () => {
     const requestBody = {
       fromDate: fromDate.toISOString().split("T")[0],
@@ -195,6 +141,7 @@ const CallingTeam = () => {
         });
       }
 
+      // setRecords(data);
       setRecords(data);
     } catch (error) {
       console.error("Failed to fetch leads:", error);
@@ -216,7 +163,16 @@ const CallingTeam = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.put(`https://legalwingcrm.in:8443/legal-wings-management/lead/${id}/cancel+`);
+          await axios.put(
+            `https://legalwingcrm.in:8081/legal-wings-management/clients/${id}`,
+            {}, // empty body
+            {
+              headers: {
+                Authorization: `Bearer ${keycloak.token}`,
+              },
+            }
+          );
+          
           Swal.fire("Deleted!", "Client has been removed.", "success");
           // fetchClients(selectedClientType, searchText, currentPage); // Refresh list after delete
         } catch (error) {
@@ -241,31 +197,7 @@ const CallingTeam = () => {
     setSelectedLeadId(lead);
   };
 
-  // const fetchDropdowns = async () => {
-  //   const requestBody = {
-  //     cityIdsUi: city ? [parseInt(city)] : [],
-  //     stateIdsUi: [],
-  //     zoneIdsUi: [],
-  //     areaIdsUi: area ? [parseInt(area)] : []
-  //   };
-
-  //   try {
-  //     const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${keycloak.token}`
-  //       },
-  //       body: JSON.stringify(requestBody),
-  //     });
-
-  //     const data = await response.json();
-  //     setCities(data.cities || []);
-  //     setAreas(data.areas || []);
-  //   } catch (error) {
-  //     console.error("Error fetching dropdowns:", error);
-  //   }
-  // };
+  
 
   const fetchLeads = async (page = 0) => {
     setLoading(true);
@@ -296,6 +228,9 @@ const CallingTeam = () => {
 
       // handle the response
       console.log(response.data);
+          const data = response.data?.leadPage?.content || [];
+    setRecords(data); 
+    setTotalPages(response.data?.leadPage?.totalPages || 1);
     } catch (error) {
       console.error("Error fetching leads:", error);
     } finally {
@@ -396,12 +331,7 @@ const CallingTeam = () => {
               </div>
             </div>
 
-            {/* <div className="stats-section">
-              <div className="stat-card">Total <strong>{records.length}</strong></div>
-              <div className="stat-card">Pending <strong>08</strong></div>
-              <div className="stat-card">Cancelled <strong>02</strong></div>
-              <div className="stat-card">Approved <strong>36</strong></div>
-            </div> */}
+        
             <hr />
             <div className="client-action">
               <button onClick={handleAddNewLead}>
