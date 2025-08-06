@@ -433,7 +433,7 @@ const renderDropdown = (label, field, options = []) => (
             clientType: data.client?.clientType || "",
              tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
   visitAddress: data.visitAddress || "",
-  cityId: data.client?.city?.id || "",          
+  cityId: data.city?.id || "",          
     areaId : data.area?.id || "",
             // Owner
             ownerFirstName: data.agreement?.owner?.firstName || "",

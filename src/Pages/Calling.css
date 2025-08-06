@@ -69,7 +69,7 @@
 }
 
 .filters button {
-  background-color: #efcd52;
+  background-color: #f9af2e;
   color: white;
   border: none;
   padding: 12px 12px;
@@ -225,15 +225,19 @@
 }
 
 .icon-edit {
-  background-color: #1976d2; /* blue */
+  background-color: #8cbae8; /* blue */
   color: white;
 }
 
 .icon-cancel {
-  background-color: red;
+  background-color: rgb(241, 139, 139);
   color: white;
 }
 
+.icon-assing{
+   background-color: rgb(135, 132, 105);
+  color: white;
+}
 .loading-spinner {
   display: flex;
   justify-content: center;

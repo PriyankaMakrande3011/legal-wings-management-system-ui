@@ -391,7 +391,7 @@ const Executive = () => {
                             <div>
                               <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />
 
-                              <BsBoxArrowInRight
+                              <FaEdit
                                 className="action-icon icon-edit"
                                 onClick={() => {
                                   setModalOpen(true)
@@ -402,6 +402,15 @@ const Executive = () => {
                               />
                               <MdCancel className="action-icon icon-cancel"
                                 onClick={() => handleCancel(record.id)} />
+
+                                <BsBoxArrowInRight
+                                  className="action-icon icon-assing"
+                                  onClick={() => {
+                                    setModalOpen(true)
+                                    setSelectedLeadId(record.id)
+                                  }
+                                  }
+                                />
                             </div>
                           </td>
                         </tr>
