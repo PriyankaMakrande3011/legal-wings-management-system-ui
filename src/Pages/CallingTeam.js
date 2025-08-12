@@ -382,11 +382,11 @@ const CallingTeam = () => {
                             <td>{record.status || "-"}</td>
                             <td className="action-column" >
                               <div>
-                                <FaEye className="action-icon" onClick={() => handleViewClick(record.id)} />
-                                <FaEdit className="action-icon" onClick={() => handleEditClick(record.id)} title="Edit" />
-                                <FaTrash className="action-icon" onClick={() => handleDelete(record.id)} />
+                                <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />
+                                <FaEdit className="action-icon icon-edit" onClick={() => handleEditClick(record.id)} title="Edit" />
+                                <FaTrash className="action-icon icon-cancel" onClick={() => handleDelete(record.id)} />
                                 <BsBoxArrowInRight
-                                  className="action-icon edit"
+                                  className="action-icon edit icon-assing"
                                   onClick={() => {
                                     setModalOpen(true)
                                     setSelectedLeadId(record.id)

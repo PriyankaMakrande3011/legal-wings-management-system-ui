@@ -11,11 +11,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { MdCancel } from "react-icons/md";
 import Api from "./Api.js";
-import AssignLead from "./AssingLead.js";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useKeycloak } from "@react-keycloak/web";
 import "./ClientPage.css"
+import AssignLeadToBackend from "./AssingLeadToBackend.js"
 
 const Executive = () => {
   const [records, setRecords] = useState([]);
@@ -32,6 +32,7 @@ const Executive = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
+
   const recordsPerPage = 10;
   const { keycloak } = useKeycloak();
   const handleAddNewLead = () => {
@@ -420,6 +421,12 @@ const Executive = () => {
                   </tbody>
                 </table>
               )}
+              <AssignLeadToBackend
+  isOpen={isModalOpen}
+  leadId={selectedLeadId}
+  onClose={() => setModalOpen(false)}
+ 
+/>
             </div>
           </div>
         </div>

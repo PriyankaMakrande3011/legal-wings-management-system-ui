@@ -197,6 +197,7 @@ import { FaRegUser, FaBars } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { AiOutlineDown, AiOutlineRight, AiOutlineLeft } from "react-icons/ai";
 import '../Pages/Slider.css';
+import { useUser } from "../Pages/UserContext"; 
 import { useKeycloak } from "@react-keycloak/web";
 
 const Slider = ({ child }) => {
@@ -206,6 +207,10 @@ const Slider = ({ child }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
  const { keycloak } = useKeycloak();
+  const { user } = useUser();
+
+  
+ 
   const handleResize = () => {
     setIsMobile(window.innerWidth <= 768);
     if (window.innerWidth > 768) {
@@ -229,22 +234,32 @@ const Slider = ({ child }) => {
     setIsDataManagementOpen(!isDataManagementOpen);
   };
 
-  const teams = [
-    { name: 'Dashboard', path: '/dashboard', icon: <MdDashboard /> },
-    { name: 'Calling Team', path: '/calling-team', icon: <FaRegUser /> },
-    { name: 'Executive Team', path: '/executive-team', icon: <FaRegUser /> },
-    { name: 'Backend Team', path: '/backend-team', icon: <FaRegUser /> },
-    { name: 'Account Team', path: '/accountancy-team', icon: <FaRegUser /> },
-    { name: 'Marketing Team', path: '/marketing-team', icon: <FaRegUser /> },
-    {
-      name: 'Data Management',
-      path: '/data-management',
-      icon: isDataManagementOpen ? <AiOutlineDown /> : <AiOutlineRight />,
-      subRoutes: [
-        { name: 'Client', path: '/clients', icon: <FaRegUser /> },
-      ],
-    },
-  ];
+ const teams = [
+ 
+  { name: 'Dashboard', path: '/dashboard', role: 'all',icon: <MdDashboard /> },
+  { name: 'Calling Team', path: '/calling-team', role: 'calling', icon: <FaRegUser /> },
+  { name: 'Executive Team', path: '/executive-team', role: 'executive', icon: <FaRegUser /> },
+  { name: 'Backend Team', path: '/backend-team', role: 'backend', icon: <FaRegUser /> },
+  { name: 'Account Team', path: '/accountancy-team', role: 'accounting', icon: <FaRegUser /> },
+  { name: 'Marketing Team', path: '/marketing-team', role: 'marketing', icon: <FaRegUser /> },
+  {
+    name: 'Data Management',
+    path: '/data-management',
+    icon: isDataManagementOpen ? <AiOutlineDown /> : <AiOutlineRight />,
+    subRoutes: [
+      { name: 'Client', path: '/clients', icon: <FaRegUser /> },
+    ],
+  },
+];
+
+const visibleTeams = user.roles.includes('admin')
+  ? teams
+  : teams.filter(team =>
+      team.role === 'all' || user.roles.includes(team.role)
+    );
+
+
+const handleTeamClick = (path) => navigate(path);
 
   return (
     <div className='slidermain-container'>
@@ -267,7 +282,7 @@ const Slider = ({ child }) => {
         </div>
 
         <section className='sidebar-content'>
-          {teams.map((team, index) => (
+          {visibleTeams.map((team, index) => (
             <div key={team.name}>
               {team.name === 'Data Management' && <hr className='sidebar-divider' />}
 

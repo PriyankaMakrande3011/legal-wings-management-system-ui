@@ -277,7 +277,7 @@ const BackendTeam = () => {
   const handleAddNewLead = () => {
     navigate("/add-lead", {
       state: {
-        transitLevel: "EXECUTIVE_TEAM"
+        transitLevel: "BACKEND_TEAM"
       }
     });
   };
@@ -410,11 +410,11 @@ const BackendTeam = () => {
       pageSize: 1000,
       sortField: "id",
       sortOrder: "desc",
-      transitLevel: "EXECUTIVE_TEAM"
+      transitLevel: "BACKEND_TEAM"
     };
 
     try {
-      const response = await fetch(`${Api.BASE_URL}leads/byAssignedUser`, {
+      const response = await fetch(`${Api.BASE_URL}leads/all`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -453,7 +453,7 @@ const BackendTeam = () => {
     };
 
     try {
-      const response = await fetch(`${Api.BASE_URL}leads/byAssignedUser`, {
+      const response = await fetch(`${Api.BASE_URL}leads/all`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
           "Authorization": `Bearer ${keycloak.token}`
