@@ -421,12 +421,13 @@ const Executive = () => {
                   </tbody>
                 </table>
               )}
-              <AssignLeadToBackend
+<AssignLeadToBackend
   isOpen={isModalOpen}
   leadId={selectedLeadId}
   onClose={() => setModalOpen(false)}
- 
+  onAssignSuccess={fetchLeads}
 />
+
             </div>
           </div>
         </div>
