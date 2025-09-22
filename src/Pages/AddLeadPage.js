@@ -13,6 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
 import CustomDatePicker from '../common/CustomDatePicker.js';
+import Select from "react-select";
 
 
 
@@ -42,6 +43,7 @@ const AddLeadPage = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const clientTypeOptions = ["OWNER", "TENANT", "AGENT"];
+  const leadSourceOptions = ["ONLINE","CALL","EXCEL","REFERENCE","SHOP"];
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { keycloak } = useKeycloak();
   const transitLevel = location.state?.transitLevel;
@@ -94,6 +96,15 @@ const AddLeadPage = ({
       visitAddress: formData.visitAddress,
       id: leadId,
       transitLevel: transitLevel,
+      leadSource: formData.leadSource, 
+      description: formData.description,
+      appointmentTime: formData.appointmentTime,
+      referenceNumber: formData.referenceNumber,
+      referenceName: formData.referenceName,
+      amount: formData.amount,
+      lastFollowUpDate: formData.lastFollowUpDate ? format(new Date(formData.lastFollowUpDate), 'yyyy-MM-dd') : null,
+      nextFollowUpDate: formData.nextFollowUpDate ? format(new Date(formData.nextFollowUpDate), 'yyyy-MM-dd') : null,
+
       
    city: {
       id: formData.cityId || null  
@@ -146,8 +157,8 @@ const AddLeadPage = ({
     const agreementData = {
       leadId,
       tokenNo: formData.tokenNumber,
-      agreementStartDate: formData.startDate,
-      agreementEndDate: formData.endDate,
+      agreementStartDate: formData.agreementStartDate ? format(new Date(formData.agreementStartDate), 'yyyy-MM-dd') : null,
+      agreementEndDate: formData.agreementEndDate ? format(new Date(formData.agreementEndDate), 'yyyy-MM-dd') : null,
       area: {
       id: formData.areaId|| null
   
@@ -161,9 +172,6 @@ const AddLeadPage = ({
         clientType: "TENANT", // Hardcoded for now, can be adjusted
         email: formData.tenantEmail,
         phoneNo: formData.tenantContact,
-        areaName: formData.area,
-        cityName: formData.city,
-        pinCode: formData.pinCode,
         aadharNumber: formData.tenantAadhar,
         panNumber: formData.tenantPan,
       },
@@ -174,9 +182,6 @@ const AddLeadPage = ({
         clientType: "OWNER", // Hardcoded for now, can be adjusted
         email: formData.ownerEmail,
         phoneNo: formData.ownerContact,
-        areaName: formData.area,
-        cityName: formData.city,
-        pinCode: formData.pinCode,
         aadharNumber: formData.ownerAadhar,
         panNumber: formData.ownerPan,
       }
@@ -211,16 +216,16 @@ const AddLeadPage = ({
     setIsSubmitting(true);
     const paymentData = {
       leadId,
-      ownerAmount: formData.ownerPayment,
-      ownerPaymentDate: formData.ownerPaymentDate,
+      totalAmount: formData.totalAmount,
+      ownerPayment: formData.ownerPayment,
+      ownerPaymentDate: formData.ownerPaymentDate ? format(new Date(formData.ownerPaymentDate), 'yyyy-MM-dd') : null,
+      ownerModeOfPayment: formData.ownerModeOfPayment,
       tenantAmount: formData.tenantPayment,
-      tenantPaymentDate: formData.tenantPaymentDate,
-      totalAmount: formData.totalPayment,
-      remainingAmount: formData.remainingPayment,
-      modeOfPayment: formData.paymentMode,
+      tenantPaymentDate: formData.tenantPaymentDate ? format(new Date(formData.tenantPaymentDate), 'yyyy-MM-dd') : null,
+      tenantModeOfPayment: formData.tenantModeOfPayment,
       grnNumber: formData.grnNumber,
-      govtGrnDate: formData.govtGrnDate,
-      dhcDate: formData.dhcDate,
+      govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null,
+      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null,
     };
 
     fetch("https://legalwingcrm.in:8081/legal-wings-management/payments", {
@@ -275,8 +280,6 @@ const AddLeadPage = ({
           clientType: client.clientType,
           email: client.email,
           address: client.address,
-          city: client.cityName,
-          area: client.areaName,
           contactNumber: client.phoneNo,
         };
 
@@ -310,40 +313,42 @@ const AddLeadPage = ({
       .catch(err => console.error("Failed to fetch client data", err));
   };
 
-  // const renderClientDropdown = (type) => (
-  //   <select
-  //     onChange={(e) => fetchAndAutofillClient(e.target.value, type)}
-  //     defaultValue=""
-  //     className='client-dropdown'
-  //   >
-  //     <option value="">Select Existing Client</option>
-  //     {clients.map(client => (
-  //       <option key={client.id} value={client.id}>{client.name}</option>
-  //     ))}
-  //   </select>
-  // );
 
-  const renderClientDropdown = (type) => {
-    // Return null if mode is "view" to hide the dropdown
-    if (mode === "view") {
-      return null;
-    }
+const renderClientDropdown = (type) => {
+  if (mode === "view") return null;
 
-    return (
-      <select
-        onChange={(e) => fetchAndAutofillClient(e.target.value, type)}
-        defaultValue=""
-        className="client-dropdown"
-      >
-        <option value="">Select Existing Client</option>
-        {clients.map((client) => (
-          <option key={client.id} value={client.id}>
-            {client.name}
-          </option>
-        ))}
-      </select>
-    );
-  };
+  const clientOptions = clients.map((client) => ({
+    value: client.id,
+    label: client.name, // you might want firstName + lastName instead
+  }));
+
+  return (
+    <Select
+      options={clientOptions}
+      placeholder="Select Existing Client"
+      isClearable
+      isSearchable
+      onChange={(selected) =>
+        fetchAndAutofillClient(selected?.value || null, type)
+      }
+  styles={{
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,        // keeps it above other elements
+      minWidth: "250px",   // ensures suggestions don’t shrink
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: "200px",  // makes list scrollable instead of shrinking
+    }),
+    control: (provided) => ({
+      ...provided,
+      minWidth: "250px",   // ensures input is wide enough
+    }),
+  }}
+    />
+  );
+};
 
 
   const fetchDropdowns = async (selectedCityId = null, selectedAreaId = null) => {
@@ -379,26 +384,46 @@ const AddLeadPage = ({
     fetchDropdowns(); // Fetch cities initially
   }, []);
 
-const renderDropdown = (label, field, options = []) => (
-  <div>
-    <label>{label}</label>
-    <select
-      name={field}
-      value={formData[field] || ''}
-      onChange={(e) => handleCityInputChange(field, e.target.value)}
-      className="client-dropdown"
-    disabled={mode === 'view'}
-    >
-      <option value="">Select {label}</option>
-      readOnly={mode === 'view'}
-      {options.map((opt, idx) => (
-        <option key={opt.id || idx} value={opt.id}>
-          {opt.name || opt}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+  const renderDropdown = (label, field, options = []) => {
+    const selectOptions = options.map((opt) =>
+      typeof opt === "string"
+        ? { value: opt, label: opt }
+        : { value: opt.id, label: opt.name }
+    );
+
+    const currentValue = selectOptions.find(
+      (opt) => opt.value === formData[field]
+    );
+
+    return (
+      <div>
+        <label>{label}</label>
+        <Select
+          options={selectOptions}
+          placeholder={`Select ${label}`}
+          isClearable
+          isSearchable
+          isDisabled={mode === "view"}
+          value={currentValue}
+          onChange={(selected) =>
+            handleCityInputChange(field, selected?.value || null)
+          }
+          styles={{
+            menu: (provided) => ({ ...provided, zIndex: 9998 }),
+            control: (provided) => ({
+              ...provided,
+              minWidth: "200px", // Adjust as needed
+              border: '1px solid #ccc',
+              boxShadow: 'none',
+              '&:hover': {
+                borderColor: '#888'
+              }
+            }),
+          }}
+        />
+      </div>
+    );
+  };
 
   const renderInput = (label, placeholder, field) => (
     <div>
@@ -433,8 +458,19 @@ const renderDropdown = (label, field, options = []) => (
             clientType: data.client?.clientType || "",
              tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
   visitAddress: data.visitAddress || "",
+        description: data.description || "",
+      appointmentTime: data.appointmentTime || "",
+      referenceNumber: data.referenceNumber || "",
+      referenceName: data.referenceName || "",
+      cancellationReason: data.cancellationReason || "",
+      amount: data.amount || "",
+      lastFollowUpDate: data.lastFollowUpDate ? new Date(data.lastFollowUpDate) : null,
+      nextFollowUpDate: data.nextFollowUpDate ? new Date(data.nextFollowUpDate) : null,
+
+
   cityId: data.city?.id || "",          
     areaId : data.area?.id || "",
+    leadSource: data.leadSource||"",
             // Owner
             ownerFirstName: data.agreement?.owner?.firstName || "",
             ownerLastName: data.agreement?.owner?.lastName || "",
@@ -452,13 +488,11 @@ const renderDropdown = (label, field, options = []) => (
             tenantPan: data.agreement?.tenant?.panNumber || "",
 
             // Agreement
-            startDate: data.agreement?.agreementStartDate || "",
-            endDate: data.agreement?.agreementEndDate || "",
+            agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
+            agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
             area: data.agreement?.area?.name || "",
             addressLine1: data.agreement?.addressLine1 || "",
             addressLine2: data.agreement?.addressLine2 || "",
-            city: data.agreement?.city || "",
-            pinCode: data.agreement?.pinCode || "",
             tokenNumber: data.agreement?.tokenNo || "",
 
             // Payment
@@ -466,12 +500,13 @@ const renderDropdown = (label, field, options = []) => (
             ownerPayment: data.payment?.ownerAmount || "",
             tenantPayment: data.payment?.tenantAmount || "",
             remainingPayment: data.payment?.remainingAmount || "",
-            paymentMode: data.payment?.modeOfPayment || "",
-            ownerPaymentDate: data.payment?.ownerPaymentDate || "",
-            tenantPaymentDate: data.payment?.tenantPaymentDate || "",
+            ownerModeOfPayment: data.payment?.ownerModeOfPayment || "",
+            tenantModeOfPayment: data.payment?.tenantModeOfPayment || "",
+            ownerPaymentDate: data.payment?.ownerPaymentDate ? new Date(data.payment.ownerPaymentDate) : null,
+            tenantPaymentDate: data.payment?.tenantPaymentDate ? new Date(data.payment.tenantPaymentDate) : null,
             grnNumber: data.payment?.grnNumber || "",
-            govtGrnDate: data.payment?.govtGrnDate || "",
-            dhcDate: data.payment?.dhcDate || ""
+            govtGrnDate: data.payment?.govtGrnDate ? new Date(data.payment.govtGrnDate) : null,
+            dhcDate: data.payment?.dhcDate ? new Date(data.payment.dhcDate) : null
           });
 await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
           // For datepicker values
@@ -508,6 +543,7 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
               {renderDropdown("Client Type", "clientType", clientTypeOptions)}
               {renderInput("Contact Number", "Contact Number", "contactNumber")}
               {renderInput("Email", "Email", "email")}
+              {renderDropdown("Lead Source", "leadSource", leadSourceOptions)}
               <CustomDatePicker
                 label="Tentative Agreement Date"
                 placeholder="Tentative Agreement Date"
@@ -515,9 +551,28 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
                 onChange={(date) => handleInputChange('tentativeAgreementDate', date)}
                 dateFormat="yyyy-MM-dd"
               />
+              {renderInput("Appointment Time", "Appointment Time", "appointmentTime")}
               {renderInput("Visit Address", "Visit Address", "visitAddress")}
-             {renderDropdown("City", "cityId", cityOptions)}
-{renderDropdown("Area", "areaId", areaOptions)}
+              {renderInput("Description", "Description", "description")}
+              {renderInput("Reference Name", "Reference Name", "referenceName")}
+              {renderInput("Amount", "Amount", "amount")}
+              {renderDropdown("City", "cityId", cityOptions)}
+              {renderDropdown("Area", "areaId", areaOptions)}
+              <CustomDatePicker
+                label="Last FollowUp Date"
+                placeholder="Last FollowUp Date"
+                value={formData.lastFollowUpDate}
+                onChange={(date) => handleInputChange('lastFollowUpDate', date)}
+                dateFormat="yyyy-MM-dd"
+              />
+              <CustomDatePicker
+                label="Next FollowUp Date"
+                placeholder="Next FollowUp Date"
+                value={formData.nextFollowUpDate}
+                onChange={(date) => handleInputChange('nextFollowUpDate', date)}
+                dateFormat="yyyy-MM-dd"
+              />
+              {mode === 'view' && formData.cancellationReason && renderInput("Cancellation Reason", "Cancellation Reason", "cancellationReason")}
 
             </div>
             {mode !== 'view' && (
@@ -555,8 +610,18 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
             <h3 className="agreement-heading">Agreement Details</h3>
             <div className="form-grid">
               {renderInput("Token Number", "Token Number", "tokenNumber")}
-              {renderInput("Agreement Start Date", "Agreement Start Date", "startDate")}
-              {renderInput("Agreement End Date", "Agreement End Date", "endDate")}
+              <CustomDatePicker
+                label="Agreement Start Date"
+                placeholder="Agreement Start Date"
+                value={formData.agreementStartDate}
+                onChange={(date) => handleInputChange('agreementStartDate', date)}
+              />
+              <CustomDatePicker
+                label="Agreement End Date"
+                placeholder="Agreement End Date"
+                value={formData.agreementEndDate}
+                onChange={(date) => handleInputChange('agreementEndDate', date)}
+              />
               {renderInput("Address Line 1", "Address Line 1", "addressLine1")}
               {renderInput("Address Line 2", "Address Line 2", "addressLine2")}
             </div>
@@ -573,16 +638,27 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
         return (
           <>
             <div className="form-grid">
-              {renderInput("Owner Payment Amount", "Owner Payment Amount", "ownerPayment")}
-              {renderInput(" Owner Payment Date ", "Owner Payment Date", "ownerPaymentDate")}
+              {renderInput("Total Amount", "Total Amount", "totalAmount")}
+              {renderInput("Owner Payment", "Owner Payment", "ownerPayment")}
+               <CustomDatePicker
+                label="Owner Payment Date"
+                placeholder="Owner Payment Date"
+                value={formData.ownerPaymentDate}
+                onChange={(date) => handleInputChange('ownerPaymentDate', date)}
+              />
+              {renderInput("Owner Mode of Payment", "Owner Mode of Payment", "ownerModeOfPayment")}
               {renderInput("Tenant Payment Amount", "Tenant Payment Amount", "tenantPayment")}
-              {renderInput(" Tenant Payment Date ", "Tenant Payment Date", "tenantPaymentDate")}
-              {renderInput("Total Payment", "Total Payment", "totalPayment")}
-              {renderInput("Remaining Payment", "Remaining Payment", "remainingPayment")}
-              {renderInput("Mode of Payment", "Mode of Payment", "paymentMode")}
+              <CustomDatePicker
+                label="Tenant Payment Date"
+                placeholder="Tenant Payment Date"
+                value={formData.tenantPaymentDate}
+                onChange={(date) => handleInputChange('tenantPaymentDate', date)}
+              />
+              {renderInput("Tenant Mode of Payment", "Tenant Mode of Payment", "tenantModeOfPayment")}
               {renderInput("GRN Number", "GRN Number", "grnNumber")}
-              {renderInput("Govt GRN Date", "Govt GRN Date", "govtGrnDate")}
-              {renderInput("DHC Date", "DHC Date", "dhcDate")}
+              <CustomDatePicker label="Govt GRN Date" placeholder="Govt GRN Date" value={formData.govtGrnDate} onChange={date => handleInputChange('govtGrnDate', date)} />
+              <CustomDatePicker label="DHC Date" placeholder="DHC Date" value={formData.dhcDate} onChange={date => handleInputChange('dhcDate', date)} />
+
 
             </div>
             {mode !== 'view' && (

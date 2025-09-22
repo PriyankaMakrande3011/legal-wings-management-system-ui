@@ -746,3 +746,11 @@ td {
   margin-bottom: 20px;
 }
 
+.sticky-col {
+  position: -webkit-sticky; /* For Safari */
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: #fff; /* Match row background */
+}
+

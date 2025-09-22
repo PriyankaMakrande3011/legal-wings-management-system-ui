@@ -15,6 +15,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useKeycloak } from "@react-keycloak/web";
 import "./ClientPage.css"
+import Select from "react-select";
 import AssignLeadToBackend from "./AssingLeadToBackend.js"
 
 const Executive = () => {
@@ -67,36 +68,42 @@ const Executive = () => {
   //   });
   // };
   const handleCancel = async (id) => {
-    Swal.fire({
+    const { value: cancellationReason } = await Swal.fire({
       title: "Are you sure?",
-      text: "This action will cancel the lead!",
+      text: "Please enter the reason for cancellation:",
       icon: "warning",
+      input: "text",
+      inputPlaceholder: "Cancellation Reason",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
       confirmButtonText: "Yes, cancel it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await axios.put(
-            `https://legalwingcrm.in:8081/legal-wings-management/leads/${id}/cancel`,
-            {}, // empty body
-            {
-              headers: {
-                Authorization: `Bearer ${keycloak.token}`,
-              },
-            }
-          );
-
-          Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
-
-          fetchLeads();
-        } catch (error) {
-          console.error("Error canceling lead:", error.response?.data || error.message);
-          Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
+      inputValidator: (value) => {
+        if (!value) {
+          return "You need to write a reason!";
         }
-      }
+      },
     });
+
+    if (cancellationReason) {
+      try {
+        await axios.put(
+          `${Api.BASE_URL}leads/cancel`,
+          { id, cancellationReason },
+          {
+            headers: {
+              Authorization: `Bearer ${keycloak.token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        Swal.fire("Cancelled!", "The lead has been cancelled.", "success");
+        fetchLeads(); // Refresh list
+      } catch (error) {
+        console.error("Error canceling lead:", error.response?.data || error.message);
+        Swal.fire("Error!", "Failed to cancel the lead. Please try again.", "error");
+      }
+    }
   };
 
 
@@ -130,26 +137,15 @@ const Executive = () => {
     fetchDropdowns();
   }, []);
 
-  const handleCityChange = (e) => {
-    const selectedCityId = e.target.value;
+  const handleCityChange = (selectedCityId) => {
     setCity(selectedCityId);
-    fetchDropdowns(selectedCityId, area);
+    setArea(null); // Reset area when city changes
+    fetchDropdowns(selectedCityId, null);
   };
 
-  const handleAreaChange = (e) => {
-    const selectedAreaId = e.target.value;
+  const handleAreaChange = (selectedAreaId) => {
     setArea(selectedAreaId);
     fetchDropdowns(city, selectedAreaId);
-  };
-
-  const handleClearCity = () => {
-    setCity("");
-    fetchDropdowns("", area);
-  };
-
-  const handleClearArea = () => {
-    setArea("");
-    fetchDropdowns(city, "");
   };
 
   const handleClearClientType = () => {
@@ -168,7 +164,7 @@ const Executive = () => {
       cityIdsUi: city ? [parseInt(city)] : [],
       areaIdsUi: area ? [parseInt(area)] : [],
       pageNumber: 0,
-      pageSize: 1000,
+      pageSize: 2000,
       sortField: "id",
       sortOrder: "desc",
       transitLevel: "EXECUTIVE_TEAM"
@@ -210,7 +206,7 @@ const Executive = () => {
       sortOrder: "",
       searchText: null,
       pageNumber: 0,
-      pageSize: 10
+      pageSize: 20
     };
 
     try {
@@ -259,6 +255,39 @@ const Executive = () => {
     setSelectedLeadId(lead);
   };
 
+  const renderDropdown = (label, field, value, options, onChange) => {
+    const selectOptions = options.map(opt => ({ value: opt.id, label: opt.name }));
+    const currentValue = selectOptions.find(opt => opt.value === value);
+
+    return (
+      <div className="select-wrapper">
+        <Select
+          placeholder={`Select ${label}`}
+          isClearable
+          isSearchable
+          value={currentValue}
+          options={selectOptions}
+          onChange={(selected) => onChange(selected ? selected.value : null)}
+          styles={{
+            container: (provided) => ({
+              ...provided,
+              minWidth: '190px',
+            }),
+            menu: (provided) => ({
+              ...provided,
+              zIndex: 5,
+            }),
+            control: (provided) => ({
+              ...provided,
+              borderRadius: '16px',
+              padding: '2px',
+              fontSize: '0.85rem'
+            }),
+          }}
+        />
+      </div>
+    );
+  };
 
 
   return (
@@ -299,26 +328,9 @@ const Executive = () => {
 
               <div className="filters">
                 {/* City Dropdown */}
-                <div className="select-wrapper">
-                  <select value={city} onChange={handleCityChange}>
-                    <option value="">Select City</option>
-                    {cities.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                  {city && <span className="clear-icon" onClick={handleClearCity}><FaTimes /></span>}
-                </div>
-
+                {renderDropdown("City", "city", city, cities, handleCityChange)}
                 {/* Area Dropdown */}
-                <div className="select-wrapper">
-                  <select value={area} onChange={handleAreaChange}>
-                    <option value="">Select Area</option>
-                    {areas.map((a) => (
-                      <option key={a.id} value={a.id}>{a.name}</option>
-                    ))}
-                  </select>
-                  {area && <span className="clear-icon" onClick={handleClearArea}><FaTimes /></span>}
-                </div>
+                {renderDropdown("Area", "area", area, areas, handleAreaChange)}
 
                 {/* Client Type Dropdown */}
                 <div className="select-wrapper">
@@ -360,9 +372,9 @@ const Executive = () => {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>First Name</th>
-                      <th>Last Name</th>
-                      <th>Phone No</th>
+                      <th className="sticky-col">Name</th>
+                      <th>Phone No.</th>
+                      <th>Visit Address</th>
                       <th>Client Type</th>
                       <th>Address</th>
                       <th>Created Date</th>
@@ -376,10 +388,11 @@ const Executive = () => {
                   <tbody>
                     {records.map((record, index) => {
                       const client = record.client || {};
+                      const name = `${client.firstName || ''} ${client.lastName || ''}`.trim() || '-';
                       return (
                         <tr key={index}>
-                          <td>{client.firstName || "-"}</td>
-                          <td>{client.lastName || "-"}</td>
+                          <td className="sticky-col">{name}</td>
+                          <td>{record.visitAddress || "-"}</td>
                           <td>{client.phoneNo || "-"}</td>
                           <td>{client.clientType || "-"}</td>
                           <td>{client.address || "-"}</td>

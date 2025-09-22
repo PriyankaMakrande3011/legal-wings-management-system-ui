@@ -6,6 +6,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import CustomDatePicker from '../common/CustomDatePicker.js';
+import { format } from 'date-fns';
 import Api from './Api.js';
 
 const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
@@ -192,8 +193,9 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             lastName: data.client?.lastName || "",
             contactNumber: data.client?.phoneNo || "",
             email: data.client?.email || "",
+            cancellationReason: data.cancellationReason || "",
             clientType: data.client?.clientType || "",
-            tentativeAgreementDate: data.tentativeAgreementDate || "",
+            tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
             visitAddress: data.visitAddress || "",
             cityId: data.city?.id || "",
             areaId: data.area?.id || "",
@@ -210,20 +212,20 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             tenantAadhar: data.agreement?.tenant?.aadharNumber || "",
             tenantPan: data.agreement?.tenant?.panNumber || "",
             tokenNumber: data.agreement?.tokenNo || "",
-            startDate: data.agreement?.agreementStartDate || "",
-            endDate: data.agreement?.agreementEndDate || "",
+            agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
+            agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
             addressLine1: data.agreement?.addressLine1 || "",
             addressLine2: data.agreement?.addressLine2 || "",
             totalPayment: data.payment?.totalAmount || "",
             ownerPayment: data.payment?.ownerAmount || "",
-            ownerPaymentDate: data.payment?.ownerPaymentDate || "",
+            ownerPaymentDate: data.payment?.ownerPaymentDate ? new Date(data.payment.ownerPaymentDate) : null,
+            ownerModeOfPayment: data.payment?.ownerModeOfPayment || "",
             tenantPayment: data.payment?.tenantAmount || "",
-            tenantPaymentDate: data.payment?.tenantPaymentDate || "",
-            remainingPayment: data.payment?.remainingAmount || "",
-            paymentMode: data.payment?.modeOfPayment || "",
+            tenantPaymentDate: data.payment?.tenantPaymentDate ? new Date(data.payment.tenantPaymentDate) : null,
+            tenantModeOfPayment: data.payment?.tenantModeOfPayment || "",
             grnNumber: data.payment?.grnNumber || "",
-            govtGrnDate: data.payment?.govtGrnDate || "",
-            dhcDate: data.payment?.dhcDate || ""
+            govtGrnDate: data.payment?.govtGrnDate ? new Date(data.payment.govtGrnDate) : null,
+            dhcDate: data.payment?.dhcDate ? new Date(data.payment.dhcDate) : null
           });
           fetchDropdowns(data.city?.id);
         })
@@ -235,7 +237,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   const handleSaveLead = () => {
     const payload = {
       id: leadId,
-      tentativeAgreementDate: formData.tentativeAgreementDate,
+      tentativeAgreementDate: formData.tentativeAgreementDate ? format(new Date(formData.tentativeAgreementDate), 'yyyy-MM-dd') : null,
       visitAddress: formData.visitAddress,
       city: { id: formData.cityId || null },
       area: { id: formData.areaId || null },
@@ -274,8 +276,8 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
     const data = {
       leadId,
       tokenNo: formData.tokenNumber,
-      agreementStartDate: formData.startDate,
-      agreementEndDate: formData.endDate,
+      agreementStartDate: formData.agreementStartDate ? format(new Date(formData.agreementStartDate), 'yyyy-MM-dd') : null,
+      agreementEndDate: formData.agreementEndDate ? format(new Date(formData.agreementEndDate), 'yyyy-MM-dd') : null,
       area: { id: formData.areaId || null },
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
@@ -323,16 +325,16 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   const handleSavePayment = () => {
     const data = {
       leadId,
-      ownerAmount: formData.ownerPayment,
-      ownerPaymentDate: formData.ownerPaymentDate,
-      tenantAmount: formData.tenantPayment,
-      tenantPaymentDate: formData.tenantPaymentDate,
       totalAmount: formData.totalPayment,
-      remainingAmount: formData.remainingPayment,
-      modeOfPayment: formData.paymentMode,
+      ownerAmount: formData.ownerPayment,
+      ownerPaymentDate: formData.ownerPaymentDate ? format(new Date(formData.ownerPaymentDate), 'yyyy-MM-dd') : null,
+      ownerModeOfPayment: formData.ownerModeOfPayment,
+      tenantAmount: formData.tenantPayment,
+      tenantPaymentDate: formData.tenantPaymentDate ? format(new Date(formData.tenantPaymentDate), 'yyyy-MM-dd') : null,
+      tenantModeOfPayment: formData.tenantModeOfPayment,
       grnNumber: formData.grnNumber,
-      govtGrnDate: formData.govtGrnDate,
-      dhcDate: formData.dhcDate
+      govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null,
+      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null
     };
     fetch(`${Api.BASE_URL}payments`, {
       method: "POST",
@@ -378,6 +380,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             {renderInput("Visit Address", "visitAddress")}
             {renderDropdown("City", "cityId", cityOptions)}
             {renderDropdown("Area", "areaId", areaOptions)}
+            {formData.cancellationReason && renderInput("Cancellation Reason", "cancellationReason")}
           </div>
           {mode === 'edit' && (
             <div className="button-wrapper">
@@ -416,18 +419,18 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             <CustomDatePicker
               label="Agreement Start Date"
               placeholder="Start Date"
-              value={formData.startDate}
-              onChange={date => handleInputChange('startDate', date)}
+              value={formData.agreementStartDate}
+              onChange={date => handleInputChange('agreementStartDate', date)}
               dateFormat="yyyy-MM-dd"
-              readOnly={!isEditable('startDate')}
+              readOnly={!isEditable('agreementStartDate')}
             />
             <CustomDatePicker
               label="Agreement End Date"
               placeholder="End Date"
-              value={formData.endDate}
-              onChange={date => handleInputChange('endDate', date)}
+              value={formData.agreementEndDate}
+              onChange={date => handleInputChange('agreementEndDate', date)}
               dateFormat="yyyy-MM-dd"
-              readOnly={!isEditable('endDate')}
+              readOnly={!isEditable('agreementEndDate')}
             />
             {renderInput("Address Line 1", "addressLine1")}
             {renderInput("Address Line 2", "addressLine2")}
@@ -444,16 +447,28 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       case 'payment': return (
         <>
           <div className="form-grid">
-            {renderInput("Owner Payment Amount", "ownerPayment")}
-            {renderInput("Owner Payment Date", "ownerPaymentDate")}
+            {renderInput("Total Amount", "totalAmount")}
+            {renderInput("Owner Payment", "ownerPayment")}
+            <CustomDatePicker
+              label="Owner Payment Date"
+              placeholder="Owner Payment Date"
+              value={formData.ownerPaymentDate}
+              onChange={date => handleInputChange('ownerPaymentDate', date)}
+              readOnly={!isEditable('ownerPaymentDate')}
+            />
+            {renderInput("Owner Mode of Payment", "ownerModeOfPayment")}
             {renderInput("Tenant Payment Amount", "tenantPayment")}
-            {renderInput("Tenant Payment Date", "tenantPaymentDate")}
-            {renderInput("Total Payment", "totalPayment")}
-            {renderInput("Remaining Payment", "remainingPayment")}
-            {renderInput("Mode of Payment", "paymentMode")}
+            <CustomDatePicker
+              label="Tenant Payment Date"
+              placeholder="Tenant Payment Date"
+              value={formData.tenantPaymentDate}
+              onChange={date => handleInputChange('tenantPaymentDate', date)}
+              readOnly={!isEditable('tenantPaymentDate')}
+            />
+            {renderInput("Tenant Mode of Payment", "tenantModeOfPayment")}
             {renderInput("GRN Number", "grnNumber")}
-            {renderInput("Govt GRN Date", "govtGrnDate")}
-            {renderInput("DHC Date", "dhcDate")}
+            <CustomDatePicker label="Govt GRN Date" placeholder="Govt GRN Date" value={formData.govtGrnDate} onChange={date => handleInputChange('govtGrnDate', date)} readOnly={!isEditable('govtGrnDate')} />
+            <CustomDatePicker label="DHC Date" placeholder="DHC Date" value={formData.dhcDate} onChange={date => handleInputChange('dhcDate', date)} readOnly={!isEditable('dhcDate')} />
           </div>
           {mode === 'edit' && (
             <div className="button-wrapper">

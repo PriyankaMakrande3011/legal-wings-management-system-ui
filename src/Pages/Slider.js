@@ -245,6 +245,7 @@ const Slider = ({ child }) => {
   {
     name: 'Data Management',
     path: '/data-management',
+    role: 'admin',
     icon: isDataManagementOpen ? <AiOutlineDown /> : <AiOutlineRight />,
     subRoutes: [
       { name: 'Client', path: '/clients', icon: <FaRegUser /> },
