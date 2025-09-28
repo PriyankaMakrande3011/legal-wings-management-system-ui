@@ -56,7 +56,7 @@ const Executive = () => {
   //     if (result.isConfirmed) {
   //       try {
 
-  //         await axios.put(`https://legalwingcrm.in:8081/legal-wings-management/leads/${id}/cancel`);
+  //         await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
   //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
 
   //         fetchLeads(); 
@@ -206,7 +206,8 @@ const Executive = () => {
       sortOrder: "",
       searchText: null,
       pageNumber: 0,
-      pageSize: 20
+      pageSize: 20,
+      transitLevel: "EXECUTIVE_TEAM"
     };
 
     try {
@@ -275,7 +276,7 @@ const Executive = () => {
             }),
             menu: (provided) => ({
               ...provided,
-              zIndex: 5,
+              zIndex: 999,
             }),
             control: (provided) => ({
               ...provided,
@@ -306,6 +307,7 @@ const Executive = () => {
                       selected={fromDate}
                       onChange={(date) => setFromDate(date)}
                       dateFormat="dd-MM-yyyy"
+                      placeholderText="DD-MM-YYYY"
                       className="custom-input"
                     />
                     <FaRegCalendarAlt className="calendar-icon" />
@@ -318,6 +320,7 @@ const Executive = () => {
                       selected={toDate}
                       onChange={(date) => setToDate(date)}
                       dateFormat="dd-MM-yyyy"
+                      placeholderText="DD-MM-YYYY"
                       className="custom-input"
                     />
                     <FaRegCalendarAlt className="calendar-icon" />
@@ -392,8 +395,8 @@ const Executive = () => {
                       return (
                         <tr key={index}>
                           <td className="sticky-col">{name}</td>
-                          <td>{record.visitAddress || "-"}</td>
                           <td>{client.phoneNo || "-"}</td>
+                          <td>{record.visitAddress || "-"}</td>
                           <td>{client.clientType || "-"}</td>
                           <td>{client.address || "-"}</td>
                           <td>{new Date(record.createdDate).toLocaleDateString() || "-"}</td>

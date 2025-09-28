@@ -8,7 +8,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaPlus, FaRegCalendarAlt } from "react-icons/fa";
+import { FaPlus, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
@@ -49,6 +49,8 @@ const AddLeadPage = ({
   const transitLevel = location.state?.transitLevel;
   const [cityOptions, setCityOptions] = useState([]);
   const [areaOptions, setAreaOptions] = useState([]);
+  const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
+  const [agreementFile, setAgreementFile] = useState(null);
 
 
 
@@ -64,6 +66,21 @@ const AddLeadPage = ({
         .then(data => setClients(data))
         .catch(err => console.error("Failed to fetch clients", err));
     }
+
+    // Fetch Agreement Statuses
+    if (keycloak?.token) {
+      fetch(`${Api.BASE_URL}agreements/agreement-status`, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setAgreementStatusOptions(data);
+        })
+        .catch((err) => console.error("Failed to fetch agreement statuses", err));
+    }
+
   }, [keycloak?.token]);
 
   const handleAcceptLead = (lead) => {
@@ -127,7 +144,7 @@ const AddLeadPage = ({
       
     };
 
-    fetch("https://legalwingcrm.in:8081/legal-wings-management/leads", {
+    fetch("http://localhost:8081/legal-wings-management/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -163,6 +180,7 @@ const AddLeadPage = ({
       id: formData.areaId|| null
   
     },
+      agreementStatus: formData.agreementStatus,
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
       tenant: {
@@ -187,7 +205,7 @@ const AddLeadPage = ({
       }
     };
 
-    fetch("https://legalwingcrm.in:8081/legal-wings-management/agreements", {
+    fetch("http://localhost:8081/legal-wings-management/agreements", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -228,7 +246,7 @@ const AddLeadPage = ({
       dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null,
     };
 
-    fetch("https://legalwingcrm.in:8081/legal-wings-management/payments", {
+    fetch("http://localhost:8081/legal-wings-management/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -385,10 +403,12 @@ const renderClientDropdown = (type) => {
   }, []);
 
   const renderDropdown = (label, field, options = []) => {
-    const selectOptions = options.map((opt) =>
-      typeof opt === "string"
+    // Ensure options are in { value, label } format.
+    // This handles both arrays of strings and arrays of objects.
+    const selectOptions = options.map(opt =>
+      typeof opt === 'string'
         ? { value: opt, label: opt }
-        : { value: opt.id, label: opt.name }
+        : { value: opt.id || opt.name, label: opt.name }
     );
 
     const currentValue = selectOptions.find(
@@ -437,12 +457,40 @@ const renderClientDropdown = (type) => {
     </div>
   );
 
+  const renderFileInput = (label, field) => (
+    <div>
+      <label>{label}</label>
+      <div className="file-input-wrapper">
+        {agreementFile ? (
+          <div className="file-display">
+            <span>{agreementFile.name}</span>
+            {mode !== 'view' && (
+              <FaTimes
+                className="remove-file-icon"
+                onClick={() => setAgreementFile(null)}
+              />
+            )}
+          </div>
+        ) : mode !== 'view' && (
+          <input
+            type="file"
+            id={field}
+            onChange={e => setAgreementFile(e.target.files ? e.target.files[0] : null)}
+          />
+        )}
+        {formData.fileUrl && (
+          <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">View Agreement</a>
+        )}
+      </div>
+    </div>
+  );
+
   useEffect(() => {
     console.log("Mode:", mode, "ID:", id);
     const fetchLeadDetails = async () => {
       if (mode === "view" && id) {
         try {
-          const response = await axios.get(`https://legalwingcrm.in:8081/legal-wings-management/leads/${id}`, {
+          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`, {
             headers: {
               Authorization: `Bearer ${keycloak.token}`
             }
@@ -490,6 +538,8 @@ const renderClientDropdown = (type) => {
             // Agreement
             agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
             agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
+            agreementStatus: data.agreement?.agreementStatus || "",
+            fileUrl: data.agreement?.fileUrl || "",
             area: data.agreement?.area?.name || "",
             addressLine1: data.agreement?.addressLine1 || "",
             addressLine2: data.agreement?.addressLine2 || "",
@@ -546,29 +596,33 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
               {renderDropdown("Lead Source", "leadSource", leadSourceOptions)}
               <CustomDatePicker
                 label="Tentative Agreement Date"
-                placeholder="Tentative Agreement Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.tentativeAgreementDate}
                 onChange={(date) => handleInputChange('tentativeAgreementDate', date)}
+                readOnly={mode === 'view'}
                 dateFormat="yyyy-MM-dd"
               />
               {renderInput("Appointment Time", "Appointment Time", "appointmentTime")}
               {renderInput("Visit Address", "Visit Address", "visitAddress")}
               {renderInput("Description", "Description", "description")}
               {renderInput("Reference Name", "Reference Name", "referenceName")}
+              {renderInput("Reference Number", "Reference Number", "referenceNumber")}
               {renderInput("Amount", "Amount", "amount")}
               {renderDropdown("City", "cityId", cityOptions)}
               {renderDropdown("Area", "areaId", areaOptions)}
               <CustomDatePicker
                 label="Last FollowUp Date"
-                placeholder="Last FollowUp Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.lastFollowUpDate}
                 onChange={(date) => handleInputChange('lastFollowUpDate', date)}
+                readOnly={mode === 'view'}
                 dateFormat="yyyy-MM-dd"
               />
               <CustomDatePicker
                 label="Next FollowUp Date"
-                placeholder="Next FollowUp Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.nextFollowUpDate}
+                readOnly={mode === 'view'}
                 onChange={(date) => handleInputChange('nextFollowUpDate', date)}
                 dateFormat="yyyy-MM-dd"
               />
@@ -612,18 +666,26 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
               {renderInput("Token Number", "Token Number", "tokenNumber")}
               <CustomDatePicker
                 label="Agreement Start Date"
-                placeholder="Agreement Start Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.agreementStartDate}
+                readOnly={mode === 'view'}
                 onChange={(date) => handleInputChange('agreementStartDate', date)}
               />
               <CustomDatePicker
                 label="Agreement End Date"
-                placeholder="Agreement End Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.agreementEndDate}
+                readOnly={mode === 'view'}
                 onChange={(date) => handleInputChange('agreementEndDate', date)}
               />
               {renderInput("Address Line 1", "Address Line 1", "addressLine1")}
               {renderInput("Address Line 2", "Address Line 2", "addressLine2")}
+              {renderDropdown(
+                "Agreement Status",
+                "agreementStatus",
+                Array.isArray(agreementStatusOptions) ? agreementStatusOptions.map(s => ({ id: s.key, name: s.value })) : []
+              )}
+              {renderFileInput("Agreement File", "agreementFile")}
             </div>
             {mode !== 'view' && (
               <div className="button-wrapper">
@@ -642,22 +704,24 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
               {renderInput("Owner Payment", "Owner Payment", "ownerPayment")}
                <CustomDatePicker
                 label="Owner Payment Date"
-                placeholder="Owner Payment Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.ownerPaymentDate}
+                readOnly={mode === 'view'}
                 onChange={(date) => handleInputChange('ownerPaymentDate', date)}
               />
               {renderInput("Owner Mode of Payment", "Owner Mode of Payment", "ownerModeOfPayment")}
               {renderInput("Tenant Payment Amount", "Tenant Payment Amount", "tenantPayment")}
               <CustomDatePicker
                 label="Tenant Payment Date"
-                placeholder="Tenant Payment Date"
+                placeholderText="DD-MM-YYYY"
                 value={formData.tenantPaymentDate}
+                readOnly={mode === 'view'}
                 onChange={(date) => handleInputChange('tenantPaymentDate', date)}
               />
               {renderInput("Tenant Mode of Payment", "Tenant Mode of Payment", "tenantModeOfPayment")}
               {renderInput("GRN Number", "GRN Number", "grnNumber")}
-              <CustomDatePicker label="Govt GRN Date" placeholder="Govt GRN Date" value={formData.govtGrnDate} onChange={date => handleInputChange('govtGrnDate', date)} />
-              <CustomDatePicker label="DHC Date" placeholder="DHC Date" value={formData.dhcDate} onChange={date => handleInputChange('dhcDate', date)} />
+              <CustomDatePicker label="Govt GRN Date" placeholderText="DD-MM-YYYY" value={formData.govtGrnDate} readOnly={mode === 'view'} onChange={date => handleInputChange('govtGrnDate', date)} />
+              <CustomDatePicker label="DHC Date" placeholderText="DD-MM-YYYY" value={formData.dhcDate} readOnly={mode === 'view'} onChange={date => handleInputChange('dhcDate', date)} />
 
 
             </div>

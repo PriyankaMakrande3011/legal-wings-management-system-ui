@@ -295,7 +295,7 @@ const BackendTeam = () => {
   //     if (result.isConfirmed) {
   //       try {
 
-  //         await axios.put(`https://legalwingcrm.in:8081/legal-wings-management/leads/${id}/cancel`);
+  //         await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
   //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
 
   //         fetchLeads(); 
@@ -445,7 +445,8 @@ const BackendTeam = () => {
       sortOrder: "",
       searchText: null,
       pageNumber: 0,
-      pageSize: 20
+      pageSize: 20,
+      transitLevel: "BACKEND_TEAM"
     };
 
     try {
@@ -514,7 +515,7 @@ const BackendTeam = () => {
             }),
             menu: (provided) => ({
               ...provided,
-              zIndex: 5,
+              zIndex: 999,
             }),
             control: (provided) => ({
               ...provided,
@@ -631,6 +632,7 @@ const BackendTeam = () => {
                       return (
                         <tr key={index}>
                           <td className="sticky-col">{name}</td>
+                          <td>{client.phoneNo || "-"}</td>
                           <td>{record.visitAddress || "-"}</td>
                           <td>{client.clientType || "-"}</td>
                           <td>{client.address || "-"}</td>

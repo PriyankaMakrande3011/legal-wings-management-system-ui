@@ -211,7 +211,7 @@ const CallingTeam = () => {
       const response = await axios.post(
         `${Api.BASE_URL}leads/all`,
         {
-          clientType: selectedClientType || null,
+          clientType: clientType || null,
           searchText: searchText || null,
           cityId: city || null,
           areaId: area || null,
@@ -274,7 +274,7 @@ const CallingTeam = () => {
             }),
             menu: (provided) => ({
               ...provided,
-              zIndex: 5,
+              zIndex: 999,
             }),
             control: (provided) => ({
               ...provided,
@@ -304,6 +304,7 @@ const CallingTeam = () => {
                       selected={fromDate}
                       onChange={(date) => setFromDate(date)}
                       dateFormat="dd-MM-yyyy"
+                      placeholderText="DD-MM-YYYY"
                       className="custom-input"
                     />
                     <FaRegCalendarAlt className="calendar-icon" />
@@ -316,6 +317,7 @@ const CallingTeam = () => {
                       selected={toDate}
                       onChange={(date) => setToDate(date)}
                       dateFormat="dd-MM-yyyy"
+                      placeholderText="DD-MM-YYYY"
                       className="custom-input"
                     />
                     <FaRegCalendarAlt className="calendar-icon" />
