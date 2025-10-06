@@ -52,7 +52,7 @@
 //     { name: 'Calling Team', path: '/calling-team',icon:<FaRegUser /> },
 //     { name: 'Executive Team', path: '/executive-team' ,icon:<FaRegUser /> },
 //     { name: 'Backend Team', path: '/backend-team',icon:<FaRegUser />  },
-//     { name: 'Account Team', path: '/accountancy-team' ,icon:<FaRegUser /> },
+//     { name: 'Account Team', path: '/account-team' ,icon:<FaRegUser /> },
 //     { name: 'Marketing Team', path: '/marketing-team',icon:<FaRegUser />  },
 //     {
 //         name: 'Data Management',
@@ -240,7 +240,7 @@ const Slider = ({ child }) => {
   { name: 'Calling Team', path: '/calling-team', role: 'calling', icon: <FaRegUser /> },
   { name: 'Executive Team', path: '/executive-team', role: 'executive', icon: <FaRegUser /> },
   { name: 'Backend Team', path: '/backend-team', role: 'backend', icon: <FaRegUser /> },
-  { name: 'Account Team', path: '/accountancy-team', role: 'accounting', icon: <FaRegUser /> },
+  { name: 'Account Team', path: '/account-team', role: 'accounting', icon: <FaRegUser /> },
   { name: 'Marketing Team', path: '/marketing-team', role: 'marketing', icon: <FaRegUser /> },
   {
     name: 'Data Management',

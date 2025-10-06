@@ -16,7 +16,7 @@ import BackendTeam from './Pages/BackendTeam';
 import BackendDetails from './Pages/BackendDetails';
 import AddLeadPage from './Pages/AddLeadPage';
 import AssignLead from './Pages/AssingLead';
-import ExecutiveAddDetails from './Pages/ExecativeAddDetails';
+import AccountsTeam from './Pages/AccountsTeam';
 import Edit from './Pages/Edit';
 import EditClient from './Pages/EditClient';
 import { useKeycloak } from '@react-keycloak/web';
@@ -54,10 +54,12 @@ function App() {
           <Route path="/backend-team" element={<BackendTeam />} />
           <Route path="/lead-details/" element={<BackendDetails />} />
           <Route path="/assing-lead" element={<AssignLead />} />
-          <Route path="/add-Executive-details" element={<ExecutiveAddDetails />} />
+          <Route path="/account-team" element={<AccountsTeam />} />
+          <Route path="/add-Executive-details" element={<Executive />} />
           <Route path="/add-lead" element={<AddLeadPage />} />
           <Route path="/edit" element={<Edit />} />
           <Route path="/edit-client" element={<EditClient />} />
+          
 
 
           {/* {teams.map((team, index) => (

@@ -22,7 +22,7 @@ const Dashboard = () => {
         { name: 'Calling Team', path: '/calling-team', role: 'calling' },
         { name: 'Executive Team', path: '/executive-team', role: 'executive' },
         { name: 'Backend Team', path: '/backend-team', role: 'backend' },
-        { name: 'Account Team', path: '/accountancy-team', role: 'accounting' },
+        { name: 'Account Team', path: '/account-team', role: 'accounting' },
         { name: 'Marketing Team', path: '/marketing-team', role: 'marketing' },
     ];
 

@@ -235,7 +235,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
 
   // Fetch existing lead details
   useEffect(() => {
-    if (mode === "edit" && id) {
+    if ((mode === "edit" || mode === "view") && id) {
       axios.get(`${Api.BASE_URL}leads/${id}`, {
         headers: { Authorization: `Bearer ${keycloak.token}` }
       })
@@ -295,7 +295,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
         })
         .catch(err => console.error("Error fetching lead details:", err));
     }
-  }, [mode, id]);
+  }, [mode, id, keycloak.token]);
 
   // Save methods (same as in AddLeadPage)
   const handleSaveLead = () => {
