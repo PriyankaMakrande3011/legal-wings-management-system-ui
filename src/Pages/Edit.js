@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Slider from "./Slider";
 import Header from "./Header.js";
-import './AddLead.css';
+import './AddLead.css'; // Using the same CSS for consistency
 import { useKeycloak } from "@react-keycloak/web";
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import CustomDatePicker from '../common/CustomDatePicker.js';
-import { format } from 'date-fns';
+import { format } from 'date-fns'; // Ensure date-fns is used
 import Api from './Api.js';
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaPlus } from "react-icons/fa";
+import Select from "react-select";
 
 
 const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
@@ -20,12 +21,23 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [formData, setFormData] = useState({ cityId: "", areaId: "" });
   const [clients, setClients] = useState([]);
-  const [leadId, setLeadId] = useState(null);
+  const [leadId, setLeadId] = useState(id); // Initialize leadId from URL
   const { keycloak } = useKeycloak();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [cityOptions, setCityOptions] = useState([]);
   const [areaOptions, setAreaOptions] = useState([]);
   const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
   const [agreementFile, setAgreementFile] = useState(null);
+  const [ownerPayments, setOwnerPayments] = useState([{}]);
+  const [tenantPayments, setTenantPayments] = useState([{}]);
+  const [outstandingAmount, setOutstandingAmount] = useState(0);
+  const [totalAmountReceived, setTotalAmountReceived] = useState(0);
+  const [autoFilledClients, setAutoFilledClients] = useState({ lead: false, owner: false, tenant: false });
+
+  const clientTypeOptions = ["OWNER", "TENANT", "AGENT"];
+  const leadSourceOptions = ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"];
+  const modeOfPaymentOptions = ["CASH", "ONLINE", "CHEQUE"];
+
 
   // Fetch clients
   useEffect(() => {
@@ -79,6 +91,41 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
     fetchDropdowns();
   }, []);
 
+  useEffect(() => {
+    const totalAgreement = parseFloat(formData.totalAmount) || 0;
+    const commission = parseFloat(formData.commissionAmount) || 0;
+    const grandTotal = totalAgreement + commission;
+
+    const totalOwnerPaid = ownerPayments.reduce((acc, p) => acc + (parseFloat(p.paymentAmount) || 0), 0);
+    const totalTenantPaid = tenantPayments.reduce((acc, p) => acc + (parseFloat(p.paymentAmount) || 0), 0);
+
+    const totalPaid = totalOwnerPaid + totalTenantPaid;
+    setTotalAmountReceived(totalPaid);
+    setOutstandingAmount(grandTotal - totalPaid);
+  }, [formData.totalAmount, formData.commissionAmount, ownerPayments, tenantPayments]);
+
+  const handlePaymentChange = (index, field, value, type) => {
+    const payments = type === 'owner' ? [...ownerPayments] : [...tenantPayments];
+    const setPayments = type === 'owner' ? setOwnerPayments : setTenantPayments;
+    payments[index][field] = value;
+    setPayments(payments);
+  };
+
+  const addPaymentEntry = (type) => {
+    const setter = type === 'owner' ? setOwnerPayments : setTenantPayments;
+    setter(prev => [...prev, {}]);
+  };
+
+  const removePaymentEntry = (index, type) => {
+    const payments = type === 'owner' ? ownerPayments : tenantPayments;
+    const setPayments = type === 'owner' ? setOwnerPayments : setTenantPayments;
+    if (payments.length > 1) {
+      const newPayments = payments.filter((_, i) => i !== index);
+      setPayments(newPayments);
+    }
+  };
+
+
   // Utility to check if a field should be editable in ‘edit’ mode
   const isEditable = field => {
     if (mode !== 'edit') return true;
@@ -89,12 +136,15 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       "lastFollowUpDate", "nextFollowUpDate",
       // Agreement,
       "tokenNumber", "agreementStartDate", "agreementEndDate", "addressLine1", "addressLine2", "agreementStatus", "agreementFile",
-      // Payment
-      "ownerPayment", "ownerPaymentDate",
-      "tenantPayment", "tenantPaymentDate",
-      "totalAmount", "remainingPayment",
-      "paymentMode", "grnNumber",
-      "govtGrnDate", "dhcDate"
+      // Payment Part A
+      "totalAmount", "commissionAmount",
+      "ownerPaymentDate", "ownerPaymentAmount", "ownerModeOfPayment", "ownerPayerName",
+      "tenantPaymentDate", "tenantPaymentAmount", "tenantModeOfPayment", "tenantPayerName",
+      "paymentDescription",
+      // Payment Part B
+      "govtGrnDate", "grnNumber", "grnAmount",
+      "dhcDate", "dhcNumber", "dhcAmount",
+      "commissionDate", "commissionName", "commissionAmount"
     ];
     return editableFields.includes(field);
   };
@@ -102,43 +152,96 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   // Input and Dropdown render helpers
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === "cityId") {
+      fetchDropdowns(value);
+    }
   };
-  const renderInput = (label, field, placeholder = "") => (
+
+  const isClientFieldLocked = (field) => {
+    if (autoFilledClients.lead && ["firstName", "lastName", "clientType", "contactNumber", "email"].includes(field)) return true;
+    if (autoFilledClients.owner && ["ownerFirstName", "ownerLastName", "ownerEmail", "ownerContact", "ownerAadhar", "ownerPan"].includes(field)) return true;
+    if (autoFilledClients.tenant && ["tenantFirstName", "tenantLastName", "tenantEmail", "tenantContact", "tenantAadhar", "tenantPan"].includes(field)) return true;
+    return false;
+  };
+
+  const handleLockedFieldClick = () => {
+    alert("This is client's master data. To edit, please go to the Data Management tab or create a new client.");
+  };
+
+  const renderInput = (label, placeholder, field, onChange, value) => {
+    const locked = isClientFieldLocked(field);
+    let editableCheckField = field;
+    if (field.startsWith('owner-') || field.startsWith('tenant-')) {
+      const parts = field.split('-');
+      const type = parts[0]; // owner or tenant
+      const fieldNameParts = parts.slice(1, -1); // e.g., ['payment', 'Amount']
+      const capitalizedFieldName = fieldNameParts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+      editableCheckField = `${type}${capitalizedFieldName}`; // e.g., ownerPaymentAmount
+    }
+
+    const readOnly = mode === 'view' || !isEditable(editableCheckField) || locked;
+
+    return (
     <div>
       <label htmlFor={field}>{label}</label>
       <input
-        placeholder={placeholder || label}
-        value={formData[field] || ""}
-        onChange={e => handleInputChange(field, e.target.value)}
-        readOnly={!isEditable(field)}
+        placeholder={placeholder}
+        value={value !== undefined ? value : (formData[field] || '')}
+        onChange={readOnly ? () => {} : (onChange || (e => handleInputChange(field, e.target.value)))}
+        readOnly={readOnly}
+        onClick={locked ? handleLockedFieldClick : undefined}
+        style={locked ? { backgroundColor: '#f2f2f2', cursor: 'not-allowed' } : {}}
       />
     </div>
-  );
-  const renderDropdown = (label, field, options) => (
+    );
+  };
+
+  const renderDropdown = (label, field, options, onChange, value) => {
+    const selectOptions = options.map(opt =>
+      typeof opt === 'string'
+        ? { value: opt, label: opt }
+        : { value: opt.id || opt.name, label: opt.name }
+    );
+
+    const currentValue = selectOptions.find(
+      (opt) => opt.value === (value !== undefined ? value : formData[field])
+    );
+
+    let editableCheckField = field;
+    if (field.startsWith('owner-') || field.startsWith('tenant-')) {
+      const parts = field.split('-');
+      const type = parts[0]; // owner
+      const fieldName = parts.slice(1, -1).join(''); // modeOfPayment
+      editableCheckField = `${type}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`; // e.g., ownerModeOfPayment
+    }
+
+    return (
     <div>
       <label>{label}</label>
-      <select
-        name={field}
-        value={formData[field] || ""}
-        onChange={e => {
-          handleInputChange(field, e.target.value);
-          if (field === "cityId") fetchDropdowns(e.target.value);
+      <Select
+        options={selectOptions}
+        placeholder={`Select ${label}`}
+        isClearable
+        isSearchable
+        isDisabled={mode === "view" || !isEditable(editableCheckField)}
+        value={currentValue}
+        onChange={onChange ? (selected) => onChange(selected?.value || null) : (selected) => handleInputChange(field, selected?.value || null)}
+        styles={{
+          menu: (provided) => ({ ...provided, zIndex: 9998 }),
+          control: (provided) => ({
+            ...provided,
+            minWidth: "200px",
+            border: '1px solid #ccc',
+            boxShadow: 'none',
+            '&:hover': {
+              borderColor: '#888'
+            }
+          }),
         }}
-        disabled={!isEditable(field)}
-        className="client-dropdown"
-      >
-        <option value="">Select {label}</option>
-        {options.map(opt => (
-          <option
-            key={opt.id || opt.name || opt}
-            value={opt.id || opt.name || opt} // ✅ ensure it's a string not an object
-          >
-            {opt.name || opt}
-          </option>
-        ))}
-      </select>
+      />
     </div>
-  );
+    );
+  };
 
   const renderFileInput = (label, field) => (
     <div>
@@ -172,29 +275,44 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
 
   // Conditional dropdown for existing clients
   const renderClientDropdown = type => {
-    let show = false;
-    if (type === "lead") show = !formData.firstName;
-    else if (type === "owner") show = !formData.ownerFirstName;
-    else if (type === "tenant") show = !formData.tenantFirstName;
-    if (!show) return null;
+    if (mode === 'view') return null;
+
+    const clientOptions = clients.map((client) => ({
+      value: client.id,
+      label: client.name,
+    }));
 
     return (
-      <select
-        onChange={e => fetchAndAutofillClient(e.target.value, type)}
-        defaultValue=""
-        className="client-dropdown"
-        disabled={false}
-      >
-        <option value="">Select Existing Client</option>
-        {clients.map(c => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
+      <Select
+        options={clientOptions}
+        placeholder="Select Existing Client"
+        isClearable
+        isSearchable
+        onChange={(selected) => fetchAndAutofillClient(selected?.value || null, type)}
+        styles={{
+          menu: (provided) => ({ ...provided, zIndex: 9999, minWidth: "250px" }),
+          menuList: (provided) => ({ ...provided, maxHeight: "200px" }),
+          control: (provided) => ({ ...provided, minWidth: "250px" }),
+        }}
+      />
     );
   };
 
   const fetchAndAutofillClient = (clientId, type) => {
-    if (!clientId) return;
+    if (!clientId) {
+      setAutoFilledClients(prev => ({ ...prev, [type]: false }));
+      if (type === "lead") {
+        setFormData(prev => ({ ...prev, firstName: '', lastName: '', email: '', contactNumber: '', clientType: '' }));
+      } else if (type === "owner") {
+        setFormData(prev => ({ ...prev, ownerFirstName: '', ownerLastName: '', ownerEmail: '', ownerContact: '', ownerAadhar: '', ownerPan: '' }));
+      } else if (type === "tenant") {
+        setFormData(prev => ({ ...prev, tenantFirstName: '', tenantLastName: '', tenantEmail: '', tenantContact: '', tenantAadhar: '', tenantPan: '' }));
+      }
+      return;
+    }
+
+    setAutoFilledClients(prev => ({ ...prev, [type]: true }));
+
     fetch(`${Api.BASE_URL}clients/${clientId}`, {
       headers: { Authorization: `Bearer ${keycloak.token}` }
     })
@@ -204,7 +322,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
           firstName: client.firstName,
           lastName: client.lastName,
           email: client.email,
-          contactNumber: client.phoneNo
+          contactNumber: client.phoneNo,
         };
         if (type === "lead") {
           setFormData(prev => ({ ...prev, ...base }));
@@ -241,7 +359,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       })
         .then(resp => {
           const data = resp.data;
-          setLeadId(data.id);
+          setLeadId(data.id); // Already set from URL, but good to confirm
           setFormData({
             firstName: data.client?.firstName || "",
             lastName: data.client?.lastName || "",
@@ -276,21 +394,32 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             tokenNumber: data.agreement?.tokenNo || "",
             agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
             agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
-            agreementStatus: data.agreement?.agreementStatus || "",
+            agreementStatus: data.agreement?.status || "",
             fileUrl: data.agreement?.fileUrl || "",
             addressLine1: data.agreement?.addressLine1 || "",
             addressLine2: data.agreement?.addressLine2 || "",
+            // Payment
+            paymentId: data.payment?.id || null,
             totalAmount: data.payment?.totalAmount || "",
-            ownerPayment: data.payment?.ownerAmount || "",
-            ownerPaymentDate: data.payment?.ownerPaymentDate ? new Date(data.payment.ownerPaymentDate) : null,
-            ownerModeOfPayment: data.payment?.ownerModeOfPayment || "",
-            tenantPayment: data.payment?.tenantAmount || "",
-            tenantPaymentDate: data.payment?.tenantPaymentDate ? new Date(data.payment.tenantPaymentDate) : null,
-            tenantModeOfPayment: data.payment?.tenantModeOfPayment || "",
             grnNumber: data.payment?.grnNumber || "",
             govtGrnDate: data.payment?.govtGrnDate ? new Date(data.payment.govtGrnDate) : null,
-            dhcDate: data.payment?.dhcDate ? new Date(data.payment.dhcDate) : null
+            grnAmount: data.payment?.grnAmount || "",
+            dhcDate: data.payment?.dhcDate ? new Date(data.payment.dhcDate) : null,
+            dhcAmount: data.payment?.dhcAmount || "",
+            dhcNumber: data.payment?.dhcNumber || "",
+            commissionDate: data.payment?.commissionDate ? new Date(data.payment.commissionDate) : null,
+            commissionName: data.payment?.commissionName || "",
+            commissionAmount: data.payment?.commissionAmount || "",
+            paymentDescription: data.payment?.description || "",
           });
+
+          if (data.payment?.paymentDetails) {
+            const ownerPays = data.payment.paymentDetails.filter(p => p.clientType === 'OWNER').map(p => ({ ...p, paymentDate: p.paymentDate ? new Date(p.paymentDate) : null }));
+            const tenantPays = data.payment.paymentDetails.filter(p => p.clientType === 'TENANT').map(p => ({ ...p, paymentDate: p.paymentDate ? new Date(p.paymentDate) : null }));
+            setOwnerPayments(ownerPays.length > 0 ? ownerPays : [{}]);
+            setTenantPayments(tenantPays.length > 0 ? tenantPays : [{}]);
+          }
+
           fetchDropdowns(data.city?.id);
         })
         .catch(err => console.error("Error fetching lead details:", err));
@@ -350,7 +479,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       tokenNo: formData.tokenNumber,
       agreementStartDate: formData.agreementStartDate ? format(new Date(formData.agreementStartDate), 'yyyy-MM-dd') : null,
       agreementEndDate: formData.agreementEndDate ? format(new Date(formData.agreementEndDate), 'yyyy-MM-dd') : null,
-      agreementStatus: formData.agreementStatus,
+      status: formData.agreementStatus,
       area: { id: formData.areaId || null },
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
@@ -399,36 +528,60 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   };
 
   const handleSavePayment = () => {
-    const data = {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const allPaymentDetails = [
+      ...ownerPayments.filter(p => p.paymentAmount).map(p => ({ ...p, clientType: 'OWNER' })),
+      ...tenantPayments.filter(p => p.paymentAmount).map(p => ({ ...p, clientType: 'TENANT' }))
+    ];
+
+    const formattedDetails = allPaymentDetails.map(detail => ({
+      ...detail,
+      paymentDate: detail.paymentDate ? format(new Date(detail.paymentDate), 'yyyy-MM-dd') : null,
+    }));
+
+    const totalAgreement = parseFloat(formData.totalAmount) || 0; // This is the agreement amount
+    const commission = parseFloat(formData.commissionAmount) || 0;
+
+    const paymentData = {
       leadId,
-      totalAmount: formData.totalAmount,
-      ownerAmount: formData.ownerPayment,
-      ownerPaymentDate: formData.ownerPaymentDate ? format(new Date(formData.ownerPaymentDate), 'yyyy-MM-dd') : null,
-      ownerModeOfPayment: formData.ownerModeOfPayment,
-      tenantAmount: formData.tenantPayment,
-      tenantPaymentDate: formData.tenantPaymentDate ? format(new Date(formData.tenantPaymentDate), 'yyyy-MM-dd') : null,
-      tenantModeOfPayment: formData.tenantModeOfPayment,
+      id: formData.paymentId, // Include payment ID for updates
+      totalAmount: totalAgreement,
       grnNumber: formData.grnNumber,
       govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null,
-      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null
+      grnAmount: formData.grnAmount,
+      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null,
+      dhcAmount: formData.dhcAmount,
+      dhcNumber: formData.dhcNumber,
+      commissionDate: formData.commissionDate ? format(new Date(formData.commissionDate), 'yyyy-MM-dd') : null, // Added
+      commissionName: formData.commissionName,
+      commissionAmount: formData.commissionAmount,
+      description: formData.paymentDescription,
+      paymentDetails: formattedDetails
     };
+
     fetch(`${Api.BASE_URL}payments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${keycloak.token}`
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(paymentData)
     })
       .then(res => {
         if (!res.ok) throw new Error("Failed to save payment");
         return res.json();
       })
-      .then(() => alert("Payment saved successfully!"))
+      .then((data) => {
+        alert("Payment saved successfully!");
+        setFormData(prev => ({ ...prev, paymentId: data.id })); // Store the payment ID after save
+      })
       .catch(err => {
         console.error("Payment Save Error:", err);
         alert("Error saving payment. Please try again.");
-      });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   // Render content per tab
@@ -440,11 +593,11 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             {renderClientDropdown('lead')}
           </div>
           <div className="form-grid">
-            {renderInput("First Name", "firstName")}
-            {renderInput("Last Name", "lastName")}
-            {renderDropdown("Client Type", "clientType", [{ name: "OWNER" }, { name: "TENANT" }, { name: "AGENT" }])}
-            {renderInput("Contact Number", "contactNumber")}
-            {renderInput("Email", "email")}
+            {renderInput("First Name", "First Name", "firstName")}
+            {renderInput("Last Name", "Last Name", "lastName")}
+            {renderDropdown("Client Type", "clientType", clientTypeOptions)}
+            {renderInput("Contact Number", "Contact Number", "contactNumber")}
+            {renderInput("Email", "Email", "email")}
             {renderDropdown("Lead Source", "leadSource", ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"])}
             <CustomDatePicker
               label="Tentative Agreement Date"
@@ -453,13 +606,13 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
               onChange={date => handleInputChange('tentativeAgreementDate', date)}
               dateFormat="yyyy-MM-dd"
               readOnly={mode === 'view' || !isEditable('tentativeAgreementDate')}
-            />
-            {renderInput("Appointment Time", "appointmentTime")}
-            {renderInput("Visit Address", "visitAddress")}
-            {renderInput("Description", "description")}
-            {renderInput("Reference Name", "referenceName")}
-            {renderInput("Reference Number", "referenceNumber")}
-            {renderInput("Amount", "amount")}
+            /> 
+            {renderInput("Appointment Time", "Appointment Time", "appointmentTime")}
+            {renderInput("Visit Address", "Visit Address", "visitAddress")}
+            {renderInput("Description", "Description", "description")}
+            {renderInput("Reference Name", "Reference Name", "referenceName")}
+            {renderInput("Reference Number", "Reference Number", "referenceNumber")}
+            {renderInput("Amount", "Amount", "amount")}
             {renderDropdown("City", "cityId", cityOptions)}
             {renderDropdown("Area", "areaId", areaOptions)}
             <CustomDatePicker
@@ -494,22 +647,22 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
           <h3 className="agreement-heading">Owner</h3>
           {renderClientDropdown('owner')}
           <div className="form-grid">
-            {renderInput("Owner Firstname", "ownerFirstName")}
-            {renderInput("Owner Last Name", "ownerLastName")}
-            {renderInput("Owner Email", "ownerEmail")}
-            {renderInput("Owner Contact", "ownerContact")}
-            {renderInput("Owner Aadhar Number", "ownerAadhar")}
-            {renderInput("Owner PAN Number", "ownerPan")}
+            {renderInput("Owner Firstname", "Owner Firstname", "ownerFirstName")}
+            {renderInput("Owner Last Name", "Owner Last Name", "ownerLastName")}
+            {renderInput("Owner Email", "Owner Email", "ownerEmail")}
+            {renderInput("Owner Contact", "Owner Contact", "ownerContact")}
+            {renderInput("Owner Aadhar Number", "Owner Aadhar Number", "ownerAadhar")}
+            {renderInput("Owner PAN Number", "Owner PAN Number", "ownerPan")}
           </div>
           <h3 className="agreement-heading">Tenant</h3>
           {renderClientDropdown('tenant')}
           <div className="form-grid">
-            {renderInput("Tenant Firstname", "tenantFirstName")}
-            {renderInput("Tenant Last Name", "tenantLastName")}
-            {renderInput("Tenant Email", "tenantEmail")}
-            {renderInput("Tenant Contact", "tenantContact")}
-            {renderInput("Tenant Aadhar Number", "tenantAadhar")}
-            {renderInput("Tenant PAN Number", "tenantPan")}
+            {renderInput("Tenant Firstname", "Tenant Firstname", "tenantFirstName")}
+            {renderInput("Tenant Last Name", "Tenant Last Name", "tenantLastName")}
+            {renderInput("Tenant Email", "Tenant Email", "tenantEmail")}
+            {renderInput("Tenant Contact", "Tenant Contact", "tenantContact")}
+            {renderInput("Tenant Aadhar Number", "Tenant Aadhar Number", "tenantAadhar")}
+            {renderInput("Tenant PAN Number", "Tenant PAN Number", "tenantPan")}
           </div>
           <h3 className="agreement-heading">Agreement Details</h3>
           <div className="form-grid">
@@ -551,29 +704,107 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
 
       case 'payment': return (
         <>
-          <div className="form-grid">
-            {renderInput("Total Amount", "totalAmount")}
-            {renderInput("Owner Payment", "ownerPayment")}
-            <CustomDatePicker
-              label="Owner Payment Date"
-              placeholderText="YYYY-MM-DD"
-              value={formData.ownerPaymentDate}
-              onChange={date => handleInputChange('ownerPaymentDate', date)}
-              readOnly={mode === 'view' || !isEditable('ownerPaymentDate')}
-            />
-            {renderInput("Owner Mode of Payment", "ownerModeOfPayment")}
-            {renderInput("Tenant Payment Amount", "tenantPayment")}
-            <CustomDatePicker
-              label="Tenant Payment Date"
-              placeholderText="YYYY-MM-DD"
-              value={formData.tenantPaymentDate}
-              onChange={date => handleInputChange('tenantPaymentDate', date)}
-              readOnly={mode === 'view' || !isEditable('tenantPaymentDate')}
-            />
-            {renderInput("Tenant Mode of Payment", "tenantModeOfPayment")}
-            {renderInput("GRN Number", "grnNumber")}
-            <CustomDatePicker label="Govt GRN Date" placeholderText="YYYY-MM-DD" value={formData.govtGrnDate} onChange={date => handleInputChange('govtGrnDate', date)} readOnly={mode === 'view' || !isEditable('govtGrnDate')} />
-            <CustomDatePicker label="DHC Date" placeholderText="YYYY-MM-DD" value={formData.dhcDate} onChange={date => handleInputChange('dhcDate', date)} readOnly={mode === 'view' || !isEditable('dhcDate')} />
+          <div className="payment-section">
+            <div className="payment-part-a">
+              <div className="form-grid payment-grid-top">
+                {renderInput("Total Agreement Amount", "e.g., 3000", "totalAmount")}
+                {renderInput("Commission Amount", "e.g., 500", "commissionAmount")}
+                <div>
+                  <label>Outstanding Amount</label>
+                  <input value={outstandingAmount.toFixed(2)} readOnly className="outstanding-amount" />
+                </div>
+              </div>
+
+              <div className="payment-details-section">
+                <h4>Owner Payments</h4>
+                {ownerPayments.map((p, index) => (
+                  <div key={index} className="payment-entry-grid">
+                    <CustomDatePicker
+                      label="Payment Date"
+                      value={p.paymentDate}
+                      readOnly={mode === 'view' || !isEditable('ownerPaymentDate')}
+                      onChange={(date) => handlePaymentChange(index, 'paymentDate', date, 'owner')}
+                    />
+                    {renderInput('Amount', 'Amount', `owner-payment-amount-${index}`, (e) => handlePaymentChange(index, 'paymentAmount', e.target.value, 'owner'), p.paymentAmount)}
+                    {renderDropdown('Mode', `owner-modeOfPayment-${index}`, modeOfPaymentOptions, (val) => handlePaymentChange(index, 'modeOfPayment', val, 'owner'), p.modeOfPayment)}
+                    {renderInput('Payer Name', 'Payer Name', `owner-payerName-${index}`, (e) => handlePaymentChange(index, 'payerName', e.target.value, 'owner'), p.payerName)}
+                    {mode === 'edit' && ownerPayments.length > 1 && (
+                      <button type="button" className="remove-payment-btn" onClick={() => removePaymentEntry(index, 'owner')}>
+                        <FaTimes />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {mode === 'edit' && <button className="add-more-btn" onClick={() => addPaymentEntry('owner')}>+ Add Owner Payment</button>}
+              </div>
+
+              <div className="payment-details-section">
+                <h4>Tenant Payments</h4>
+                {tenantPayments.map((p, index) => (
+                  <div key={index} className="payment-entry-grid">
+                    <CustomDatePicker
+                      label="Payment Date"
+                      value={p.paymentDate}
+                      readOnly={mode === 'view' || !isEditable('tenantPaymentDate')}
+                      onChange={(date) => handlePaymentChange(index, 'paymentDate', date, 'tenant')}
+                    />
+                    {renderInput('Amount', 'Amount', `tenant-payment-amount-${index}`, (e) => handlePaymentChange(index, 'paymentAmount', e.target.value, 'tenant'), p.paymentAmount)}
+                    {renderDropdown('Mode', `tenant-modeOfPayment-${index}`, modeOfPaymentOptions, (val) => handlePaymentChange(index, 'modeOfPayment', val, 'tenant'), p.modeOfPayment)}
+                    {renderInput('Payer Name', 'Payer Name', `tenant-payerName-${index}`, (e) => handlePaymentChange(index, 'payerName', e.target.value, 'tenant'), p.payerName)}
+                    {mode === 'edit' && tenantPayments.length > 1 && (
+                      <button type="button" className="remove-payment-btn" onClick={() => removePaymentEntry(index, 'tenant')}>
+                        <FaTimes />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {mode === 'edit' && <button className="add-more-btn" onClick={() => addPaymentEntry('tenant')}>+ Add Tenant Payment</button>}
+              </div>
+              <div>
+                <label>Total Amount Received</label>
+                <input value={totalAmountReceived.toFixed(2)} readOnly className="total-received-amount" />
+              </div>
+              <div>
+                <label>Description</label>
+                <textarea
+                  placeholder="Add any payment related notes here..."
+                  value={formData.paymentDescription || ''}
+                  readOnly={mode === 'view' || !isEditable('paymentDescription')}
+                  onChange={e => handleInputChange('paymentDescription', e.target.value)}
+                  rows="3"
+                />
+              </div>
+            </div>
+
+            <div className="payment-part-b">
+              <h4>Back Work Account</h4>
+              <div className="form-grid payment-grid-bottom">
+                <CustomDatePicker
+                  label="Govt GRN Date"
+                  value={formData.govtGrnDate}
+                  readOnly={mode === 'view' || !isEditable('govtGrnDate')}
+                  onChange={date => handleInputChange('govtGrnDate', date)}
+                />
+                {renderInput("GRN Number", "GRN Number", "grnNumber")}
+                {renderInput("GRN Amount", "GRN Amount", "grnAmount")}
+                <CustomDatePicker
+                  label="DHC Date"
+                  value={formData.dhcDate}
+                  readOnly={mode === 'view' || !isEditable('dhcDate')}
+                  onChange={date => handleInputChange('dhcDate', date)}
+                />
+                {renderInput("DHC Number", "DHC Number", "dhcNumber")}
+                {renderInput("DHC Amount", "DHC Amount", "dhcAmount")}
+                <CustomDatePicker
+                  label="Commission Date"
+                  value={formData.commissionDate}
+                  readOnly={mode === 'view' || !isEditable('commissionDate')}
+                  onChange={date => handleInputChange('commissionDate', date)}
+                />
+                {renderInput("Commission Name", "Commission Name", "commissionName")}
+                {renderInput("Commission Amount", "Commission Amount", "commissionAmount")}
+              </div>
+            </div>
           </div>
           {mode === 'edit' && (
             <div className="button-wrapper">

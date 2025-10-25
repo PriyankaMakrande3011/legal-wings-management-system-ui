@@ -26,8 +26,10 @@ const CustomDatePicker = ({
   dateFormat = "yyyy-MM-dd",
   minDate,
   maxDate,
+  readOnly = false,
 }) => {
   const handleChange = (date) => {
+    if (readOnly) return;
     onChange(date ? format(date, dateFormat) : "");
   };
 
@@ -41,6 +43,7 @@ const CustomDatePicker = ({
         placeholderText={placeholder}
         minDate={minDate}
         maxDate={maxDate}
+        disabled={readOnly}
         customInput={<CustomInput placeholder={placeholder} />}
       />
     </div>

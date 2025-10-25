@@ -51,8 +51,15 @@ const AddLeadPage = ({
   const [areaOptions, setAreaOptions] = useState([]);
   const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
   const [agreementFile, setAgreementFile] = useState(null);
+  const [ownerPayments, setOwnerPayments] = useState([{}]);
+  const [tenantPayments, setTenantPayments] = useState([{}]);
+  const [outstandingAmount, setOutstandingAmount] = useState(0);
+  const [autoFilledClients, setAutoFilledClients] = useState({ lead: false, owner: false, tenant: false });
+  const [totalAmountReceived, setTotalAmountReceived] = useState(0);
 
+  const modeOfPaymentOptions = ["CASH", "ONLINE", "CHEQUE"];
 
+  
 
   useEffect(() => {
     if (keycloak?.token) {
@@ -92,6 +99,45 @@ const AddLeadPage = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  useEffect(() => {
+    const totalAgreement = parseFloat(formData.totalAmount) || 0;
+    const commission = parseFloat(formData.commissionAmount) || 0;
+    const grandTotal = totalAgreement + commission;
+
+    const totalOwnerPaid = ownerPayments.reduce((acc, p) => acc + (parseFloat(p.paymentAmount) || 0), 0);
+    const totalTenantPaid = tenantPayments.reduce((acc, p) => acc + (parseFloat(p.paymentAmount) || 0), 0);
+
+    const totalPaid = totalOwnerPaid + totalTenantPaid;
+    setTotalAmountReceived(totalPaid);
+    setOutstandingAmount(grandTotal - totalPaid);
+  }, [formData.totalAmount, formData.commissionAmount, ownerPayments, tenantPayments]);
+
+
+  const handlePaymentChange = (index, field, value, type) => {
+    if (type === 'owner') {
+      const newPayments = [...ownerPayments];
+      newPayments[index][field] = value;
+      setOwnerPayments(newPayments);
+    } else if (type === 'tenant') {
+      const newPayments = [...tenantPayments];
+      newPayments[index][field] = value;
+      setTenantPayments(newPayments);
+    }
+  };
+
+  const removePaymentEntry = (index, type) => {
+    if (type === 'owner') {
+      if (ownerPayments.length > 1) {
+        const newPayments = ownerPayments.filter((_, i) => i !== index);
+        setOwnerPayments(newPayments);
+      }
+    } else if (type === 'tenant') {
+      if (tenantPayments.length > 1) {
+        const newPayments = tenantPayments.filter((_, i) => i !== index);
+        setTenantPayments(newPayments);
+      }
+    }
+  };
   const handleCityInputChange = (field, value) => {
   setFormData(prev => {
     const updated = { ...prev, [field]: value };
@@ -109,7 +155,7 @@ const AddLeadPage = ({
     console.log("formData before save:", formData);
     console.log("Accessing areaId directly:", formData.areaId);
     const requestBody = {
-      tentativeAgreementDate: formData.tentativeAgreementDate,
+      tentativeAgreementDate: formData.tentativeAgreementDate ? format(new Date(formData.tentativeAgreementDate), 'yyyy-MM-dd') : null,
       visitAddress: formData.visitAddress,
       id: leadId,
       transitLevel: transitLevel,
@@ -144,7 +190,7 @@ const AddLeadPage = ({
       
     };
 
-    fetch("http://localhost:8081/legal-wings-management/leads", {
+    fetch("http://legalwingcrm.in:8081/legal-wings-management/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -171,48 +217,50 @@ const AddLeadPage = ({
   };
 
   const handleSaveAgreement = () => {
+    const formDataPayload = new FormData();
+
     const agreementData = {
       leadId,
       tokenNo: formData.tokenNumber,
       agreementStartDate: formData.agreementStartDate ? format(new Date(formData.agreementStartDate), 'yyyy-MM-dd') : null,
       agreementEndDate: formData.agreementEndDate ? format(new Date(formData.agreementEndDate), 'yyyy-MM-dd') : null,
-      area: {
-      id: formData.areaId|| null
-  
-    },
-      agreementStatus: formData.agreementStatus,
+      area: { id: formData.areaId || null },
+      status: formData.agreementStatus,
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
       tenant: {
-
         firstName: formData.tenantFirstName,
         lastName: formData.tenantLastName,
-        clientType: "TENANT", // Hardcoded for now, can be adjusted
+        clientType: "TENANT",
         email: formData.tenantEmail,
         phoneNo: formData.tenantContact,
         aadharNumber: formData.tenantAadhar,
         panNumber: formData.tenantPan,
       },
       owner: {
-
         firstName: formData.ownerFirstName,
         lastName: formData.ownerLastName,
-        clientType: "OWNER", // Hardcoded for now, can be adjusted
+        clientType: "OWNER",
         email: formData.ownerEmail,
         phoneNo: formData.ownerContact,
         aadharNumber: formData.ownerAadhar,
         panNumber: formData.ownerPan,
       }
     };
+    
+    formDataPayload.append('agreement', new Blob([JSON.stringify(agreementData)], { type: 'application/json' }));
 
-    fetch("http://localhost:8081/legal-wings-management/agreements", {
+    if (agreementFile) {
+      formDataPayload.append('file', agreementFile);
+    }
+
+    fetch("http://legalwingcrm.in:8081/legal-wings-management/agreements", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "accept": "*/*",
         "Authorization": `Bearer ${keycloak.token}`
       },
-      body: JSON.stringify(agreementData)
+      body: formDataPayload
     })
       .then(res => {
         if (!res.ok) throw new Error("Failed to save agreement");
@@ -232,21 +280,39 @@ const AddLeadPage = ({
   const handleSavePayment = () => {
     if (isSubmitting) return; // prevent multiple submissions
     setIsSubmitting(true);
+
+    const allPaymentDetails = [
+      ...ownerPayments.filter(p => p.paymentAmount).map(p => ({ ...p, clientType: 'OWNER' })),
+      ...tenantPayments.filter(p => p.paymentAmount).map(p => ({ ...p, clientType: 'TENANT' }))
+    ];
+
+    // Format dates before sending
+    const formattedDetails = allPaymentDetails.map(detail => ({
+      ...detail,
+      paymentDate: detail.paymentDate ? format(new Date(detail.paymentDate), 'yyyy-MM-dd') : null,
+    }));
+
+    const totalAgreement = parseFloat(formData.totalAmount) || 0; // This is the agreement amount
+    const commission = parseFloat(formData.commissionAmount) || 0;
+
     const paymentData = {
       leadId,
-      totalAmount: formData.totalAmount,
-      ownerPayment: formData.ownerPayment,
-      ownerPaymentDate: formData.ownerPaymentDate ? format(new Date(formData.ownerPaymentDate), 'yyyy-MM-dd') : null,
-      ownerModeOfPayment: formData.ownerModeOfPayment,
-      tenantAmount: formData.tenantPayment,
-      tenantPaymentDate: formData.tenantPaymentDate ? format(new Date(formData.tenantPaymentDate), 'yyyy-MM-dd') : null,
-      tenantModeOfPayment: formData.tenantModeOfPayment,
+      id: formData.paymentId, // Include payment ID for updates
+      totalAmount: totalAgreement, // The main payment object's totalAmount is just the agreement amount
       grnNumber: formData.grnNumber,
       govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null,
       dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null,
+      dhcAmount: formData.dhcAmount,
+      grnAmount: formData.grnAmount,
+      dhcNumber: formData.dhcNumber,
+      commissionDate: formData.commissionDate ? format(new Date(formData.commissionDate), 'yyyy-MM-dd') : null,
+      commissionAmount: commission,
+      commissionName: formData.commissionName,
+      description: formData.paymentDescription,
+      paymentDetails: formattedDetails
     };
 
-    fetch("http://localhost:8081/legal-wings-management/payments", {
+    fetch("http://legalwingcrm.in:8081/legal-wings-management/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -261,8 +327,8 @@ const AddLeadPage = ({
       })
       .then(data => {
         alert("Payment saved successfully!");
-
         console.log("Saved Payment:", data);
+        setFormData(prev => ({ ...prev, paymentId: data.id })); // Store the payment ID after save
       })
       .catch(err => {
         console.error("Payment Save Error:", err);
@@ -271,8 +337,6 @@ const AddLeadPage = ({
       .finally(() => {
         setIsSubmitting(false); // re-enable button after request
       });
-
-
   };
 
   const handleNext = (nextTab) => {
@@ -280,9 +344,24 @@ const AddLeadPage = ({
   };
 
   const fetchAndAutofillClient = (clientId, type) => {
-    if (!clientId) return;
+    if (!clientId) {
+      // Clear fields and reset autofill status if client is deselected
+      setAutoFilledClients(prev => ({ ...prev, [type]: false }));
+      if (type === 'lead') {
+        setFormData(prev => ({ ...prev, firstName: '', lastName: '', clientType: '', email: '', contactNumber: '' }));
+      } else if (type === 'owner') {
+        setFormData(prev => ({ ...prev, ownerFirstName: '', ownerLastName: '', ownerEmail: '', ownerContact: '', ownerAadhar: '', ownerPan: '' }));
+      } else if (type === 'tenant') {
+        setFormData(prev => ({ ...prev, tenantFirstName: '', tenantLastName: '', tenantEmail: '', tenantContact: '', tenantAadhar: '', tenantPan: '' }));
+      }
+      setSelectedClientId(null);
+      return;
+    }
 
     setSelectedClientId(clientId); // <--- New
+
+    // Set autofill status to true for the given type
+    setAutoFilledClients(prev => ({ ...prev, [type]: true }));
 
     fetch(`${Api.BASE_URL}clients/${clientId}`, {
       headers: {
@@ -445,17 +524,33 @@ const renderClientDropdown = (type) => {
     );
   };
 
-  const renderInput = (label, placeholder, field) => (
+  const isClientFieldLocked = (field) => {
+    if (autoFilledClients.lead && ["firstName", "lastName", "clientType", "contactNumber", "email"].includes(field)) return true;
+    if (autoFilledClients.owner && ["ownerFirstName", "ownerLastName", "ownerEmail", "ownerContact", "ownerAadhar", "ownerPan"].includes(field)) return true;
+    if (autoFilledClients.tenant && ["tenantFirstName", "tenantLastName", "tenantEmail", "tenantContact", "tenantAadhar", "tenantPan"].includes(field)) return true;
+    return false;
+  };
+
+  const handleLockedFieldClick = () => {
+    alert("This is client's master data. You cannot edit that from here. Go to the Data Management tab and edit from there, or create a new client.");
+  };
+
+  const renderInput = (label, placeholder, field, onChange, value) => {
+    const locked = isClientFieldLocked(field);
+    return (
     <div>
       <label htmlFor={field}>{label}</label>
       <input
         placeholder={placeholder}
-        value={formData[field] || ''}
-        readOnly={mode === 'view'}
-        onChange={e => handleInputChange(field, e.target.value)}
+        value={value !== undefined ? value : (formData[field] || '')}
+        onChange={locked ? () => {} : (onChange || (e => handleInputChange(field, e.target.value)))}
+        readOnly={mode === 'view' || locked}
+        onClick={locked ? handleLockedFieldClick : undefined}
+        style={locked ? { backgroundColor: '#f2f2f2', cursor: 'not-allowed' } : {}}
       />
     </div>
-  );
+    );
+  };
 
   const renderFileInput = (label, field) => (
     <div>
@@ -485,12 +580,17 @@ const renderClientDropdown = (type) => {
     </div>
   );
 
+  const addPaymentEntry = (type) => {
+    const setter = type === 'owner' ? setOwnerPayments : setTenantPayments;
+    setter(prev => [...prev, {}]);
+  };
+
   useEffect(() => {
     console.log("Mode:", mode, "ID:", id);
     const fetchLeadDetails = async () => {
       if (mode === "view" && id) {
         try {
-          const response = await axios.get(`http://localhost:8081/legal-wings-management/leads/${id}`, {
+          const response = await axios.get(`http://legalwingcrm.in:8081/legal-wings-management/leads/${id}`, {
             headers: {
               Authorization: `Bearer ${keycloak.token}`
             }
@@ -538,7 +638,7 @@ const renderClientDropdown = (type) => {
             // Agreement
             agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
             agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
-            agreementStatus: data.agreement?.agreementStatus || "",
+            agreementStatus: data.agreement?.status || "",
             fileUrl: data.agreement?.fileUrl || "",
             area: data.agreement?.area?.name || "",
             addressLine1: data.agreement?.addressLine1 || "",
@@ -546,18 +646,33 @@ const renderClientDropdown = (type) => {
             tokenNumber: data.agreement?.tokenNo || "",
 
             // Payment
-            totalPayment: data.payment?.totalAmount || "",
-            ownerPayment: data.payment?.ownerAmount || "",
-            tenantPayment: data.payment?.tenantAmount || "",
-            remainingPayment: data.payment?.remainingAmount || "",
-            ownerModeOfPayment: data.payment?.ownerModeOfPayment || "",
-            tenantModeOfPayment: data.payment?.tenantModeOfPayment || "",
-            ownerPaymentDate: data.payment?.ownerPaymentDate ? new Date(data.payment.ownerPaymentDate) : null,
-            tenantPaymentDate: data.payment?.tenantPaymentDate ? new Date(data.payment.tenantPaymentDate) : null,
+            paymentId: data.payment?.id || null,
+            totalAmount: data.payment?.totalAmount || "", // This might need adjustment based on logic
             grnNumber: data.payment?.grnNumber || "",
             govtGrnDate: data.payment?.govtGrnDate ? new Date(data.payment.govtGrnDate) : null,
-            dhcDate: data.payment?.dhcDate ? new Date(data.payment.dhcDate) : null
+            dhcDate: data.payment?.dhcDate ? new Date(data.payment.dhcDate) : null,
+            dhcAmount: data.payment?.dhcAmount || "",
+            paymentDescription: data.payment?.description || "",
+            grnAmount: data.payment?.grnAmount || "",
+            dhcNumber: data.payment?.dhcNumber || "",
+            commissionAmount: data.payment?.commissionAmount || "",
+            commissionName: data.payment?.commissionName || "",
+            commissionDate: data.payment?.commissionDate ? new Date(data.payment.commissionDate) : null,
           });
+
+          if (data.payment?.paymentDetails) {
+            const ownerPays = data.payment.paymentDetails
+              .filter(p => p.clientType === 'OWNER')
+              .map(p => ({ ...p, paymentDate: p.paymentDate ? new Date(p.paymentDate) : null }));
+            const tenantPays = data.payment.paymentDetails
+              .filter(p => p.clientType === 'TENANT')
+              .map(p => ({ ...p, paymentDate: p.paymentDate ? new Date(p.paymentDate) : null }));
+
+            setOwnerPayments(ownerPays.length > 0 ? ownerPays : [{}]);
+            setTenantPayments(tenantPays.length > 0 ? tenantPays : [{}]);
+          }
+
+
 await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
           // For datepicker values
           if (data.agreement?.agreementStartDate) {
@@ -645,7 +760,7 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
             {renderClientDropdown('owner')}
             <div className="form-grid">
               {renderInput("Owner Firstname", "Owner Firstname", "ownerFirstName")}
-              {renderInput("Tenant LastName", "Tenant LastName", "ownerLastName")}
+              {renderInput("Owner LastName", "Owner LastName", "ownerLastName")}
               {renderInput("Owner Email", "Owner Email", "ownerEmail")}
               {renderInput("Owner Contact", "Owner Contact", "ownerContact")}
               {renderInput("Owner Aadhar Number", "Owner Aadhar Number", "ownerAadhar")}
@@ -699,36 +814,119 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
       case 'payment':
         return (
           <>
-            <div className="form-grid">
-              {renderInput("Total Amount", "Total Amount", "totalAmount")}
-              {renderInput("Owner Payment", "Owner Payment", "ownerPayment")}
-               <CustomDatePicker
-                label="Owner Payment Date"
-                placeholderText="DD-MM-YYYY"
-                value={formData.ownerPaymentDate}
-                readOnly={mode === 'view'}
-                onChange={(date) => handleInputChange('ownerPaymentDate', date)}
-              />
-              {renderInput("Owner Mode of Payment", "Owner Mode of Payment", "ownerModeOfPayment")}
-              {renderInput("Tenant Payment Amount", "Tenant Payment Amount", "tenantPayment")}
-              <CustomDatePicker
-                label="Tenant Payment Date"
-                placeholderText="DD-MM-YYYY"
-                value={formData.tenantPaymentDate}
-                readOnly={mode === 'view'}
-                onChange={(date) => handleInputChange('tenantPaymentDate', date)}
-              />
-              {renderInput("Tenant Mode of Payment", "Tenant Mode of Payment", "tenantModeOfPayment")}
-              {renderInput("GRN Number", "GRN Number", "grnNumber")}
-              <CustomDatePicker label="Govt GRN Date" placeholderText="DD-MM-YYYY" value={formData.govtGrnDate} readOnly={mode === 'view'} onChange={date => handleInputChange('govtGrnDate', date)} />
-              <CustomDatePicker label="DHC Date" placeholderText="DD-MM-YYYY" value={formData.dhcDate} readOnly={mode === 'view'} onChange={date => handleInputChange('dhcDate', date)} />
+            <div className="payment-section">
+              {/* Part A */}
+              <div className="payment-part-a">
+                <div className="form-grid payment-grid-top">
+                  {renderInput("Total Agreement Amount", "e.g., 3000", "totalAmount")}
+                  {renderInput("Commission Amount", "e.g., 500", "commissionAmount")}
+                  <div>
+                    <label>Outstanding Amount</label>
+                    <input value={outstandingAmount.toFixed(2)} readOnly className="outstanding-amount" />
+                  </div>
+                </div>
+
+                <div className="payment-details-section">
+                  <h4>Owner Payments</h4>
+                  {ownerPayments.map((p, index) => (
+                    <div key={index} className="payment-entry-grid">
+                      <CustomDatePicker
+                        label="Payment Date"
+                        value={p.paymentDate}
+                        readOnly={mode === 'view'}
+                        onChange={(date) => handlePaymentChange(index, 'paymentDate', date, 'owner')}
+                      />
+                      {renderInput('Amount', 'Amount', `owner-payment-amount-${index}`, (e) => handlePaymentChange(index, 'paymentAmount', e.target.value, 'owner'), p.paymentAmount)}
+                      {renderDropdown('Mode', `owner-modeOfPayment-${index}`, modeOfPaymentOptions, (val) => handlePaymentChange(index, 'modeOfPayment', val, 'owner'), p.modeOfPayment)}
+                      {renderInput('Payer Name', 'Payer Name', `owner-payerName-${index}`, (e) => handlePaymentChange(index, 'payerName', e.target.value, 'owner'), p.payerName)}
+                      {mode !== 'view' && ownerPayments.length > 1 && (
+                        <button type="button" className="remove-payment-btn" onClick={() => removePaymentEntry(index, 'owner')}>
+                          <FaTimes />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {mode !== 'view' && <button className="add-more-btn" onClick={() => addPaymentEntry('owner')}>+ Add Owner Payment</button>}
+                </div>
+
+                <div className="payment-details-section">
+                  <h4>Tenant Payments</h4>
+                  {tenantPayments.map((p, index) => (
+                    <div key={index} className="payment-entry-grid">
+                      <CustomDatePicker
+                        label="Payment Date"
+                        value={p.paymentDate}
+                        readOnly={mode === 'view'}
+                        onChange={(date) => handlePaymentChange(index, 'paymentDate', date, 'tenant')}
+                      />
+                      {renderInput('Amount', 'Amount', `tenant-payment-amount-${index}`, (e) => handlePaymentChange(index, 'paymentAmount', e.target.value, 'tenant'), p.paymentAmount)}
+                      {renderDropdown('Mode', `tenant-modeOfPayment-${index}`, modeOfPaymentOptions, (val) => handlePaymentChange(index, 'modeOfPayment', val, 'tenant'), p.modeOfPayment)}
+                      {renderInput('Payer Name', 'Payer Name', `tenant-payerName-${index}`, (e) => handlePaymentChange(index, 'payerName', e.target.value, 'tenant'), p.payerName)}
+                      {mode !== 'view' && tenantPayments.length > 1 && (
+                        <button type="button" className="remove-payment-btn" onClick={() => removePaymentEntry(index, 'tenant')}>
+                          <FaTimes />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {mode !== 'view' && <button className="add-more-btn" onClick={() => addPaymentEntry('tenant')}>+ Add Tenant Payment</button>}
+                </div>
+                <div>
+                  <label>Total Amount Received</label>
+                  <input value={totalAmountReceived.toFixed(2)} readOnly className="total-received-amount" />
+                </div>
 
 
+                <div>
+                  <label>Description</label>
+                  <textarea
+                    placeholder="Add any payment related notes here..."
+                    value={formData.paymentDescription || ''}
+                    readOnly={mode === 'view'}
+                    onChange={e => handleInputChange('paymentDescription', e.target.value)}
+                    rows="3"
+                  />
+                </div>
+              </div>
+
+              {/* Part B */}
+              <div className="payment-part-b">
+                <h4>Back Work Account</h4>
+                <div className="form-grid payment-grid-bottom">
+                  <CustomDatePicker
+                    label="Govt GRN Date"
+                    value={formData.govtGrnDate}
+                    readOnly={mode === 'view'}
+                    onChange={date => handleInputChange('govtGrnDate', date)}
+                  />
+                  {renderInput("GRN Number", "GRN Number", "grnNumber", (e) => handleInputChange('grnNumber', e.target.value))}
+                  {renderInput("GRN Amount", "GRN Amount", "grnAmount", (e) => handleInputChange('grnAmount', e.target.value))}
+
+                  <CustomDatePicker
+                    label="DHC Date"
+                    value={formData.dhcDate}
+                    readOnly={mode === 'view'}
+                    onChange={date => handleInputChange('dhcDate', date)}
+                  />
+                  {renderInput("DHC Number", "DHC Number", "dhcNumber", (e) => handleInputChange('dhcNumber', e.target.value))}
+                  {renderInput("DHC Amount", "DHC Amount", "dhcAmount", (e) => handleInputChange('dhcAmount', e.target.value))}
+
+                  {/* Commission Name seems to be a new concept, adding a simple version */}
+                   <CustomDatePicker
+                    label="Commission Date"
+                    value={formData.commissionDate}
+                    readOnly={mode === 'view'}
+                    onChange={date => handleInputChange('commissionDate', date)}
+                  />
+                  {renderInput("Commission Name", "Commission Name", "commissionName", (e) => handleInputChange('commissionName', e.target.value))}
+                  {renderInput("Commission Amount", "Commission Amount", "commissionAmount", (e) => handleInputChange('commissionAmount', e.target.value))}
+                </div>
+              </div>
             </div>
+
             {mode !== 'view' && (
               <div className="button-wrapper">
                 <button onClick={handleSavePayment}>Save </button>
-
               </div>
             )}
           </>

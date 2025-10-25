@@ -389,8 +389,8 @@ const CallingTeam = () => {
                             <td>{record.tentativeAgreementDate ? new Date(record.tentativeAgreementDate).toLocaleDateString() : "-"}</td>
                             <td>{client.clientType || "-"}</td>
                             <td>{record.status || "-"}</td>
-                            <td>{client.createdByUserName || "-"}</td>
-                            <td>{client.updatedByUserName || "-"}</td>
+                            <td>{record.createdByUserName || "-"}</td>
+                            <td>{record.updatedByUserName || "-"}</td>
                             <td className="action-column" >
                               <div>
                                 <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />

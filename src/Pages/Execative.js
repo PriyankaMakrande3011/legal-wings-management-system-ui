@@ -56,7 +56,7 @@ const Executive = () => {
   //     if (result.isConfirmed) {
   //       try {
 
-  //         await axios.put(`http://localhost:8081/legal-wings-management/leads/${id}/cancel`);
+  //         await axios.put(`http://legalwingcrm.in:8081/legal-wings-management/leads/${id}/cancel`);
   //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
 
   //         fetchLeads(); 

@@ -8,7 +8,7 @@ const AssignLeadToBackend = ({ isOpen, onClose, leadId, onAssignSuccess }) => {
   const handleAssignToBackend = async () => {
     try {
       await axios.put(
-        `http://localhost:8081/legal-wings-management/leads/${leadId}/approve`,
+        `http://legalwingcrm.in:8081/legal-wings-management/leads/${leadId}/approve`,
         {},
         {
           headers: {
