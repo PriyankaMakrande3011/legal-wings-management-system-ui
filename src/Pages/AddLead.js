@@ -27,7 +27,7 @@
 //   // useEffect(() => {
 //   //   const fetchClients = async () => {
 //   //     try {
-//   //       const response = await fetch("https://legalwingcrm.in:3031/Lead"); // Replace with your JSON link
+//   //       const response = await fetch("https://13.204.9.221:3031/Lead"); // Replace with your JSON link
 //   //       if (!response.ok) {
 //   //         throw new Error("Failed to fetch clients");
 //   //       }
@@ -43,7 +43,7 @@
 //   useEffect(() => {
 //   const fetchClients = async () => {
 //     try {
-//       const response = await fetch("https://legalwingcrm.in:3031/Lead", {
+//       const response = await fetch("https://13.204.9.221:3031/Lead", {
 //         method: "GET",
 //         headers: {
 //           "Content-Type": "application/json",

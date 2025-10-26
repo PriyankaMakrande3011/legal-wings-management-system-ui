@@ -295,7 +295,7 @@ const BackendTeam = () => {
   //     if (result.isConfirmed) {
   //       try {
 
-  //         await axios.put(`http://legalwingcrm.in:8081/legal-wings-management/leads/${id}/cancel`);
+  //         await axios.put(`http://13.204.9.221:8081/legal-wings-management/leads/${id}/cancel`);
   //         Swal.fire("Cancelled!", "Lead has been cancelled.", "success");
 
   //         fetchLeads(); 
