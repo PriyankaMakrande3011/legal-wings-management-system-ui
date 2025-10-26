@@ -19,7 +19,7 @@ const AssignLead = ({ isOpen, onClose, onAssignSuccess, leadId }) => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://13.204.9.221:8081/legal-wings-management/users/dropDown?userType=EXECUTIVE",
+        "https://legalwingcrm.in:8081/legal-wings-management/users/dropDown?userType=EXECUTIVE",
         {
           headers: {
             "Authorization": `Bearer ${keycloak.token}`,
@@ -51,7 +51,7 @@ const AssignLead = ({ isOpen, onClose, onAssignSuccess, leadId }) => {
 
     try {
       await axios.put(
-        `http://13.204.9.221:8081/legal-wings-management/leads/${leadId}/assign?userId=${userId}`,
+        `https://legalwingcrm.in:8081/legal-wings-management/leads/${leadId}/assign?userId=${userId}`,
         {},
         {
           headers: {
