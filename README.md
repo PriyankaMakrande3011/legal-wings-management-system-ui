@@ -9,7 +9,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.\
-Open [https://13.204.9.221:3000](https://13.204.9.221:3000) to view it in your browser.
+Open [https://legalwingcrm.in:3000](https://legalwingcrm.in:3000) to view it in your browser.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.

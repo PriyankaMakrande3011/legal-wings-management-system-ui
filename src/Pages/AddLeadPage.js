@@ -13,6 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
 import CustomDatePicker from '../common/CustomDatePicker.js';
+import CustomDateTimePicker from '../common/CustomDateTimePicker.js';
 import Select from "react-select";
 
 
@@ -36,20 +37,23 @@ const AddLeadPage = ({
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [formData, setFormData] = useState({ cityId: "",
-  areaId: "",});
+  const [formData, setFormData] = useState({
+    cityId: "",
+    areaId: "",
+  });
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(null); // <--- New
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const clientTypeOptions = ["OWNER", "TENANT", "AGENT"];
-  const leadSourceOptions = ["ONLINE","CALL","EXCEL","REFERENCE","SHOP"];
+  const leadSourceOptions = ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"];
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { keycloak } = useKeycloak();
   const transitLevel = location.state?.transitLevel;
   const [cityOptions, setCityOptions] = useState([]);
   const [areaOptions, setAreaOptions] = useState([]);
   const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
+  const [backOfficeStatusOptions, setBackOfficeStatusOptions] = useState([]);
   const [agreementFile, setAgreementFile] = useState(null);
   const [ownerPayments, setOwnerPayments] = useState([{}]);
   const [tenantPayments, setTenantPayments] = useState([{}]);
@@ -59,7 +63,7 @@ const AddLeadPage = ({
 
   const modeOfPaymentOptions = ["CASH", "ONLINE", "CHEQUE"];
 
-  
+
 
   useEffect(() => {
     if (keycloak?.token) {
@@ -86,6 +90,20 @@ const AddLeadPage = ({
           setAgreementStatusOptions(data);
         })
         .catch((err) => console.error("Failed to fetch agreement statuses", err));
+    }
+
+    // Fetch Back Office Statuses
+    if (keycloak?.token) {
+      fetch(`${Api.BASE_URL}agreements/back-office-status`, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setBackOfficeStatusOptions(data);
+        })
+        .catch((err) => console.error("Failed to fetch back office statuses", err));
     }
 
   }, [keycloak?.token]);
@@ -139,44 +157,44 @@ const AddLeadPage = ({
     }
   };
   const handleCityInputChange = (field, value) => {
-  setFormData(prev => {
-    const updated = { ...prev, [field]: value };
-    console.log("Updated formData:", updated);
-    return updated;
-  });
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      console.log("Updated formData:", updated);
+      return updated;
+    });
 
 
-  if (field === "cityId") {
-    fetchDropdowns(value);
-  }
-};
+    if (field === "cityId") {
+      fetchDropdowns(value);
+    }
+  };
 
   const handleSaveLead = () => {
     console.log("formData before save:", formData);
     console.log("Accessing areaId directly:", formData.areaId);
-    const requestBody = {
-      tentativeAgreementDate: formData.tentativeAgreementDate ? format(new Date(formData.tentativeAgreementDate), 'yyyy-MM-dd') : null,
+    const requestBody = {      
+      tentativeAgreementDate: formData.tentativeAgreementDate ? format(new Date(formData.tentativeAgreementDate), 'yyyy-MM-dd') : null, // Corrected format
       visitAddress: formData.visitAddress,
       id: leadId,
       transitLevel: transitLevel,
-      leadSource: formData.leadSource, 
+      leadSource: formData.leadSource,
       description: formData.description,
-      appointmentTime: formData.appointmentTime,
+      appointmentTime: formData.appointmentTime ? format(new Date(formData.appointmentTime), "yyyy-MM-dd'T'HH:mm:ss") : null,
       referenceNumber: formData.referenceNumber,
       referenceName: formData.referenceName,
       amount: formData.amount,
-      lastFollowUpDate: formData.lastFollowUpDate ? format(new Date(formData.lastFollowUpDate), 'yyyy-MM-dd') : null,
-      nextFollowUpDate: formData.nextFollowUpDate ? format(new Date(formData.nextFollowUpDate), 'yyyy-MM-dd') : null,
+      lastFollowUpDate: formData.lastFollowUpDate ? format(new Date(formData.lastFollowUpDate), 'yyyy-MM-dd') : null, // Corrected format
+      nextFollowUpDate: formData.nextFollowUpDate ? format(new Date(formData.nextFollowUpDate), 'yyyy-MM-dd') : null, // Corrected format
 
-      
-   city: {
-      id: formData.cityId || null  
-    },
 
-    area: {
-      id: formData.areaId|| null
-  
-    },
+      city: {
+        id: formData.cityId || null
+      },
+
+      area: {
+        id: formData.areaId || null
+
+      },
       client: {
         ...(selectedClientId ? { id: selectedClientId } : {
           firstName: formData.firstName || "",
@@ -187,7 +205,7 @@ const AddLeadPage = ({
         }
         )
       }
-      
+
     };
 
     fetch("https://legalwingcrm.in:8081/legal-wings-management/leads", {
@@ -213,7 +231,7 @@ const AddLeadPage = ({
         console.error("Lead Save Error:", err);
         alert("Error saving lead. Please try again.");
       });
-       console.log("Final payload:", requestBody); 
+    console.log("Final payload:", requestBody);
   };
 
   const handleSaveAgreement = () => {
@@ -226,6 +244,7 @@ const AddLeadPage = ({
       agreementEndDate: formData.agreementEndDate ? format(new Date(formData.agreementEndDate), 'yyyy-MM-dd') : null,
       area: { id: formData.areaId || null },
       status: formData.agreementStatus,
+      backOfficeStatus: formData.backOfficeStatus,
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
       tenant: {
@@ -247,7 +266,7 @@ const AddLeadPage = ({
         panNumber: formData.ownerPan,
       }
     };
-    
+
     formDataPayload.append('agreement', new Blob([JSON.stringify(agreementData)], { type: 'application/json' }));
 
     if (agreementFile) {
@@ -300,8 +319,8 @@ const AddLeadPage = ({
       id: formData.paymentId, // Include payment ID for updates
       totalAmount: totalAgreement, // The main payment object's totalAmount is just the agreement amount
       grnNumber: formData.grnNumber,
-      govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null,
-      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null,
+      govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null, // Correct
+      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null, // Corrected format
       dhcAmount: formData.dhcAmount,
       grnAmount: formData.grnAmount,
       dhcNumber: formData.dhcNumber,
@@ -411,47 +430,47 @@ const AddLeadPage = ({
   };
 
 
-const renderClientDropdown = (type) => {
-  if (mode === "view") return null;
+  const renderClientDropdown = (type) => {
+    if (mode === "view") return null;
 
-  const clientOptions = clients.map((client) => ({
-    value: client.id,
-    label: client.name, // you might want firstName + lastName instead
-  }));
+    const clientOptions = clients.map((client) => ({
+      value: client.id,
+      label: client.name, // you might want firstName + lastName instead
+    }));
 
-  return (
-    <Select
-      options={clientOptions}
-      placeholder="Select Existing Client"
-      isClearable
-      isSearchable
-      onChange={(selected) =>
-        fetchAndAutofillClient(selected?.value || null, type)
-      }
-  styles={{
-    menu: (provided) => ({
-      ...provided,
-      zIndex: 9999,        // keeps it above other elements
-      minWidth: "250px",   // ensures suggestions don’t shrink
-    }),
-    menuList: (provided) => ({
-      ...provided,
-      maxHeight: "200px",  // makes list scrollable instead of shrinking
-    }),
-    control: (provided) => ({
-      ...provided,
-      minWidth: "250px",   // ensures input is wide enough
-    }),
-  }}
-    />
-  );
-};
+    return (
+      <Select
+        options={clientOptions}
+        placeholder="Select Existing Client"
+        isClearable
+        isSearchable
+        onChange={(selected) =>
+          fetchAndAutofillClient(selected?.value || null, type)
+        }
+        styles={{
+          menu: (provided) => ({
+            ...provided,
+            zIndex: 9999,        // keeps it above other elements
+            minWidth: "250px",   // ensures suggestions don’t shrink
+          }),
+          menuList: (provided) => ({
+            ...provided,
+            maxHeight: "200px",  // makes list scrollable instead of shrinking
+          }),
+          control: (provided) => ({
+            ...provided,
+            minWidth: "250px",   // ensures input is wide enough
+          }),
+        }}
+      />
+    );
+  };
 
 
   const fetchDropdowns = async (selectedCityId = null, selectedAreaId = null) => {
     const requestBody = {
       cityIdsUi: selectedCityId ? [selectedCityId] : [],
-    areaIdsUi: selectedAreaId ? [selectedAreaId] : [],
+      areaIdsUi: selectedAreaId ? [selectedAreaId] : [],
     };
 
     try {
@@ -481,7 +500,7 @@ const renderClientDropdown = (type) => {
     fetchDropdowns(); // Fetch cities initially
   }, []);
 
-  const renderDropdown = (label, field, options = []) => {
+  const renderDropdown = (label, field, options = [], onChange, value) => {
     // Ensure options are in { value, label } format.
     // This handles both arrays of strings and arrays of objects.
     const selectOptions = options.map(opt =>
@@ -489,11 +508,11 @@ const renderClientDropdown = (type) => {
         ? { value: opt, label: opt }
         : { value: opt.id || opt.name, label: opt.name }
     );
-
+  
     const currentValue = selectOptions.find(
-      (opt) => opt.value === formData[field]
+      (opt) => opt.value === (value !== undefined ? value : formData[field])
     );
-
+  
     return (
       <div>
         <label>{label}</label>
@@ -504,9 +523,9 @@ const renderClientDropdown = (type) => {
           isSearchable
           isDisabled={mode === "view"}
           value={currentValue}
-          onChange={(selected) =>
-            handleCityInputChange(field, selected?.value || null)
-          }
+          onChange={onChange 
+            ? (selected) => onChange(selected?.value || null) 
+            : (selected) => handleCityInputChange(field, selected?.value || null)}
           styles={{
             menu: (provided) => ({ ...provided, zIndex: 9998 }),
             control: (provided) => ({
@@ -538,47 +557,70 @@ const renderClientDropdown = (type) => {
   const renderInput = (label, placeholder, field, onChange, value) => {
     const locked = isClientFieldLocked(field);
     return (
-    <div>
-      <label htmlFor={field}>{label}</label>
-      <input
-        placeholder={placeholder}
-        value={value !== undefined ? value : (formData[field] || '')}
-        onChange={locked ? () => {} : (onChange || (e => handleInputChange(field, e.target.value)))}
-        readOnly={mode === 'view' || locked}
-        onClick={locked ? handleLockedFieldClick : undefined}
-        style={locked ? { backgroundColor: '#f2f2f2', cursor: 'not-allowed' } : {}}
-      />
-    </div>
+      <div>
+        <label htmlFor={field}>{label}</label>
+        <input
+          type={["contactNumber", "referenceNumber", "ownerContact", "tenantContact"].includes(field) ? "tel" : "text"}
+          maxLength={["contactNumber", "referenceNumber", "ownerContact", "tenantContact"].includes(field) ? 10 : undefined}
+          placeholder={placeholder}
+          value={value !== undefined ? value : (formData[field] || '')}
+          onChange={locked ? () => { } : (onChange || (e => {
+            let value = e.target.value;
+            if (["contactNumber", "referenceNumber", "ownerContact", "tenantContact"].includes(field)) {
+              value = value.replace(/[^0-9]/g, '');
+              if (value.length > 10) {
+                value = value.slice(0, 10);
+              }
+            }
+            handleInputChange(field, value);
+          }))}
+          readOnly={mode === 'view' || locked}
+          onClick={locked ? handleLockedFieldClick : undefined}
+          style={locked ? { backgroundColor: '#f2f2f2', cursor: 'not-allowed' } : {}}
+        />
+      </div>
     );
   };
 
-  const renderFileInput = (label, field) => (
-    <div>
-      <label>{label}</label>
-      <div className="file-input-wrapper">
-        {agreementFile ? (
-          <div className="file-display">
-            <span>{agreementFile.name}</span>
-            {mode !== 'view' && (
+  const renderFileInput = (label, field) => {
+    // Determine the file name to display
+    let fileName = agreementFile ? agreementFile.name : (formData.fileUrl ? formData.fileUrl.split('/').pop() : '');
+
+    const handleRemoveFile = () => {
+      setAgreementFile(null); // Clear newly selected file
+      handleInputChange('fileUrl', ''); // Clear existing file URL
+    };
+
+    return (
+      <div>
+        <label>{label}</label>
+        <div className="file-input-wrapper">
+          {fileName && mode !== 'view' ? (
+            // If a file exists (new or old) and not in view mode, show its name and a remove button
+            <div className="file-display">
+              <a href={agreementFile ? URL.createObjectURL(agreementFile) : formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                {fileName}
+              </a>
               <FaTimes
                 className="remove-file-icon"
-                onClick={() => setAgreementFile(null)}
+                onClick={handleRemoveFile}
               />
-            )}
-          </div>
-        ) : mode !== 'view' && (
-          <input
-            type="file"
-            id={field}
-            onChange={e => setAgreementFile(e.target.files ? e.target.files[0] : null)}
-          />
-        )}
-        {formData.fileUrl && (
-          <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">View Agreement</a>
-        )}
+            </div>
+          ) : fileName && mode === 'view' ? (
+            // If a file exists and in view mode, just show the link
+            <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">{fileName}</a>
+          ) : (
+            // If no file exists and not in view mode, show the file input
+            <input
+              type="file"
+              id={field}
+              onChange={e => setAgreementFile(e.target.files ? e.target.files[0] : null)}
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const addPaymentEntry = (type) => {
     const setter = type === 'owner' ? setOwnerPayments : setTenantPayments;
@@ -604,21 +646,21 @@ const renderClientDropdown = (type) => {
             contactNumber: data.client?.phoneNo || "",
             email: data.client?.email || "",
             clientType: data.client?.clientType || "",
-             tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
-  visitAddress: data.visitAddress || "",
-        description: data.description || "",
-      appointmentTime: data.appointmentTime || "",
-      referenceNumber: data.referenceNumber || "",
-      referenceName: data.referenceName || "",
-      cancellationReason: data.cancellationReason || "",
-      amount: data.amount || "",
-      lastFollowUpDate: data.lastFollowUpDate ? new Date(data.lastFollowUpDate) : null,
-      nextFollowUpDate: data.nextFollowUpDate ? new Date(data.nextFollowUpDate) : null,
+            tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
+            visitAddress: data.visitAddress || "",
+            description: data.description || "",
+            appointmentTime: data.appointmentTime ? new Date(data.appointmentTime) : null,
+            referenceNumber: data.referenceNumber || "",
+            referenceName: data.referenceName || "",
+            cancellationReason: data.cancellationReason || "",
+            amount: data.amount || "",
+            lastFollowUpDate: data.lastFollowUpDate ? new Date(data.lastFollowUpDate) : null,
+            nextFollowUpDate: data.nextFollowUpDate ? new Date(data.nextFollowUpDate) : null,
 
 
-  cityId: data.city?.id || "",          
-    areaId : data.area?.id || "",
-    leadSource: data.leadSource||"",
+            cityId: data.city?.id || "",
+            areaId: data.area?.id || "",
+            leadSource: data.leadSource || "",
             // Owner
             ownerFirstName: data.agreement?.owner?.firstName || "",
             ownerLastName: data.agreement?.owner?.lastName || "",
@@ -639,6 +681,7 @@ const renderClientDropdown = (type) => {
             agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
             agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
             agreementStatus: data.agreement?.status || "",
+            backOfficeStatus: data.agreement?.backOfficeStatus || "",
             fileUrl: data.agreement?.fileUrl || "",
             area: data.agreement?.area?.name || "",
             addressLine1: data.agreement?.addressLine1 || "",
@@ -673,7 +716,7 @@ const renderClientDropdown = (type) => {
           }
 
 
-await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
+          await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
           // For datepicker values
           if (data.agreement?.agreementStartDate) {
             setStartDate(new Date(data.agreement.agreementStartDate));
@@ -715,9 +758,20 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
                 value={formData.tentativeAgreementDate}
                 onChange={(date) => handleInputChange('tentativeAgreementDate', date)}
                 readOnly={mode === 'view'}
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd-MM-yyyy"
               />
-              {renderInput("Appointment Time", "Appointment Time", "appointmentTime")}
+              <CustomDateTimePicker
+                label="Appointment Time"
+                placeholder="dd-MM-yyyy h:mm aa"
+                value={formData.appointmentTime}
+                onChange={(date) => handleInputChange("appointmentTime", date)}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={15}
+                dateFormat="dd-MM-yyyy h:mm aa"
+                readOnly={mode === "view"}
+              />
+
               {renderInput("Visit Address", "Visit Address", "visitAddress")}
               {renderInput("Description", "Description", "description")}
               {renderInput("Reference Name", "Reference Name", "referenceName")}
@@ -731,7 +785,7 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
                 value={formData.lastFollowUpDate}
                 onChange={(date) => handleInputChange('lastFollowUpDate', date)}
                 readOnly={mode === 'view'}
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd-MM-yyyy"
               />
               <CustomDatePicker
                 label="Next FollowUp Date"
@@ -739,7 +793,7 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
                 value={formData.nextFollowUpDate}
                 readOnly={mode === 'view'}
                 onChange={(date) => handleInputChange('nextFollowUpDate', date)}
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd-MM-yyyy"
               />
               {mode === 'view' && formData.cancellationReason && renderInput("Cancellation Reason", "Cancellation Reason", "cancellationReason")}
 
@@ -800,6 +854,11 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
                 "agreementStatus",
                 Array.isArray(agreementStatusOptions) ? agreementStatusOptions.map(s => ({ id: s.key, name: s.value })) : []
               )}
+              {renderDropdown(
+                "Back Office Status",
+                "backOfficeStatus",
+                Array.isArray(backOfficeStatusOptions) ? backOfficeStatusOptions.map(s => ({ id: s.key, name: s.value })) : []
+              )}
               {renderFileInput("Agreement File", "agreementFile")}
             </div>
             {mode !== 'view' && (
@@ -814,6 +873,11 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
       case 'payment':
         return (
           <>
+            {formData.tokenNumber && (
+              <h3 className="payment-token-title">
+                Payment Details ({formData.tokenNumber})
+              </h3>
+            )}
             <div className="payment-section">
               {/* Part A */}
               <div className="payment-part-a">
@@ -912,7 +976,7 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
                   {renderInput("DHC Amount", "DHC Amount", "dhcAmount", (e) => handleInputChange('dhcAmount', e.target.value))}
 
                   {/* Commission Name seems to be a new concept, adding a simple version */}
-                   <CustomDatePicker
+                  <CustomDatePicker
                     label="Commission Date"
                     value={formData.commissionDate}
                     readOnly={mode === 'view'}
@@ -941,7 +1005,7 @@ await fetchDropdowns(data.client?.city?.id, data.client?.area?.id);
     <div className="add-lead-container">
       <Slider />
       <div className="main-content">
-        <Header title="Add New Lead" />
+        <Header title={mode === 'view' ? 'Lead Details' : 'Add New Lead'} />
         <div className="tab-buttons">
           {showLead && <button className={activeTab === 'lead' ? 'active' : ''} onClick={() => setActiveTab('lead')}>Lead Details</button>}
           {showClient && <button className={activeTab === 'client' ? 'active' : ''} onClick={() => setActiveTab('client')}>Client Details</button>}

@@ -88,7 +88,7 @@ const Executive = () => {
     if (cancellationReason) {
       try {
         await axios.put(
-          `${Api.BASE_URL}leads/cancel`,
+          `${Api.BASE_URL}leads/${id}/cancel`,
           { id, cancellationReason },
           {
             headers: {
@@ -373,18 +373,16 @@ const Executive = () => {
                 </div>
               ) : (
                 <table className="table">
-                  <thead>
+                  <thead style={{ tableLayout: 'fixed', width: '100%' }}>
                     <tr>
                       <th className="sticky-col">Name</th>
-                      <th>Phone No.</th>
+                      <th>Phone Number</th>
                       <th>Visit Address</th>
                       <th>Client Type</th>
-                      <th>Address</th>
-                      <th>Created Date</th>
+                      <th>Appointment Time</th>
+                      <th>Agreement Status</th>
                       <th>Created By</th>
                       <th>Updated By</th>
-                      <th>Tentative Date</th>
-                      <th>Status</th>
                       <th className="action-column">Action</th>
                     </tr>
                   </thead>
@@ -395,15 +393,13 @@ const Executive = () => {
                       return (
                         <tr key={index}>
                           <td className="sticky-col">{name}</td>
-                          <td>{client.phoneNo || "-"}</td>
+                          <td>{client.phoneNo || '-'}</td>
                           <td>{record.visitAddress || "-"}</td>
                           <td>{client.clientType || "-"}</td>
-                          <td>{client.address || "-"}</td>
-                          <td>{new Date(record.createdDate).toLocaleDateString() || "-"}</td>
+                          <td>{record.appointmentTime ? new Date(record.appointmentTime).toLocaleString() : '-'}</td>
+                          <td>{record.status || '-'}</td>
                           <td>{client.createdByUserName || "-"}</td>
                           <td>{client.updatedByUserName || "-"}</td>
-                          <td>{record.tentativeAgreementDate || "-"}</td>
-                          <td>{record.status || "-"}</td>
                           <td className="action-column" >
                             <div>
                               <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />

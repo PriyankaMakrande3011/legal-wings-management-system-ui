@@ -214,7 +214,19 @@ const handleEditClick = (id) => {
                   <tr>
                     <th>Sr. No</th>
                     {columns.map((col, i) => (
-                      <th key={i}>{col.replace(/([A-Z])/g, " $1").trim()}</th>
+                      <th
+                        key={i}
+                        style={{
+                          width:
+                            col === 'phoneNo'
+                              ? '100px'
+                              : ['createdDate', 'updatedDate'].includes(col)
+                              ? '80px'
+                              : undefined,
+                        }}
+                      >
+                        {col.replace(/([A-Z])/g, ' $1').trim()}
+                      </th>
                     ))}
                     <th>Action</th>
                   </tr>

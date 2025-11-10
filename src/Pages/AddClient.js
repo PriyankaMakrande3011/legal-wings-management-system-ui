@@ -529,10 +529,16 @@ const onSubmit = async (data) => {
               <input
                 id="phoneNo"
                 type="tel"
+                maxLength="10"
                 {...register("phoneNo", {
                   required: "Contact Number is required",
                   pattern: { value: /^[0-9]{10}$/, message: "Enter a valid 10-digit contact number" },
                 })}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^0-9]/g, '');
+                  if (value.length > 10) value = value.slice(0, 10);
+                  e.target.value = value;
+                }}
                 placeholder="Enter contact number"
               />
               {errors.phoneNo && <p className="error-message">{errors.phoneNo.message}</p>}

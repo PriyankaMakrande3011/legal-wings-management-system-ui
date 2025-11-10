@@ -127,7 +127,7 @@ const CallingTeam = () => {
       let data = (await response.json())?.leadPage?.content || [];
 
       if (searchText.trim()) {
-        const keyword = searchText.toLowerCase();
+        const keyword = searchText.trim().toLowerCase();
         data = data.filter((record) => {
           const firstName = record.client?.firstName?.toLowerCase() || "";
           const lastName = record.client?.lastName?.toLowerCase() || "";
@@ -221,6 +221,7 @@ const CallingTeam = () => {
           pageSize: recordsPerPage,
           sortField: "id",
           sortOrder: "desc",
+          transitLevel: "CALLING_TEAM"
         },
         {
           headers: {
@@ -373,7 +374,24 @@ const CallingTeam = () => {
               ) : (
                 <>
                   <table className="table">
-                    <thead> <tr> <th className="sticky-col">Name</th> <th>Created Date</th> <th>Phone No.</th> <th>Visit Address</th> <th>Last Follow Up Date</th> <th>Next Follow Up Date</th> <th>Tentative Agreement Date</th> <th>Client Type</th> <th>Status</th> <th>Created By</th> <th>Updated By</th> <th className="action-column">Action</th> </tr> </thead>
+                    <thead style={{ tableLayout: 'fixed', width: '100%' }}>
+                      <tr>
+                        <th className="sticky-col">Name</th>
+                        <th style={{ width: '100px' }}>Phone No.</th>
+                        <th style={{ width: '80px' }}>Last Follow Up</th>
+                        <th style={{ width: '80px' }}>Next Follow Up</th>
+                        <th style={{ width: '150px' }}>Appointment Time</th>
+                        <th>Status</th>
+                        <th>Visit Address</th>
+                        <th>Client Type</th>
+                        <th>Address</th>
+                        <th style={{ width: '80px' }}>Created Date</th>
+                        <th>Created By</th>
+                        <th>Updated By</th>
+                        <th style={{ width: '80px' }}>Tentative Date</th>
+                        <th className="action-column">Action</th>
+                      </tr>
+                    </thead>
                     <tbody>
                       {records.map((record, index) => {
                         const client = record.client || {};
@@ -381,16 +399,18 @@ const CallingTeam = () => {
                         return (
                           <tr key={index}>
                             <td className="sticky-col">{name}</td>
-                            <td>{record.createdDate ? new Date(record.createdDate).toLocaleDateString() : "-"}</td>
                             <td>{client.phoneNo || "-"}</td>
-                            <td>{record.visitAddress || "-"}</td>
                             <td>{record.lastFollowUpDate ? new Date(record.lastFollowUpDate).toLocaleDateString() : "-"}</td>
                             <td>{record.nextFollowUpDate ? new Date(record.nextFollowUpDate).toLocaleDateString() : "-"}</td>
-                            <td>{record.tentativeAgreementDate ? new Date(record.tentativeAgreementDate).toLocaleDateString() : "-"}</td>
-                            <td>{client.clientType || "-"}</td>
+                            <td>{record.appointmentTime ? new Date(record.appointmentTime).toLocaleString() : "-"}</td>
                             <td>{record.status || "-"}</td>
+                            <td>{record.visitAddress || "-"}</td>
+                            <td>{client.clientType || "-"}</td>
+                            <td>{client.address || "-"}</td>
+                            <td style={{ width: "40px" }}>{record.createdDate ? new Date(record.createdDate).toLocaleDateString() : "-"}</td>
                             <td>{record.createdByUserName || "-"}</td>
                             <td>{record.updatedByUserName || "-"}</td>
+                            <td>{record.tentativeAgreementDate ? new Date(record.tentativeAgreementDate).toLocaleDateString() : "-"}</td>
                             <td className="action-column" >
                               <div>
                                 <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />

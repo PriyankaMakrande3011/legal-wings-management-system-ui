@@ -13,7 +13,6 @@ import { useState } from 'react';
 import AddClient from './Pages/AddClient';
 import Executive from './Pages/Execative';
 import BackendTeam from './Pages/BackendTeam';
-import BackendDetails from './Pages/BackendDetails';
 import AddLeadPage from './Pages/AddLeadPage';
 import AssignLead from './Pages/AssingLead';
 import AccountsTeam from './Pages/AccountsTeam';
@@ -52,7 +51,6 @@ function App() {
           <Route path="/calling-team" element={<CallingTeam />} />
           <Route path="/executive-team" element={<Executive />} />
           <Route path="/backend-team" element={<BackendTeam />} />
-          <Route path="/lead-details/" element={<BackendDetails />} />
           <Route path="/assing-lead" element={<AssignLead />} />
           <Route path="/account-team" element={<AccountsTeam />} />
           <Route path="/add-Executive-details" element={<Executive />} />

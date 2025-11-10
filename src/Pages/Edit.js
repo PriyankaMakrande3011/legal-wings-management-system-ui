@@ -10,6 +10,8 @@ import { format } from 'date-fns'; // Ensure date-fns is used
 import Api from './Api.js';
 import { FaTimes, FaPlus } from "react-icons/fa";
 import Select from "react-select";
+import CustomDateTimePicker from '../common/CustomDateTimePicker.js';
+
 
 
 const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
@@ -27,6 +29,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   const [cityOptions, setCityOptions] = useState([]);
   const [areaOptions, setAreaOptions] = useState([]);
   const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
+  const [backOfficeStatusOptions, setBackOfficeStatusOptions] = useState([]);
   const [agreementFile, setAgreementFile] = useState(null);
   const [ownerPayments, setOwnerPayments] = useState([{}]);
   const [tenantPayments, setTenantPayments] = useState([{}]);
@@ -60,6 +63,18 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
           setAgreementStatusOptions(data);
         })
         .catch((err) => console.error("Failed to fetch agreement statuses", err));
+
+      // Fetch Back Office Statuses
+      fetch(`${Api.BASE_URL}agreements/back-office-status`, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setBackOfficeStatusOptions(data);
+        })
+        .catch((err) => console.error("Failed to fetch back office statuses", err));
 
     }
   }, [keycloak?.token]);
@@ -133,7 +148,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       // Lead
       "tentativeAgreementDate", "visitAddress", "cityId", "areaId", "leadSource",
       "description", "appointmentTime", "referenceName", "referenceNumber", "amount",
-      "lastFollowUpDate", "nextFollowUpDate",
+      "lastFollowUpDate", "nextFollowUpDate", "backOfficeStatus",
       // Agreement,
       "tokenNumber", "agreementStartDate", "agreementEndDate", "addressLine1", "addressLine2", "agreementStatus", "agreementFile",
       // Payment Part A
@@ -168,33 +183,68 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
     alert("This is client's master data. To edit, please go to the Data Management tab or create a new client.");
   };
 
-  const renderInput = (label, placeholder, field, onChange, value) => {
-    const locked = isClientFieldLocked(field);
-    let editableCheckField = field;
-    if (field.startsWith('owner-') || field.startsWith('tenant-')) {
-      const parts = field.split('-');
-      const type = parts[0]; // owner or tenant
-      const fieldNameParts = parts.slice(1, -1); // e.g., ['payment', 'Amount']
-      const capitalizedFieldName = fieldNameParts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
-      editableCheckField = `${type}${capitalizedFieldName}`; // e.g., ownerPaymentAmount
-    }
+const renderInput = (label, placeholder, field, onChange, value) => {
+  // ✅ Add a safety check to prevent startsWith() errors
+  if (!field || typeof field !== "string") {
+    console.warn("renderInput called with invalid field:", field);
+    return null;
+  }
 
-    const readOnly = mode === 'view' || !isEditable(editableCheckField) || locked;
+  const locked = isClientFieldLocked(field);
+  let editableCheckField = field;
 
-    return (
+  if (field?.startsWith?.("owner-") || field?.startsWith?.("tenant-")) {
+    const parts = field.split("-");
+    const type = parts[0]; // owner or tenant
+    const fieldNameParts = parts.slice(1, -1); // e.g., ['payment', 'Amount']
+    const capitalizedFieldName = fieldNameParts
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join("");
+    editableCheckField = `${type}${capitalizedFieldName}`; // e.g., ownerPaymentAmount
+  }
+
+  const readOnly = mode === "view" || !isEditable(editableCheckField) || locked;
+
+  return (
     <div>
       <label htmlFor={field}>{label}</label>
       <input
+        type={
+          ["contactNumber", "referenceNumber", "ownerContact", "tenantContact"].includes(field)
+            ? "tel"
+            : "text"
+        }
+        maxLength={
+          ["contactNumber", "referenceNumber", "ownerContact", "tenantContact"].includes(field)
+            ? 10
+            : undefined
+        }
         placeholder={placeholder}
-        value={value !== undefined ? value : (formData[field] || '')}
-        onChange={readOnly ? () => {} : (onChange || (e => handleInputChange(field, e.target.value)))}
+        value={value !== undefined ? value : formData[field] || ""}
+        onChange={
+          readOnly
+            ? () => {}
+            : onChange ||
+              ((e) => {
+                let newValue = e.target.value;
+                if (
+                  ["contactNumber", "referenceNumber", "ownerContact", "tenantContact"].includes(
+                    field
+                  )
+                ) {
+                  newValue = newValue.replace(/[^0-9]/g, "").slice(0, 10);
+                }
+                handleInputChange(field, newValue);
+              })
+        }
         readOnly={readOnly}
         onClick={locked ? handleLockedFieldClick : undefined}
-        style={locked ? { backgroundColor: '#f2f2f2', cursor: 'not-allowed' } : {}}
+        style={locked ? { backgroundColor: "#f2f2f2", cursor: "not-allowed" } : {}}
       />
     </div>
-    );
-  };
+  );
+};
+
 
   const renderDropdown = (label, field, options, onChange, value) => {
     const selectOptions = options.map(opt =>
@@ -211,66 +261,78 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
     if (field.startsWith('owner-') || field.startsWith('tenant-')) {
       const parts = field.split('-');
       const type = parts[0]; // owner
-      const fieldName = parts.slice(1, -1).join(''); // modeOfPayment
-      editableCheckField = `${type}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`; // e.g., ownerModeOfPayment
+      const fieldName = parts.slice(1, -1).join('');
+      editableCheckField = `${type}${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`; 
     }
 
     return (
-    <div>
-      <label>{label}</label>
-      <Select
-        options={selectOptions}
-        placeholder={`Select ${label}`}
-        isClearable
-        isSearchable
-        isDisabled={mode === "view" || !isEditable(editableCheckField)}
-        value={currentValue}
-        onChange={onChange ? (selected) => onChange(selected?.value || null) : (selected) => handleInputChange(field, selected?.value || null)}
-        styles={{
-          menu: (provided) => ({ ...provided, zIndex: 9998 }),
-          control: (provided) => ({
-            ...provided,
-            minWidth: "200px",
-            border: '1px solid #ccc',
-            boxShadow: 'none',
-            '&:hover': {
-              borderColor: '#888'
-            }
-          }),
-        }}
-      />
-    </div>
+      <div>
+        <label>{label}</label>
+        <Select
+          options={selectOptions}
+          placeholder={`Select ${label}`}
+          isClearable
+          isSearchable
+          isDisabled={mode === "view" || !isEditable(editableCheckField)}
+          value={currentValue}
+          onChange={onChange ? (selected) => onChange(selected?.value || null) : (selected) => handleInputChange(field, selected?.value || null)}
+          styles={{
+            menu: (provided) => ({ ...provided, zIndex: 9998 }),
+            control: (provided) => ({
+              ...provided,
+              minWidth: "200px",
+              border: '1px solid #ccc',
+              boxShadow: 'none',
+              '&:hover': {
+                borderColor: '#888'
+              }
+            }),
+          }}
+        />
+      </div>
     );
   };
 
-  const renderFileInput = (label, field) => (
-    <div>
-      <label>{label}</label>
-      <div className="file-input-wrapper">
-        {agreementFile ? (
-          <div className="file-display">
-            <span>{agreementFile.name}</span>
-            {mode !== 'view' && (
+  const renderFileInput = (label, field) => {
+    // Determine the file name to display
+    let fileName = agreementFile ? agreementFile.name : (formData.fileUrl ? formData.fileUrl.split('/').pop() : '');
+
+    const handleRemoveFile = () => {
+      setAgreementFile(null); // Clear newly selected file
+      handleInputChange('fileUrl', ''); // Clear existing file URL
+    };
+
+    return (
+      <div>
+        <label>{label}</label>
+        <div className="file-input-wrapper">
+          {fileName && mode !== 'view' ? (
+            // If a file exists (new or old) and not in view mode, show its name and a remove button
+            <div className="file-display">
+              <a href={agreementFile ? URL.createObjectURL(agreementFile) : formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                {fileName}
+              </a>
               <FaTimes
                 className="remove-file-icon"
-                onClick={() => setAgreementFile(null)}
+                onClick={handleRemoveFile}
               />
-            )}
-          </div>
-        ) : mode !== 'view' && (
-          <input
-            type="file"
-            id={field}
-            disabled={!isEditable(field)}
-            onChange={e => setAgreementFile(e.target.files ? e.target.files[0] : null)}
-          />
-        )}
-        {formData.fileUrl && (
-          <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">View Agreement</a>
-        )}
+            </div>
+          ) : fileName && mode === 'view' ? (
+            // If a file exists and in view mode, just show the link
+            <a href={formData.fileUrl} target="_blank" rel="noopener noreferrer" className="view-file-link">{fileName}</a>
+          ) : (
+            // If no file exists and not in view mode, show the file input
+            <input
+              type="file"
+              id={field}
+              disabled={!isEditable(field)}
+              onChange={e => setAgreementFile(e.target.files ? e.target.files[0] : null)}
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
 
   // Conditional dropdown for existing clients
@@ -367,10 +429,10 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             email: data.client?.email || "",
             cancellationReason: data.cancellationReason || "",
             clientType: data.client?.clientType || "",
-            tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
+            tentativeAgreementDate: data.tentativeAgreementDate ? format(new Date(data.tentativeAgreementDate), 'yyyy-MM-dd') : null, // Corrected format
             leadSource: data.leadSource || "",
             description: data.description || "",
-            appointmentTime: data.appointmentTime || "",
+            appointmentTime: data.appointmentTime ? new Date(data.appointmentTime) : null,
             referenceName: data.referenceName || "",
             referenceNumber: data.referenceNumber || "",
             amount: data.amount || "",
@@ -395,6 +457,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             agreementStartDate: data.agreement?.agreementStartDate ? new Date(data.agreement.agreementStartDate) : null,
             agreementEndDate: data.agreement?.agreementEndDate ? new Date(data.agreement.agreementEndDate) : null,
             agreementStatus: data.agreement?.status || "",
+            backOfficeStatus: data.agreement?.backOfficeStatus || "",
             fileUrl: data.agreement?.fileUrl || "",
             addressLine1: data.agreement?.addressLine1 || "",
             addressLine2: data.agreement?.addressLine2 || "",
@@ -434,7 +497,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       visitAddress: formData.visitAddress,
       leadSource: formData.leadSource,
       description: formData.description,
-      appointmentTime: formData.appointmentTime,
+      appointmentTime: formData.appointmentTime ? format(new Date(formData.appointmentTime), "yyyy-MM-dd'T'HH:mm:ss") : null,
       referenceName: formData.referenceName,
       referenceNumber: formData.referenceNumber,
       amount: formData.amount,
@@ -480,6 +543,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       agreementStartDate: formData.agreementStartDate ? format(new Date(formData.agreementStartDate), 'yyyy-MM-dd') : null,
       agreementEndDate: formData.agreementEndDate ? format(new Date(formData.agreementEndDate), 'yyyy-MM-dd') : null,
       status: formData.agreementStatus,
+      backOfficeStatus: formData.backOfficeStatus,
       area: { id: formData.areaId || null },
       addressLine1: formData.addressLine1,
       addressLine2: formData.addressLine2,
@@ -550,8 +614,8 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       totalAmount: totalAgreement,
       grnNumber: formData.grnNumber,
       govtGrnDate: formData.govtGrnDate ? format(new Date(formData.govtGrnDate), 'yyyy-MM-dd') : null,
-      grnAmount: formData.grnAmount,
-      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null,
+      grnAmount: formData.grnAmount, // Correct
+      dhcDate: formData.dhcDate ? format(new Date(formData.dhcDate), 'yyyy-MM-dd') : null, // Corrected format
       dhcAmount: formData.dhcAmount,
       dhcNumber: formData.dhcNumber,
       commissionDate: formData.commissionDate ? format(new Date(formData.commissionDate), 'yyyy-MM-dd') : null, // Added
@@ -601,13 +665,23 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             {renderDropdown("Lead Source", "leadSource", ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"])}
             <CustomDatePicker
               label="Tentative Agreement Date"
-              placeholderText="YYYY-MM-DD"
+              placeholderText="dd-MM-yyyy"
               value={formData.tentativeAgreementDate}
               onChange={date => handleInputChange('tentativeAgreementDate', date)}
-              dateFormat="yyyy-MM-dd"
+              dateFormat="dd-MM-yyyy"
               readOnly={mode === 'view' || !isEditable('tentativeAgreementDate')}
-            /> 
-            {renderInput("Appointment Time", "Appointment Time", "appointmentTime")}
+            />
+            <CustomDateTimePicker
+              label="Appointment Time"
+              placeholder="dd-MM-yyyy h:mm aa"
+              value={formData.appointmentTime}
+              onChange={(date) => handleInputChange("appointmentTime", date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="dd-MM-yyyy h:mm aa"
+              readOnly={mode === "view"}
+            />
             {renderInput("Visit Address", "Visit Address", "visitAddress")}
             {renderInput("Description", "Description", "description")}
             {renderInput("Reference Name", "Reference Name", "referenceName")}
@@ -617,19 +691,19 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
             {renderDropdown("Area", "areaId", areaOptions)}
             <CustomDatePicker
               label="Last FollowUp Date"
-              placeholderText="YYYY-MM-DD"
+              placeholderText="dd-MM-yyyy"
               value={formData.lastFollowUpDate}
               onChange={(date) => handleInputChange('lastFollowUpDate', date)}
               readOnly={mode === 'view' || !isEditable('lastFollowUpDate')}
-              dateFormat="yyyy-MM-dd"
+              dateFormat="dd-MM-yyyy"
             />
             <CustomDatePicker
               label="Next FollowUp Date"
-              placeholderText="YYYY-MM-DD"
+              placeholderText="dd-MM-yyyy"
               value={formData.nextFollowUpDate}
               readOnly={mode === 'view' || !isEditable('nextFollowUpDate')}
               onChange={(date) => handleInputChange('nextFollowUpDate', date)}
-              dateFormat="yyyy-MM-dd"
+              dateFormat="dd-MM-yyyy"
             />
             {formData.cancellationReason && renderInput("Cancellation Reason", "cancellationReason")}
           </div>
@@ -666,21 +740,21 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
           </div>
           <h3 className="agreement-heading">Agreement Details</h3>
           <div className="form-grid">
-            {renderInput("Token Number", "tokenNumber")}
+            {renderInput("Token Number", "Token Number", "tokenNumber")}
             <CustomDatePicker
               label="Agreement Start Date"
-              placeholderText="YYYY-MM-DD"
+              placeholderText="dd-MM-yyyy"
               value={formData.agreementStartDate}
               onChange={date => handleInputChange('agreementStartDate', date)}
-              dateFormat="yyyy-MM-dd"
+              dateFormat="dd-MM-yyyy"
               readOnly={mode === 'view' || !isEditable('agreementStartDate')}
             />
             <CustomDatePicker
               label="Agreement End Date"
-              placeholderText="YYYY-MM-DD"
+              placeholderText="dd-MM-yyyy"
               value={formData.agreementEndDate}
               onChange={date => handleInputChange('agreementEndDate', date)}
-              dateFormat="yyyy-MM-dd"
+              dateFormat="dd-MM-yyyy" // Correct
               readOnly={mode === 'view' || !isEditable('agreementEndDate')}
             />
             {renderInput("Address Line 1", "addressLine1")}
@@ -689,6 +763,11 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
               "Agreement Status",
               "agreementStatus",
               Array.isArray(agreementStatusOptions) ? agreementStatusOptions.map(s => ({ id: s.key, name: s.value })) : []
+            )}
+            {renderDropdown(
+              "Back Office Status",
+              "backOfficeStatus",
+              Array.isArray(backOfficeStatusOptions) ? backOfficeStatusOptions.map(s => ({ id: s.key, name: s.value })) : []
             )}
             {renderFileInput("Agreement File", "agreementFile")}
 
@@ -704,6 +783,11 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
 
       case 'payment': return (
         <>
+          {formData.tokenNumber && (
+            <h3 className="payment-token-title">
+              Payment Details ({formData.tokenNumber})
+            </h3>
+          )}
           <div className="payment-section">
             <div className="payment-part-a">
               <div className="form-grid payment-grid-top">
@@ -719,10 +803,10 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
                 <h4>Owner Payments</h4>
                 {ownerPayments.map((p, index) => (
                   <div key={index} className="payment-entry-grid">
-                    <CustomDatePicker
+                  <CustomDatePicker // Correct
                       label="Payment Date"
                       value={p.paymentDate}
-                      readOnly={mode === 'view' || !isEditable('ownerPaymentDate')}
+                    readOnly={mode === 'view' || !isEditable('ownerPaymentDate')} // Correct
                       onChange={(date) => handlePaymentChange(index, 'paymentDate', date, 'owner')}
                     />
                     {renderInput('Amount', 'Amount', `owner-payment-amount-${index}`, (e) => handlePaymentChange(index, 'paymentAmount', e.target.value, 'owner'), p.paymentAmount)}
@@ -783,26 +867,26 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
                   label="Govt GRN Date"
                   value={formData.govtGrnDate}
                   readOnly={mode === 'view' || !isEditable('govtGrnDate')}
-                  onChange={date => handleInputChange('govtGrnDate', date)}
+                  onChange={date => handleInputChange('govtGrnDate', date)} // Correct
                 />
-                {renderInput("GRN Number", "GRN Number", "grnNumber")}
-                {renderInput("GRN Amount", "GRN Amount", "grnAmount")}
+                {renderInput("GRN Number", "GRN Number", "grnNumber", (e) => handleInputChange('grnNumber', e.target.value))}
+                {renderInput("GRN Amount", "GRN Amount", "grnAmount", (e) => handleInputChange('grnAmount', e.target.value))}
                 <CustomDatePicker
                   label="DHC Date"
                   value={formData.dhcDate}
                   readOnly={mode === 'view' || !isEditable('dhcDate')}
                   onChange={date => handleInputChange('dhcDate', date)}
                 />
-                {renderInput("DHC Number", "DHC Number", "dhcNumber")}
-                {renderInput("DHC Amount", "DHC Amount", "dhcAmount")}
+                {renderInput("DHC Number", "DHC Number", "dhcNumber", (e) => handleInputChange('dhcNumber', e.target.value))}
+                {renderInput("DHC Amount", "DHC Amount", "dhcAmount", (e) => handleInputChange('dhcAmount', e.target.value))}
                 <CustomDatePicker
                   label="Commission Date"
                   value={formData.commissionDate}
                   readOnly={mode === 'view' || !isEditable('commissionDate')}
                   onChange={date => handleInputChange('commissionDate', date)}
                 />
-                {renderInput("Commission Name", "Commission Name", "commissionName")}
-                {renderInput("Commission Amount", "Commission Amount", "commissionAmount")}
+                {renderInput("Commission Name", "Commission Name", "commissionName", (e) => handleInputChange('commissionName', e.target.value))}
+                {renderInput("Commission Amount", "Commission Amount", "commissionAmount", (e) => handleInputChange('commissionAmount', e.target.value))}
               </div>
             </div>
           </div>
@@ -822,7 +906,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
     <div className="add-lead-container">
       <Slider />
       <div className="main-content">
-        <Header title="Edit Lead" />
+        <Header title={mode === 'view' ? 'Lead Details' : 'Edit Lead'} />
         <div className="tab-buttons">
           {showLead && <button className={activeTab === 'lead' ? 'active' : ''} onClick={() => setActiveTab('lead')}>Lead Details</button>}
           {showClient && <button className={activeTab === 'client' ? 'active' : ''} onClick={() => setActiveTab('client')}>Client Details</button>}

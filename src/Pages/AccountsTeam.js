@@ -160,7 +160,7 @@ const AccountsTeam = () => {
       try {
         await keycloak.updateToken(30);
         await axios.put(
-          `${Api.BASE_URL}leads/cancel`,
+          `${Api.BASE_URL}leads/${id}/cancel`,
           { id: id, cancellationReason: reason },
           {
             headers: {
@@ -256,17 +256,17 @@ const AccountsTeam = () => {
               ) : (
                 <>
                   <table className="table">
-                    <thead>
+                    <thead style={{ tableLayout: 'fixed', width: '100%' }}>
                       <tr>
                         <th className="sticky-col">Owner Name</th>
-                        <th>Owner Phone</th>
+                        <th style={{ width: '100px' }}>Owner Phone</th>
                         <th>Tenant Name</th>
-                        <th>Tenant Phone</th>
+                        <th style={{ width: '100px' }}>Tenant Phone</th>
                         <th>Total Amount</th>
                         <th>Owner Amount</th>
-                        <th>Owner Payment Date</th>
+                        <th style={{ width: '80px' }}>Owner Payment Date</th>
                         <th>Tenant Amount</th>
-                        <th>Tenant Payment Date</th>
+                        <th style={{ width: '80px' }}>Tenant Payment Date</th>
                         <th>GRN Number</th>
                         <th>Token No</th>
                         <th>Status</th>

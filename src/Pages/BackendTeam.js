@@ -327,7 +327,7 @@ const BackendTeam = () => {
     if (cancellationReason) {
       try {
         await axios.put(
-          `${Api.BASE_URL}leads/cancel`,
+          `${Api.BASE_URL}leads/${id}/cancel`,
           { id, cancellationReason },
           {
             headers: {
@@ -610,18 +610,18 @@ const BackendTeam = () => {
                 </div>
               ) : (
                 <table className="table">
-                  <thead>
+                  <thead style={{ tableLayout: 'fixed', width: '100%' }}>
                     <tr>
                       <th className="sticky-col">Name</th>
-                      <th>Phone No.</th>
-                      <th>Visit Address</th>
-                      <th>Client Type</th>
-                      <th>Address</th>
-                      <th>Created Date</th>
-                      <th>Created By</th>
-                      <th>Updated By</th>
-                      <th>Tentative Date</th>
-                      <th>Status</th>
+                      <th>Owner Name</th>
+                      <th>Tenant Name</th>
+                      <th>Token Number</th>
+                      <th>Agreement Status</th>
+                      <th>Back Office Status</th>
+                      <th>GRN No</th>
+                      <th>DHC No</th>
+                      <th>Commission Date</th>
+                      <th>Commission Amount</th>
                       <th className="action-column">Action</th>
                     </tr>
                   </thead>
@@ -629,18 +629,20 @@ const BackendTeam = () => {
                     {records.map((record, index) => {
                       const client = record.client || {};
                       const name = `${client.firstName || ''} ${client.lastName || ''}`.trim() || '-';
+                      const agreement = record.agreement || {};
+                      const payment = record.payment || {};
                       return (
                         <tr key={index}>
                           <td className="sticky-col">{name}</td>
-                          <td>{client.phoneNo || "-"}</td>
-                          <td>{record.visitAddress || "-"}</td>
-                          <td>{client.clientType || "-"}</td>
-                          <td>{client.address || "-"}</td>
-                          <td>{new Date(record.createdDate).toLocaleDateString() || "-"}</td>
-                          <td>{client.createdByUserName || "-"}</td>
-                          <td>{client.updatedByUserName || "-"}</td>
-                          <td>{record.tentativeAgreementDate || "-"}</td>
-                          <td>{record.status || "-"}</td>
+                          <td>{`${agreement.owner?.firstName || ''} ${agreement.owner?.lastName || ''}`.trim() || '-'}</td>
+                          <td>{`${agreement.tenant?.firstName || ''} ${agreement.tenant?.lastName || ''}`.trim() || '-'}</td>
+                          <td>{agreement.tokenNo || '-'}</td>
+                          <td>{agreement.status || '-'}</td>
+                          <td>{agreement.backOfficeStatus || '-'}</td>
+                          <td>{payment.grnNumber || '-'}</td>
+                          <td>{payment.dhcNumber || '-'}</td>
+                          <td>{payment.commissionDate ? new Date(payment.commissionDate).toLocaleDateString() : '-'}</td>
+                          <td>{payment.commissionAmount || '-'}</td>
                           <td className="action-column" >
                             <div>
                               <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />

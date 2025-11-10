@@ -227,8 +227,7 @@ input {
   font-size: 1.1rem;
 }
 
-.payment-grid-top,
-.payment-grid-bottom {
+.payment-grid-top {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem 1.5rem;
@@ -297,4 +296,11 @@ input {
 
 .remove-payment-btn:hover {
   background-color: #ffccbc;
+}
+
+.payment-grid-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: end;
 }

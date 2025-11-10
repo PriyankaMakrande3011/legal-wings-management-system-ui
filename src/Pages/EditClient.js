@@ -28,7 +28,7 @@ const EditClient = ({ isOpen, onClose, leadId }) => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await fetch("https://13.204.9.221:3031/Lead"); // Replace with your JSON link
+        const response = await fetch("https://legalwingcrm.in:8081/Lead"); // Replace with your JSON link
         if (!response.ok) {
           throw new Error("Failed to fetch clients");
         }
@@ -45,7 +45,7 @@ useEffect(() => {
   if (leadId) {
     const fetchLead = async () => {
       try {
-        const response = await fetch(`https://13.204.9.221:3031/Lead/${leadId}`, {
+        const response = await fetch(`https://legalwingcrm.in:8081/Lead/${leadId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -81,7 +81,7 @@ useEffect(() => {
   //   if (leadId) {
   //     const fetchLead = async () => {
   //       try {
-  //         const response = await fetch(`https://13.204.9.221:3031/Lead/${leadId}`);
+  //         const response = await fetch(`https://legalwingcrm.in:8081/Lead/${leadId}`);
   //         const data = await response.json();
 
   //         // Autofill form values
@@ -177,6 +177,7 @@ useEffect(() => {
               <input
                 id="contactNo"
                 type="tel"
+                maxLength="10"
                 {...register("contactNo", {
                   required: "Contact Number is required",
                   pattern: {
@@ -184,6 +185,11 @@ useEffect(() => {
                     message: "Enter a valid 10-digit contact number",
                   },
                 })}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^0-9]/g, '');
+                  if (value.length > 10) value = value.slice(0, 10);
+                  setValue("contactNo", value, { shouldValidate: true });
+                }}
                 placeholder="Enter contact number"
               />
               {errors.contactNo && (
