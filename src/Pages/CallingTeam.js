@@ -62,8 +62,10 @@ const CallingTeam = () => {
     try {
       const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${keycloak.token}` },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}`
+        },
         body: JSON.stringify(requestBody),
       });
 
@@ -201,7 +203,7 @@ const CallingTeam = () => {
     setSelectedLeadId(lead);
   };
 
-  
+
 
   const fetchLeads = async (page = 0) => {
     setLoading(true);
@@ -233,9 +235,9 @@ const CallingTeam = () => {
 
       // handle the response
       console.log(response.data);
-          const data = response.data?.leadPage?.content || [];
-    setRecords(data); 
-    setTotalPages(response.data?.leadPage?.totalPages || 1);
+      const data = response.data?.leadPage?.content || [];
+      setRecords(data);
+      setTotalPages(response.data?.leadPage?.totalPages || 1);
     } catch (error) {
       console.error("Error fetching leads:", error);
     } finally {
@@ -355,7 +357,7 @@ const CallingTeam = () => {
               </div>
             </div>
 
-        
+
             <hr />
             <div className="client-action">
               <button onClick={handleAddNewLead}>
@@ -373,14 +375,14 @@ const CallingTeam = () => {
                 <p>No records found.</p>
               ) : (
                 <>
-                  <table className="table">
-                    <thead style={{ tableLayout: 'fixed', width: '100%' }}>
+                  <table className="table fixed-table" >
+                    <thead>
                       <tr>
                         <th className="sticky-col">Name</th>
-                        <th style={{ width: '100px' }}>Phone No.</th>
-                        <th style={{ width: '80px' }}>Last Follow Up</th>
-                        <th style={{ width: '80px' }}>Next Follow Up</th>
-                        <th style={{ width: '150px' }}>Appointment Time</th>
+                        <th style={{Width: '50px' }}>Phone No.</th>
+                        <th style={{ Width: '50px', whiteSpace: "nowrap" }}>Last Follow Up</th>
+                        <th >Next Follow Up</th>
+                        <th >Appointment Time</th>
                         <th>Status</th>
                         <th>Visit Address</th>
                         <th>Client Type</th>
@@ -398,8 +400,8 @@ const CallingTeam = () => {
                         const name = `${client.firstName || ''} ${client.lastName || ''}`.trim() || '-';
                         return (
                           <tr key={index}>
-                            <td className="sticky-col">{name}</td>
-                            <td>{client.phoneNo || "-"}</td>
+                            <td className="sticky-col fixed-col">{name}</td>
+                            <td className="fixed-col">{client.phoneNo || "-"}</td>
                             <td>{record.lastFollowUpDate ? new Date(record.lastFollowUpDate).toLocaleDateString() : "-"}</td>
                             <td>{record.nextFollowUpDate ? new Date(record.nextFollowUpDate).toLocaleDateString() : "-"}</td>
                             <td>{record.appointmentTime ? new Date(record.appointmentTime).toLocaleString() : "-"}</td>
@@ -407,7 +409,7 @@ const CallingTeam = () => {
                             <td>{record.visitAddress || "-"}</td>
                             <td>{client.clientType || "-"}</td>
                             <td>{client.address || "-"}</td>
-                            <td style={{ width: "40px" }}>{record.createdDate ? new Date(record.createdDate).toLocaleDateString() : "-"}</td>
+                            <td className="fixed-col">{record.createdDate ? new Date(record.createdDate).toLocaleDateString() : "-"}</td>
                             <td>{record.createdByUserName || "-"}</td>
                             <td>{record.updatedByUserName || "-"}</td>
                             <td>{record.tentativeAgreementDate ? new Date(record.tentativeAgreementDate).toLocaleDateString() : "-"}</td>

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
-import { useNavigate } from "react-router-dom";
-import { FaEye, FaEdit, FaTrash, FaRegCalendarAlt } from "react-icons/fa";
+import { useNavigate, Link } from "react-router-dom";
+import { FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Api from "./Api.js";
@@ -96,6 +96,50 @@ const AccountsTeam = () => {
       setNoData(true);
       setRecords([]);
       setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    setLoading(true);
+    try {
+      await keycloak.updateToken(30);
+
+      const response = await axios.post(
+        `${Api.BASE_URL}payments/getPaymentsExcel`,
+        {
+          searchText: searchText || null,
+          cityId: city || null,
+          areaId: area || null,
+          fromDate,
+          toDate,
+          pageNumber: 0, // Export all, so typically page 0 and a large size
+          pageSize: 10000, // Or adjust as per backend capabilities for export
+          sortField: "id",
+          sortOrder: "desc",
+          transitLevel: "ACCOUNT_TEAM"
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+            "Content-Type": "application/json",
+          },
+          responseType: 'blob', // Important for handling file downloads
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Payments.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+      Swal.fire("Error!", "Failed to download the Excel file. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -241,6 +285,9 @@ const AccountsTeam = () => {
                 {renderDropdown("Area", area, areas, handleAreaChange)}
                 <input type="text" className="searchClient" placeholder="Search" value={searchText} onChange={(e) => setSearchText(e.target.value)} />
                 <button onClick={handleSubmit}>Submit</button>
+                <button className="download-btn" title="Download Payments Excel" onClick={handleDownloadExcel}>
+                  <FaDownload />
+                </button>
               </div>
             </div>
 
@@ -258,40 +305,34 @@ const AccountsTeam = () => {
                   <table className="table">
                     <thead style={{ tableLayout: 'fixed', width: '100%' }}>
                       <tr>
-                        <th className="sticky-col">Owner Name</th>
-                        <th style={{ width: '100px' }}>Owner Phone</th>
-                        <th>Tenant Name</th>
-                        <th style={{ width: '100px' }}>Tenant Phone</th>
+                        <th className="sticky-col">Token Number</th>
+                        <th>Amount Received</th>
+                        <th>Outstanding Amount</th>
                         <th>Total Amount</th>
-                        <th>Owner Amount</th>
-                        <th style={{ width: '80px' }}>Owner Payment Date</th>
-                        <th>Tenant Amount</th>
-                        <th style={{ width: '80px' }}>Tenant Payment Date</th>
                         <th>GRN Number</th>
-                        <th>Token No</th>
-                        <th>Status</th>
-                        <th>Created By</th>
-                        <th>Updated By</th>
+                        <th>GRN Amount</th>
+                        <th>DHC Number</th>
+                        <th>DHC Amount</th>
+                        <th>Commission Name</th>
+                        <th>Commission Amount</th>
+                        <th>Commission Date</th>
                         <th className="action-column">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {records.map((record, index) => (
                         <tr key={index}>
-                          <td className="sticky-col">{record.ownerName || "-"}</td>
-                          <td>{record.ownerPhone || "-"}</td>
-                          <td>{record.tenantName || "-"}</td>
-                          <td>{record.tenantPhone || "-"}</td>
+                          <td className="sticky-col">{record.tokenNo || "-"}</td>
+                          <td>{record.totalReceivedAmount || "-"}</td>
+                          <td>{record.outstandingAmount || "-"}</td>
                           <td>{record.totalAmount || "-"}</td>
-                          <td>{record.ownerAmount || "-"}</td>
-                          <td>{formatDate(record.ownerPaymentDate)}</td>
-                          <td>{record.tenantAmount || "-"}</td>
-                          <td>{formatDate(record.tenantPaymentDate)}</td>
                           <td>{record.grnNumber || "-"}</td>
-                          <td>{record.tokenNo || "-"}</td>
-                          <td>{record.status || "-"}</td>
-                          <td>{record.createdByUserName || "-"}</td>
-                          <td>{record.updatedByUserName || "-"}</td>
+                          <td>{record.grnAmount || "-"}</td>
+                          <td>{record.dhcNumber || "-"}</td>
+                          <td>{record.dhcAmount || "-"}</td>
+                          <td>{record.commissionName || "-"}</td>
+                          <td>{record.commissionAmount || "-"}</td>
+                          <td>{formatDate(record.commissionDate)}</td>
                           <td className="action-column">
                             <div>
                               <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.leadId)} />
