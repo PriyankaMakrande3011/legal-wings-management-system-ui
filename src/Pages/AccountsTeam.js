@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -15,21 +15,26 @@ import Select from "react-select";
 import { useKeycloak } from "@react-keycloak/web";
 
 const AccountsTeam = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { keycloak } = useKeycloak();
+
+  const savedFilters = location.state?.filters;
+
   const [records, setRecords] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
-  const [city, setCity] = useState("");
-  const [area, setArea] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [city, setCity] = useState(savedFilters?.city || "");
+  const [area, setArea] = useState(savedFilters?.area || "");
+  const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [fromDate, setFromDate] = useState(savedFilters ? new Date(savedFilters.fromDate) : new Date());
+  const [toDate, setToDate] = useState(savedFilters ? new Date(savedFilters.toDate) : new Date());
   const [loading, setLoading] = useState(false);
   const [noData, setNoData] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(savedFilters?.currentPage || 0);
   const [totalPages, setTotalPages] = useState(1);
-  const navigate = useNavigate();
   const recordsPerPage = 20;
-  const { keycloak } = useKeycloak();
 
   const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
     const requestBody = {
@@ -71,6 +76,7 @@ const AccountsTeam = () => {
           areaId: area || null,
           fromDate,
           toDate,
+          dateFilter: dateFilter || null,
           pageNumber: page,
           pageSize: recordsPerPage,
           sortField: "id",
@@ -114,6 +120,7 @@ const AccountsTeam = () => {
           areaId: area || null,
           fromDate,
           toDate,
+          dateFilter: dateFilter || null,
           pageNumber: 0, // Export all, so typically page 0 and a large size
           pageSize: 10000, // Or adjust as per backend capabilities for export
           sortField: "id",
@@ -175,11 +182,37 @@ const AccountsTeam = () => {
   };
 
   const handleViewClick = (leadId) => {
-    navigate(`/add-lead?mode=view&id=${leadId}&showLead=false`);
+    navigate(`/add-lead?mode=view&id=${leadId}&showLead=false`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          searchText,
+          dateFilter,
+          currentPage,
+        },
+      },
+    });
   };
 
   const handleEditClick = (leadId) => {
-    navigate(`/edit?mode=edit&id=${leadId}&showLead=false`);
+    navigate(`/edit?mode=edit&id=${leadId}&showLead=false`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          searchText,
+          dateFilter,
+          currentPage,
+        },
+      },
+    });
   };
 
   const handleDelete = async (id) => {
@@ -277,6 +310,19 @@ const AccountsTeam = () => {
                     <DatePicker selected={toDate} onChange={(date) => setToDate(date)} dateFormat="dd-MM-yyyy" className="custom-input" />
                     <FaRegCalendarAlt className="calendar-icon" />
                   </div>
+                </div>
+                <div className="date-field">
+                  <label>Filter On</label>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="custom-input"
+                  >
+                    <option value="">Select Filter</option>
+                    <option value="CREATED_DATE">Created Date</option>
+                    <option value="LAST_FOLLOWUP_DATE">Last Followup Date</option>
+                    <option value="NEXT_FOLLOWUP_DATE">Next Followup Date</option>
+                  </select>
                 </div>
               </div>
 

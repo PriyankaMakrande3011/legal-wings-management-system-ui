@@ -244,7 +244,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -259,27 +259,52 @@ import "./ClientPage.css"
 import Select from "react-select";
 
 const BackendTeam = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { keycloak } = useKeycloak();
+
+  const savedFilters = location.state?.filters;
+
   const [records, setRecords] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
+  const [leadStatusOptions, setLeadStatusOptions] = useState([]);
+  const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
+  const [backOfficeStatusOptions, setBackOfficeStatusOptions] = useState([]);
   const [clientTypes, setClientTypes] = useState(["OWNER", "TENANT", "AGENT"]);
-  const [city, setCity] = useState("");
-  const [area, setArea] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [clientType, setClientType] = useState("");
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [city, setCity] = useState(savedFilters?.city || "");
+  const [area, setArea] = useState(savedFilters?.area || "");
+  const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
+  const [clientType, setClientType] = useState(savedFilters?.clientType || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [leadStatus, setLeadStatus] = useState(savedFilters?.leadStatus || "");
+  const [agreementStatus, setAgreementStatus] = useState(savedFilters?.agreementStatus || "");
+  const [backOfficeStatus, setBackOfficeStatus] = useState(savedFilters?.backOfficeStatus || "");
+  const [fromDate, setFromDate] = useState(savedFilters ? new Date(savedFilters.fromDate) : new Date());
+  const [toDate, setToDate] = useState(savedFilters ? new Date(savedFilters.toDate) : new Date());
   const [isModalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
   const recordsPerPage = 10;
-  const { keycloak } = useKeycloak();
+
   const handleAddNewLead = () => {
     navigate("/add-lead", {
       state: {
-        transitLevel: "BACKEND_TEAM"
-      }
+        transitLevel: "BACKEND_TEAM",
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          searchText,
+          leadStatus,
+          agreementStatus,
+          backOfficeStatus,
+          dateFilter,
+        },
+      },
     });
   };
   // const handleCancel = async (id) => {
@@ -345,6 +370,22 @@ const BackendTeam = () => {
     }
   };
 
+  const fetchStatusDropdowns = async () => {
+    try {
+      const headers = { "Authorization": `Bearer ${keycloak.token}` };
+      const [leadRes, agreementRes, backOfficeRes] = await Promise.all([
+        axios.get(`${Api.BASE_URL}leads/lead-status`, { headers }),
+        axios.get(`${Api.BASE_URL}agreements/agreement-status`, { headers }),
+        axios.get(`${Api.BASE_URL}agreements/back-office-status`, { headers })
+      ]);
+      setLeadStatusOptions(leadRes.data.map(s => ({ id: s.name, name: s.value })));
+      setAgreementStatusOptions(agreementRes.data.map(s => ({ id: s.name, name: s.value })));
+      setBackOfficeStatusOptions(backOfficeRes.data.map(s => ({ id: s.name, name: s.value })));
+    } catch (error) {
+      console.error("Error fetching status dropdowns:", error);
+    }
+  };
+
 
   const fetchDropdowns = async (selectedCityId, selectedAreaId) => {
     const requestBody = {
@@ -372,10 +413,6 @@ const BackendTeam = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDropdowns();
-  }, []);
-
   const handleCityChange = (selectedCityId) => {
     setCity(selectedCityId);
     setArea(null); // Reset area when city changes
@@ -400,8 +437,12 @@ const BackendTeam = () => {
       fromDate: fromDate.toISOString().split("T")[0],
       toDate: toDate.toISOString().split("T")[0],
       clientType: clientType ? clientType.toUpperCase() : undefined,
-      cityIdsUi: city ? [parseInt(city)] : [],
-      areaIdsUi: area ? [parseInt(area)] : [],
+          cityId: city || null,
+          areaId: area || null,
+      dateFilter: dateFilter || null,
+      leadStatus: leadStatus || undefined,
+      agreementStatus: agreementStatus || null,
+      backOfficeStatus: backOfficeStatus || null,
       pageNumber: 0,
       pageSize: 1000,
       sortField: "id",
@@ -436,57 +477,51 @@ const BackendTeam = () => {
     }
   };
 
-
-  const fetchAllLeads = async () => {
-    const requestBody = {
-      fromDate: fromDate.toISOString().split("T")[0],
-      toDate: toDate.toISOString().split("T")[0],
-      sortField: "id",
-      sortOrder: "",
-      searchText: null,
-      pageNumber: 0,
-      pageSize: 20,
-      transitLevel: "BACKEND_TEAM"
-    };
-
-    try {
-      const response = await fetch(`${Api.BASE_URL}leads/all`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${keycloak.token}`
-         },
-        body: JSON.stringify(requestBody),
-        "Authorization": `Bearer ${keycloak.token}`
-      });
-
-      let data = (await response.json())?.leadPage?.content || [];
-
-      if (searchText.trim()) {
-        const keyword = searchText.toLowerCase();
-        data = data.filter((record) => {
-          const firstName = record.client?.firstName?.toLowerCase() || "";
-          const lastName = record.client?.lastName?.toLowerCase() || "";
-          return firstName.includes(keyword) || lastName.includes(keyword);
-        });
-      }
-
-      setRecords(data);
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchAllLeads();
+    fetchDropdowns(city, area);
+    fetchStatusDropdowns();
+    fetchLeads();
   }, []);  // Trigger fetchLeads when component is mounted
 
 
   const handleViewClick = (leadId) => {
-    navigate(`/add-lead?mode=view&id=${leadId}&mode=view`);
+    navigate(`/add-lead?mode=view&id=${leadId}`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          searchText,
+          dateFilter,
+          leadStatus,
+          agreementStatus,
+          backOfficeStatus,
+        },
+      },
+    });
   };
 
   const handleEditClick = (leadId) => {
-    navigate(`/edit?mode=edit&id=${leadId}`);
+    navigate(`/edit?mode=edit&id=${leadId}`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          searchText,
+          dateFilter,
+          leadStatus,
+          agreementStatus,
+          backOfficeStatus,
+        },
+      },
+    });
   };
 
   const handleAssign = (lead) => {
@@ -563,6 +598,19 @@ const BackendTeam = () => {
                     <FaRegCalendarAlt className="calendar-icon" />
                   </div>
                 </div>
+                <div className="date-field">
+                  <label>Filter On</label>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="custom-input"
+                  >
+                    <option value="">Select Filter</option>
+                    <option value="CREATED_DATE">Created Date</option>
+                    <option value="LAST_FOLLOWUP_DATE">Last Followup Date</option>
+                    <option value="NEXT_FOLLOWUP_DATE">Next Followup Date</option>
+                  </select>
+                </div>
               </div>
 
 
@@ -571,6 +619,13 @@ const BackendTeam = () => {
                 {renderDropdown("City", "city", city, cities, handleCityChange)}
                 {/* Area Dropdown */}
                 {renderDropdown("Area", "area", area, areas, handleAreaChange)}
+                
+                {/* Lead Status Dropdown */}
+                {renderDropdown("Lead Status", "leadStatus", leadStatus, leadStatusOptions, setLeadStatus)}
+                {/* Agreement Status Dropdown */}
+                {renderDropdown("Agreement Status", "agreementStatus", agreementStatus, agreementStatusOptions, setAgreementStatus)}
+                {/* BackOffice Status Dropdown */}
+                {renderDropdown("BackOffice Status", "backOfficeStatus", backOfficeStatus, backOfficeStatusOptions, setBackOfficeStatus)}
 
                 {/* Client Type Dropdown */}
                 <div className="select-wrapper">

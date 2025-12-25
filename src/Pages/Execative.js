@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -19,28 +19,44 @@ import Select from "react-select";
 import AssignLeadToBackend from "./AssingLeadToBackend.js"
 
 const Executive = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { keycloak } = useKeycloak();
+
+  const savedFilters = location.state?.filters;
+
   const [records, setRecords] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [clientTypes, setClientTypes] = useState(["OWNER", "TENANT", "AGENT"]);
-  const [city, setCity] = useState("");
-  const [area, setArea] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [clientType, setClientType] = useState("");
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [city, setCity] = useState(savedFilters?.city || "");
+  const [area, setArea] = useState(savedFilters?.area || "");
+  const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
+  const [clientType, setClientType] = useState(savedFilters?.clientType || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [fromDate, setFromDate] = useState(savedFilters ? new Date(savedFilters.fromDate) : new Date());
+  const [toDate, setToDate] = useState(savedFilters ? new Date(savedFilters.toDate) : new Date());
   const [isModalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
 
   const recordsPerPage = 10;
-  const { keycloak } = useKeycloak();
+
   const handleAddNewLead = () => {
     navigate("/add-lead", {
       state: {
-        transitLevel: "EXECUTIVE_TEAM"
-      }
+        transitLevel: "EXECUTIVE_TEAM",
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          searchText,
+          dateFilter,
+        },
+      },
     });
   };
   // const handleCancel = async (id) => {
@@ -133,10 +149,6 @@ const Executive = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDropdowns();
-  }, []);
-
   const handleCityChange = (selectedCityId) => {
     setCity(selectedCityId);
     setArea(null); // Reset area when city changes
@@ -153,6 +165,7 @@ const Executive = () => {
   };
 
   const handleSubmit = () => {
+    // Assuming fetchLeads will use the current state
     fetchLeads();
   };
 
@@ -161,8 +174,10 @@ const Executive = () => {
       fromDate: fromDate.toISOString().split("T")[0],
       toDate: toDate.toISOString().split("T")[0],
       clientType: clientType ? clientType.toUpperCase() : undefined,
-      cityIdsUi: city ? [parseInt(city)] : [],
-      areaIdsUi: area ? [parseInt(area)] : [],
+          cityId: city || null,
+          areaId: area || null,
+      searchText: searchText || null,
+      dateFilter: dateFilter || null,
       pageNumber: 0,
       pageSize: 2000,
       sortField: "id",
@@ -182,72 +197,51 @@ const Executive = () => {
       });
       let data = (await response.json())?.leadPage?.content || [];
 
-      if (searchText.trim()) {
-        const keyword = searchText.toLowerCase();
-        data = data.filter((record) => {
-          const firstName = record.client?.firstName?.toLowerCase() || "";
-          const lastName = record.client?.lastName?.toLowerCase() || "";
-          return firstName.includes(keyword) || lastName.includes(keyword);
-        });
-      }
-
       setRecords(data);
     } catch (error) {
       console.error("Failed to fetch leads:", error);
     }
   };
 
-
-  const fetchAllLeads = async () => {
-    const requestBody = {
-      fromDate: fromDate.toISOString().split("T")[0],
-      toDate: toDate.toISOString().split("T")[0],
-      sortField: "id",
-      sortOrder: "",
-      searchText: null,
-      pageNumber: 0,
-      pageSize: 20,
-      transitLevel: "EXECUTIVE_TEAM"
-    };
-
-    try {
-      const response = await fetch(`${Api.BASE_URL}leads/byAssignedUser`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${keycloak.token}`
-         },
-        body: JSON.stringify(requestBody),
-        "Authorization": `Bearer ${keycloak.token}`
-      });
-
-      let data = (await response.json())?.leadPage?.content || [];
-
-      if (searchText.trim()) {
-        const keyword = searchText.toLowerCase();
-        data = data.filter((record) => {
-          const firstName = record.client?.firstName?.toLowerCase() || "";
-          const lastName = record.client?.lastName?.toLowerCase() || "";
-          return firstName.includes(keyword) || lastName.includes(keyword);
-        });
-      }
-
-      setRecords(data);
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
-    }
-  };
 
   useEffect(() => {
-    fetchAllLeads();
+    fetchDropdowns(city, area);
+    fetchLeads();
   }, []);  // Trigger fetchLeads when component is mounted
 
 
   const handleViewClick = (leadId) => {
-    navigate(`/add-lead?mode=view&id=${leadId}&mode=view`);
+    navigate(`/add-lead?mode=view&id=${leadId}`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          searchText,
+          dateFilter,
+        },
+      },
+    });
   };
 
   const handleEditClick = (leadId) => {
-    navigate(`/edit?mode=edit&id=${leadId}`);
+    navigate(`/edit?mode=edit&id=${leadId}`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          searchText,
+          dateFilter,
+        },
+      },
+    });
   };
 
   const handleAssign = (lead) => {
@@ -325,6 +319,19 @@ const Executive = () => {
                     />
                     <FaRegCalendarAlt className="calendar-icon" />
                   </div>
+                </div>
+                <div className="date-field">
+                  <label>Filter On</label>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="custom-input"
+                  >
+                    <option value="">Select Filter</option>
+                    <option value="CREATED_DATE">Created Date</option>
+                    <option value="LAST_FOLLOWUP_DATE">Last Followup Date</option>
+                    <option value="NEXT_FOLLOWUP_DATE">Next Followup Date</option>
+                  </select>
                 </div>
               </div>
 

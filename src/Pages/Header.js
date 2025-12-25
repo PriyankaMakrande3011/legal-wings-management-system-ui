@@ -5,7 +5,7 @@ import "./Header.css";
 import { FiLogOut } from "react-icons/fi"; // Logout icon
 import { useKeycloak } from "@react-keycloak/web";
 
-const Header = ({ title }) => {
+const Header = ({ title, onBack }) => {
   const location = useLocation();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,8 +105,9 @@ const Header = ({ title }) => {
 
   return (
     <header className="header">
-      <div className="header-left">
-        <h1>{title !== undefined ? title : pageName}</h1>
+      <div className="header-left" style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+        {onBack && <button onClick={onBack} className="back-button">Back</button>}
+        <h1 style={{ margin: 0 }}>{title ?? pageName}</h1>
       </div>
 
       <div style={styles.userInfo} onClick={toggleMenu}>

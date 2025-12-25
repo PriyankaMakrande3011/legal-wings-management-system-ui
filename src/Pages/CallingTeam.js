@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -14,39 +14,56 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import "./ClientPage.css"
 import Select from "react-select";
+
 import { useKeycloak } from "@react-keycloak/web";
 
 
 const CallingTeam = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { keycloak } = useKeycloak();
+
+  const savedFilters = location.state?.filters;
+
   const [records, setRecords] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [selectedClientType, setSelectedClientType] = useState("");
   const [clientTypes, setClientTypes] = useState(["OWNER", "TENANT", "AGENT"]);
-  const [city, setCity] = useState("");
-  const [area, setArea] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [clientType, setClientType] = useState("");
-  const [fromDate, setFromDate] = useState(new Date());
-  const [toDate, setToDate] = useState(new Date());
+  const [leadStatusOptions, setLeadStatusOptions] = useState([]);
+  const [city, setCity] = useState(savedFilters?.city || "");
+  const [area, setArea] = useState(savedFilters?.area || "");
+  const [leadStatus, setLeadStatus] = useState(savedFilters?.leadStatus || "");
+  const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
+  const [clientType, setClientType] = useState(savedFilters?.clientType || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [fromDate, setFromDate] = useState(savedFilters ? new Date(savedFilters.fromDate) : new Date());
+  const [toDate, setToDate] = useState(savedFilters ? new Date(savedFilters.toDate) : new Date());
   const [isModalOpen, setModalOpen] = useState(false);
-  const navigate = useNavigate();
   const [selectedLeadId, setSelectedLeadId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [noData, setNoData] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(savedFilters?.currentPage || 0);
   const [totalPages, setTotalPages] = useState(1);
   const recordsPerPage = 20;
-  const { keycloak } = useKeycloak();
-
-
-
 
   const handleAddNewLead = () => {
     navigate("/add-lead", {
       state: {
-        transitLevel: "CALLING_TEAM" // or any enum value
-      }
+        transitLevel: "CALLING_TEAM",
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          leadStatus,
+          searchText,
+          currentPage,
+          dateFilter,
+        },
+      },
     });
   };
 
@@ -77,9 +94,20 @@ const CallingTeam = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDropdowns();
-  }, []);
+  const fetchLeadStatuses = async () => {
+    try {
+      const response = await fetch(`${Api.BASE_URL}leads/lead-status`, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      });
+      const data = await response.json();
+      const options = data.map(s => ({ id: s.key || s.name, name: s.value || s.label || s.toString() }));
+      setLeadStatusOptions(options);
+    } catch (error) {
+      console.error("Error fetching lead statuses:", error);
+    }
+  };
 
   const handleCityChange = (selectedCityId) => {
     setCity(selectedCityId);
@@ -92,61 +120,19 @@ const CallingTeam = () => {
     fetchDropdowns(city, selectedAreaId);
   };
 
-
-
-
-
   const handleClearClientType = () => {
     setClientType("");
   };
 
+  const handleClearLeadStatus = () => {
+    setLeadStatus("");
+  };
+
   const handleSubmit = () => {
-    fetchLeads();
+    setCurrentPage(0);
+    fetchLeads(0);
   };
 
-  const fetchAllLeads = async () => {
-    const requestBody = {
-      fromDate: fromDate.toISOString().split("T")[0],
-      toDate: toDate.toISOString().split("T")[0],
-      sortField: "id",
-      sortOrder: "",
-      searchText: null,
-      pageNumber: 0,
-      pageSize: 20,
-      transitLevel: "CALLING_TEAM"
-    };
-
-    try {
-      const response = await fetch(`${Api.BASE_URL}leads/all`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${keycloak.token}`
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      let data = (await response.json())?.leadPage?.content || [];
-
-      if (searchText.trim()) {
-        const keyword = searchText.trim().toLowerCase();
-        data = data.filter((record) => {
-          const firstName = record.client?.firstName?.toLowerCase() || "";
-          const lastName = record.client?.lastName?.toLowerCase() || "";
-          return firstName.includes(keyword) || lastName.includes(keyword);
-        });
-      }
-
-      // setRecords(data);
-      setRecords(data);
-    } catch (error) {
-      console.error("Failed to fetch leads:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllLeads();
-  }, []);  // Trigger fetchLeads when component is mounted
   const handleDelete = async (id) => {
     const { value: reason } = await Swal.fire({
       title: "Are you sure?",
@@ -178,7 +164,7 @@ const CallingTeam = () => {
           }
         );
         Swal.fire("Cancelled!", "The lead has been cancelled.", "success");
-        fetchAllLeads(); // Refresh list
+        fetchLeads(currentPage); // Refresh list
       } catch (error) {
         console.error(
           "Error canceling lead:",
@@ -190,20 +176,42 @@ const CallingTeam = () => {
   };
 
   const handleViewClick = (leadId) => {
-    navigate(`/add-lead?mode=view&id=${leadId}&mode=view`);
+    navigate(`/add-lead?mode=view&id=${leadId}`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          leadStatus,
+          searchText,
+          currentPage,
+          dateFilter,
+        },
+      },
+    });
   };
 
   const handleEditClick = (leadId) => {
-    navigate(`/edit?mode=edit&id=${leadId}`);
+    navigate(`/edit?mode=edit&id=${leadId}`, {
+      state: {
+        from: location.pathname,
+        filters: {
+          fromDate: fromDate.toISOString(),
+          toDate: toDate.toISOString(),
+          city,
+          area,
+          clientType,
+          leadStatus,
+          searchText,
+          currentPage,
+          dateFilter,
+        },
+      },
+    });
   };
-
-  const handleAssign = (lead) => {
-
-    setModalOpen(false);
-    setSelectedLeadId(lead);
-  };
-
-
 
   const fetchLeads = async (page = 0) => {
     setLoading(true);
@@ -215,10 +223,12 @@ const CallingTeam = () => {
         {
           clientType: clientType || null,
           searchText: searchText || null,
+          leadStatus: leadStatus || null,
           cityId: city || null,
           areaId: area || null,
           fromDate,
           toDate,
+          dateFilter: dateFilter || null,
           pageNumber: page,
           pageSize: recordsPerPage,
           sortField: "id",
@@ -253,9 +263,10 @@ const CallingTeam = () => {
   };
 
   useEffect(() => {
-    fetchDropdowns();
-    fetchLeads(0);
-  }, []);
+    fetchDropdowns(city, area);
+    fetchLeadStatuses();
+    fetchLeads(currentPage);
+  }, []); // Only on initial mount
 
   const renderDropdown = (label, field, value, options, onChange) => {
     const selectOptions = options.map(opt => ({ value: opt.id, label: opt.name }));
@@ -326,6 +337,19 @@ const CallingTeam = () => {
                     <FaRegCalendarAlt className="calendar-icon" />
                   </div>
                 </div>
+                <div className="date-field">
+                  <label>Filter On</label>
+                  <select
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="custom-input"
+                  >
+                    <option value="">Select Filter</option>
+                    <option value="CREATED_DATE">Created Date</option>
+                    <option value="LAST_FOLLOWUP_DATE">Last Followup Date</option>
+                    <option value="NEXT_FOLLOWUP_DATE">Next Followup Date</option>
+                  </select>
+                </div>
               </div>
 
 
@@ -344,6 +368,16 @@ const CallingTeam = () => {
                     ))}
                   </select>
                   {clientType && <span className="clear-icon" onClick={handleClearClientType}><FaTimes /></span>}
+                </div>
+
+                <div className="select-wrapper lead-status-select">
+                  <select value={leadStatus} onChange={(e) => setLeadStatus(e.target.value)}>
+                    <option value="">Select Lead Status</option>
+                    {leadStatusOptions.map((status, index) => (
+                      <option key={index} value={status.id}>{status.name}</option>
+                    ))}
+                  </select>
+                  {leadStatus && <span className="clear-icon" onClick={handleClearLeadStatus}><FaTimes /></span>}
                 </div>
 
                 <input
@@ -391,6 +425,7 @@ const CallingTeam = () => {
                         <th>Created By</th>
                         <th>Updated By</th>
                         <th style={{ width: '80px' }}>Tentative Date</th>
+                        <th>Lead Status</th>
                         <th className="action-column">Action</th>
                       </tr>
                     </thead>
@@ -413,6 +448,7 @@ const CallingTeam = () => {
                             <td>{record.createdByUserName || "-"}</td>
                             <td>{record.updatedByUserName || "-"}</td>
                             <td>{record.tentativeAgreementDate ? new Date(record.tentativeAgreementDate).toLocaleDateString() : "-"}</td>
+                            <td>{leadStatusOptions.find(opt => opt.id === record.leadStatus)?.name || record.leadStatus || "-"}</td>
                             <td className="action-column" >
                               <div>
                                 <FaEye className="action-icon icon-view" onClick={() => handleViewClick(record.id)} />
@@ -452,7 +488,7 @@ const CallingTeam = () => {
               <AssignLead
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
-                onAssign={handleAssign}
+                onAssignSuccess={() => fetchLeads(currentPage)}
                 leadId={selectedLeadId}
               />
             </div>

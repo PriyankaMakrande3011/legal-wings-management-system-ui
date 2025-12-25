@@ -15,6 +15,22 @@
   background-color: #f9f9f9;
 }
 
+.back-button {
+  background-color: #f9af2e;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.back-button:hover {
+  background-color: #e7a029;
+}
+
 
 
 
@@ -249,3 +265,14 @@
   height: 50px;
   object-fit: contain;
 }
+
+
+.lead-status-select {
+  width: 180px;          /* adjust as needed */
+  position: relative;
+}
+
+.lead-status-select select {
+  width: 100%;
+}
+

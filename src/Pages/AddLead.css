@@ -1,3 +1,20 @@
+/* Back button in header */
+.back-button {
+  background-color: #f8c82a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  margin-right: 1rem;
+}
+
+.back-button:hover {
+  background-color: #b9500b;
+}
+
 /* Container */
 .add-lead-container {
   display: flex;

@@ -5,8 +5,7 @@ import Header from "./Header.js";
 import './AddLead.css';
 import AddClient from "./AddClient.js";
 import { useKeycloak } from "@react-keycloak/web";
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaPlus, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -29,6 +28,7 @@ const AddLeadPage = ({
 
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const mode = queryParams.get("mode");
   const id = queryParams.get("id");
@@ -44,7 +44,6 @@ const AddLeadPage = ({
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(null); // <--- New
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
   const clientTypeOptions = ["OWNER", "TENANT", "AGENT"];
   const leadSourceOptions = ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"];
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +53,7 @@ const AddLeadPage = ({
   const [areaOptions, setAreaOptions] = useState([]);
   const [agreementStatusOptions, setAgreementStatusOptions] = useState([]);
   const [backOfficeStatusOptions, setBackOfficeStatusOptions] = useState([]);
+  const [leadStatusOptions, setLeadStatusOptions] = useState([]);
   const [agreementFile, setAgreementFile] = useState(null);
   const [ownerPayments, setOwnerPayments] = useState([{}]);
   const [tenantPayments, setTenantPayments] = useState([{}]);
@@ -76,6 +76,22 @@ const AddLeadPage = ({
         .then(res => res.json())
         .then(data => setClients(data))
         .catch(err => console.error("Failed to fetch clients", err));
+    }
+
+    // Fetch Lead Statuses
+    if (keycloak?.token) {
+      fetch(`${Api.BASE_URL}leads/lead-status`, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          // Map response to { id, name } format expected by renderDropdown
+          const options = data.map(s => ({ id: s.key || s.name, name: s.value || s.label || s.toString() }));
+          setLeadStatusOptions(options);
+        })
+        .catch((err) => console.error("Failed to fetch lead statuses", err));
     }
 
     // Fetch Agreement Statuses
@@ -110,6 +126,14 @@ const AddLeadPage = ({
 
   const handleAcceptLead = (lead) => {
     navigate("/add-Executive-details");   // navigate to AddLeadPage
+  };
+
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from, { state: { filters: location.state.filters } });
+    } else {
+      navigate(-1); // Fallback
+    }
   };
 
 
@@ -183,6 +207,7 @@ const AddLeadPage = ({
       referenceNumber: formData.referenceNumber,
       referenceName: formData.referenceName,
       amount: formData.amount,
+      leadStatus: formData.leadStatus,
       lastFollowUpDate: formData.lastFollowUpDate ? format(new Date(formData.lastFollowUpDate), 'yyyy-MM-dd') : null, // Corrected format
       nextFollowUpDate: formData.nextFollowUpDate ? format(new Date(formData.nextFollowUpDate), 'yyyy-MM-dd') : null, // Corrected format
 
@@ -645,6 +670,7 @@ const AddLeadPage = ({
             lastName: data.client?.lastName || "",
             contactNumber: data.client?.phoneNo || "",
             email: data.client?.email || "",
+            leadStatus: data.leadStatus || null,
             clientType: data.client?.clientType || "",
             tentativeAgreementDate: data.tentativeAgreementDate ? new Date(data.tentativeAgreementDate) : null,
             visitAddress: data.visitAddress || "",
@@ -660,7 +686,7 @@ const AddLeadPage = ({
 
             cityId: data.city?.id || "",
             areaId: data.area?.id || "",
-            leadSource: data.leadSource || "",
+            leadSource: data.leadSource || null,
             // Owner
             ownerFirstName: data.agreement?.owner?.firstName || "",
             ownerLastName: data.agreement?.owner?.lastName || "",
@@ -1005,7 +1031,7 @@ const AddLeadPage = ({
     <div className="add-lead-container">
       <Slider />
       <div className="main-content">
-        <Header title={mode === 'view' ? 'Lead Details' : 'Add New Lead'} />
+        <Header title={mode === 'view' ? 'Lead Details' : 'Add New Lead'} onBack={handleBack} />
         <div className="tab-buttons">
           {showLead && <button className={activeTab === 'lead' ? 'active' : ''} onClick={() => setActiveTab('lead')}>Lead Details</button>}
           {showClient && <button className={activeTab === 'client' ? 'active' : ''} onClick={() => setActiveTab('client')}>Client Details</button>}

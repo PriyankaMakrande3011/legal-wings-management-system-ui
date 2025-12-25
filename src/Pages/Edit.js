@@ -3,7 +3,7 @@ import Slider from "./Slider";
 import Header from "./Header.js";
 import './AddLead.css'; // Using the same CSS for consistency
 import { useKeycloak } from "@react-keycloak/web";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CustomDatePicker from '../common/CustomDatePicker.js';
 import { format } from 'date-fns'; // Ensure date-fns is used
@@ -12,10 +12,9 @@ import { FaTimes, FaPlus } from "react-icons/fa";
 import Select from "react-select";
 import CustomDateTimePicker from '../common/CustomDateTimePicker.js';
 
-
-
 const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const mode = queryParams.get("mode");  // can be 'edit' or something
   const id = queryParams.get("id");
@@ -39,7 +38,16 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
 
   const clientTypeOptions = ["OWNER", "TENANT", "AGENT"];
   const leadSourceOptions = ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"];
+  const [leadStatusOptions, setLeadStatusOptions] = useState([]);
   const modeOfPaymentOptions = ["CASH", "ONLINE", "CHEQUE"];
+
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from, { state: { filters: location.state.filters } });
+    } else {
+      navigate(-1); // Fallback
+    }
+  };
 
 
   // Fetch clients
@@ -51,6 +59,19 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
         .then(res => res.json())
         .then(data => setClients(data))
         .catch(err => console.error("Failed to fetch clients", err));
+
+      // Fetch Lead Statuses
+      fetch(`${Api.BASE_URL}leads/lead-status`, {
+        headers: {
+          "Authorization": `Bearer ${keycloak.token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const options = data.map(s => ({ id: s.key || s.name, name: s.value || s.label || s.toString() }));
+          setLeadStatusOptions(options);
+        })
+        .catch((err) => console.error("Failed to fetch lead statuses", err));
 
       // Fetch Agreement Statuses
       fetch(`${Api.BASE_URL}agreements/agreement-status`, {
@@ -145,7 +166,7 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
   const isEditable = field => {
     if (mode !== 'edit') return true;
     const editableFields = [
-      // Lead
+      // Lead,
       "tentativeAgreementDate", "visitAddress", "cityId", "areaId", "leadSource",
       "description", "appointmentTime", "referenceName", "referenceNumber", "amount",
       "lastFollowUpDate", "nextFollowUpDate", "backOfficeStatus",
@@ -158,8 +179,11 @@ const Edit = ({ showLead = true, showClient = true, showPayment = true }) => {
       "paymentDescription",
       // Payment Part B
       "govtGrnDate", "grnNumber", "grnAmount",
-      "dhcDate", "dhcNumber", "dhcAmount",
-      "commissionDate", "commissionName", "commissionAmount"
+      "dhcDate", "dhcNumber", "dhcAmount", "leadStatus",
+      "commissionDate", "commissionName", "commissionAmount",
+      "firstName", "lastName", "clientType", "contactNumber", "email",
+      "ownerFirstName", "ownerLastName", "ownerEmail", "ownerContact", "ownerAadhar", "ownerPan",
+      "tenantFirstName", "tenantLastName", "tenantEmail", "tenantContact", "tenantAadhar", "tenantPan"
     ];
     return editableFields.includes(field);
   };
@@ -273,7 +297,7 @@ const renderInput = (label, placeholder, field, onChange, value) => {
           placeholder={`Select ${label}`}
           isClearable
           isSearchable
-          isDisabled={mode === "view" || !isEditable(editableCheckField)}
+          isDisabled={mode === "view" || !isEditable(editableCheckField) || isClientFieldLocked(field)}
           value={currentValue}
           onChange={onChange ? (selected) => onChange(selected?.value || null) : (selected) => handleInputChange(field, selected?.value || null)}
           styles={{
@@ -427,10 +451,11 @@ const renderInput = (label, placeholder, field, onChange, value) => {
             lastName: data.client?.lastName || "",
             contactNumber: data.client?.phoneNo || "",
             email: data.client?.email || "",
+            leadStatus: data.leadStatus || "",
             cancellationReason: data.cancellationReason || "",
             clientType: data.client?.clientType || "",
             tentativeAgreementDate: data.tentativeAgreementDate ? format(new Date(data.tentativeAgreementDate), 'yyyy-MM-dd') : null, // Corrected format
-            leadSource: data.leadSource || "",
+            leadSource: data.leadSource || null,
             description: data.description || "",
             appointmentTime: data.appointmentTime ? new Date(data.appointmentTime) : null,
             referenceName: data.referenceName || "",
@@ -497,6 +522,7 @@ const renderInput = (label, placeholder, field, onChange, value) => {
       visitAddress: formData.visitAddress,
       leadSource: formData.leadSource,
       description: formData.description,
+      leadStatus: formData.leadStatus,
       appointmentTime: formData.appointmentTime ? format(new Date(formData.appointmentTime), "yyyy-MM-dd'T'HH:mm:ss") : null,
       referenceName: formData.referenceName,
       referenceNumber: formData.referenceNumber,
@@ -663,6 +689,7 @@ const renderInput = (label, placeholder, field, onChange, value) => {
             {renderInput("Contact Number", "Contact Number", "contactNumber")}
             {renderInput("Email", "Email", "email")}
             {renderDropdown("Lead Source", "leadSource", ["ONLINE", "CALL", "EXCEL", "REFERENCE", "SHOP"])}
+            {renderDropdown("Lead Status", "leadStatus", leadStatusOptions)}
             <CustomDatePicker
               label="Tentative Agreement Date"
               placeholderText="dd-MM-yyyy"
@@ -906,7 +933,7 @@ const renderInput = (label, placeholder, field, onChange, value) => {
     <div className="add-lead-container">
       <Slider />
       <div className="main-content">
-        <Header title={mode === 'view' ? 'Lead Details' : 'Edit Lead'} />
+        <Header title={mode === 'view' ? 'Lead Details' : 'Edit Lead'} onBack={handleBack} />
         <div className="tab-buttons">
           {showLead && <button className={activeTab === 'lead' ? 'active' : ''} onClick={() => setActiveTab('lead')}>Lead Details</button>}
           {showClient && <button className={activeTab === 'client' ? 'active' : ''} onClick={() => setActiveTab('client')}>Client Details</button>}
