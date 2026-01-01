@@ -276,7 +276,7 @@ const BackendTeam = () => {
   const [area, setArea] = useState(savedFilters?.area || "");
   const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
   const [clientType, setClientType] = useState(savedFilters?.clientType || "");
-  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "CREATED_DATE");
   const [leadStatus, setLeadStatus] = useState(savedFilters?.leadStatus || "");
   const [agreementStatus, setAgreementStatus] = useState(savedFilters?.agreementStatus || "");
   const [backOfficeStatus, setBackOfficeStatus] = useState(savedFilters?.backOfficeStatus || "");
