@@ -778,6 +778,7 @@ const AddLeadPage = ({
               {renderInput("Contact Number", "Contact Number", "contactNumber")}
               {renderInput("Email", "Email", "email")}
               {renderDropdown("Lead Source", "leadSource", leadSourceOptions)}
+              {renderDropdown("Lead Status", "leadStatus", leadStatusOptions)}
               <CustomDatePicker
                 label="Tentative Agreement Date"
                 placeholderText="DD-MM-YYYY"

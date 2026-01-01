@@ -36,7 +36,7 @@ const CallingTeam = () => {
   const [leadStatus, setLeadStatus] = useState(savedFilters?.leadStatus || "");
   const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
   const [clientType, setClientType] = useState(savedFilters?.clientType || "");
-  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "CREATED_DATE");
   const [fromDate, setFromDate] = useState(savedFilters ? new Date(savedFilters.fromDate) : new Date());
   const [toDate, setToDate] = useState(savedFilters ? new Date(savedFilters.toDate) : new Date());
   const [isModalOpen, setModalOpen] = useState(false);

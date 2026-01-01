@@ -27,7 +27,7 @@ const AccountsTeam = () => {
   const [city, setCity] = useState(savedFilters?.city || "");
   const [area, setArea] = useState(savedFilters?.area || "");
   const [searchText, setSearchText] = useState(savedFilters?.searchText || "");
-  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "");
+  const [dateFilter, setDateFilter] = useState(savedFilters?.dateFilter || "CREATED_DATE");
   const [fromDate, setFromDate] = useState(savedFilters ? new Date(savedFilters.fromDate) : new Date());
   const [toDate, setToDate] = useState(savedFilters ? new Date(savedFilters.toDate) : new Date());
   const [loading, setLoading] = useState(false);
