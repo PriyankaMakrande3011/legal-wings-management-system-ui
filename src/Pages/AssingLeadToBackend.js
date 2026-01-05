@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
 
 const AssignLeadToBackend = ({ isOpen, onClose, leadId, onAssignSuccess }) => {
   const { keycloak } = useKeycloak();

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
+import "./BackendTeam.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
@@ -14,8 +15,9 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import "./ClientPage.css"
 import Select from "react-select";
+import CallingData from "../Callingdb.json";
 
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
 
 
 const CallingTeam = () => {
@@ -245,11 +247,67 @@ const CallingTeam = () => {
 
       // handle the response
       console.log(response.data);
-      const data = response.data?.leadPage?.content || [];
-      setRecords(data);
-      setTotalPages(response.data?.leadPage?.totalPages || 1);
+      const result = response.data?.leadPage || {};
+      const data = result.content || [];
+      
+      if (data.length === 0) {
+        setNoData(true);
+        // Load JSON data as fallback
+        const jsonRecords = CallingData.Lead.map((lead, index) => ({
+          id: lead.id,
+          client: {
+            firstName: lead.FirstName,
+            lastName: lead.LastName,
+            phoneNo: lead.ContactNumber,
+            email: lead.Email,
+            address: lead.Address,
+            clientType: lead.ClientType
+          },
+          lastFollowUpDate: null,
+          nextFollowUpDate: null,
+          appointmentTime: null,
+          status: "New",
+          visitAddress: lead.Address,
+          createdDate: lead.Created_date,
+          createdByUserName: lead.CreatedBy,
+          updatedByUserName: lead.UpdatedBy,
+          tentativeAgreementDate: null,
+          leadStatus: "Open"
+        }));
+        setRecords(jsonRecords);
+        setTotalPages(1);
+      } else {
+        setNoData(false);
+        setRecords(data);
+        setTotalPages(result.totalPages || 1);
+      }
     } catch (error) {
       console.error("Error fetching leads:", error);
+      // Load JSON data on error
+      const jsonRecords = CallingData.Lead.map((lead) => ({
+        id: lead.id,
+        client: {
+          firstName: lead.FirstName,
+          lastName: lead.LastName,
+          phoneNo: lead.ContactNumber,
+          email: lead.Email,
+          address: lead.Address,
+          clientType: lead.ClientType
+        },
+        lastFollowUpDate: null,
+        nextFollowUpDate: null,
+        appointmentTime: null,
+        status: "New",
+        visitAddress: lead.Address,
+        createdDate: lead.Created_date,
+        createdByUserName: lead.CreatedBy,
+        updatedByUserName: lead.UpdatedBy,
+        tentativeAgreementDate: null,
+        leadStatus: "Open"
+      }));
+      setRecords(jsonRecords);
+      setTotalPages(1);
+      setNoData(false);
     } finally {
       setLoading(false);
     }

@@ -5,7 +5,7 @@ import { AiOutlineUser } from "react-icons/ai";
 import Slider from './Pages/Slider';
 import Header from './Pages/Header';
 import { useUser } from './Pages/UserContext'; // ✅ Access user info
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from './mockKeycloak'; // Mock for local dev
 const Dashboard = () => {
     const navigate = useNavigate();
      const { keycloak } = useKeycloak();

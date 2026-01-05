@@ -4,7 +4,7 @@ import Slider from "./Slider";
 import Header from "./Header.js";
 import './AddLead.css';
 import AddClient from "./AddClient.js";
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaPlus, FaRegCalendarAlt, FaTimes } from "react-icons/fa";

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
+import "./BackendTeam.css";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaDownload } from "react-icons/fa";
 import DatePicker from "react-datepicker";
@@ -12,7 +13,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import "./ClientPage.css";
 import Select from "react-select";
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
 
 const AccountsTeam = () => {
   const location = useLocation();

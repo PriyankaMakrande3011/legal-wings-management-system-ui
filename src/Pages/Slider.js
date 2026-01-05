@@ -198,7 +198,7 @@ import { MdDashboard } from "react-icons/md";
 import { AiOutlineDown, AiOutlineRight, AiOutlineLeft } from "react-icons/ai";
 import '../Pages/Slider.css';
 import { useUser } from "../Pages/UserContext"; 
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
 
 const Slider = ({ child }) => {
   const [isSiderOpen, setIsSiderOpen] = useState(false);
@@ -265,18 +265,21 @@ const handleTeamClick = (path) => navigate(path);
   return (
     <div className='slidermain-container'>
       {isMobile && (
-        <div className="mobile-header">
-          <FaBars className="hamburger-icon" onClick={toggleSider} />
-        </div>
+        <>
+          <div className="mobile-header">
+            <FaBars className="hamburger-icon" onClick={toggleSider} />
+          </div>
+          {isSiderOpen && <div className="sidebar-backdrop" onClick={() => setIsSiderOpen(false)}></div>}
+        </>
       )}
 
       <motion.div
-        onMouseEnter={() => setIsSiderOpen(true)}
-        onMouseLeave={() => setIsSiderOpen(false)}
+        onMouseEnter={() => !isMobile && setIsSiderOpen(true)}
+        onMouseLeave={() => !isMobile && setIsSiderOpen(false)}
         initial={{ width: isMobile ? 0 : "80px" }}
         animate={{ width: isSiderOpen ? "250px" : (isMobile ? 0 : "80px") }}
         transition={{ type: "spring", stiffness: 120, damping: 12 }}
-        className='sidebar'
+        className={`sidebar ${isMobile && isSiderOpen ? 'open' : ''}`}
       >
         <div className='sidebar-logo'>
           {isSiderOpen && <img src={logo} alt="Logo" />}
@@ -288,7 +291,11 @@ const handleTeamClick = (path) => navigate(path);
               {team.name === 'Data Management' && <hr className='sidebar-divider' />}
 
               {!team.subRoutes ? (
-                <NavLink to={team.path} className='sidebar-link'>
+                <NavLink 
+                  to={team.path} 
+                  className='sidebar-link'
+                  onClick={() => isMobile && setIsSiderOpen(false)}
+                >
                   <div className='sidebar-icon'>{team.icon}</div>
                   {isSiderOpen && (
                     <motion.div className='sidebar-text'>
@@ -323,6 +330,7 @@ const handleTeamClick = (path) => navigate(path);
                           to={subRoute.path}
                           key={subRoute.name}
                           className='sidebar-link dropdown-link'
+                          onClick={() => isMobile && setIsSiderOpen(false)}
                         >
                           <div className='sidebar-icon'>{subRoute.icon}</div>
                           {isSiderOpen && (
