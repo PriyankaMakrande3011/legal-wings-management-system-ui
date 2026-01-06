@@ -1,6 +1,6 @@
 // UserContext.js
 import React, { createContext, useContext } from "react";
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web';
 
 const UserContext = createContext();
 
@@ -15,7 +15,8 @@ export const UserProvider = ({ children }) => {
         firstName: keycloak.tokenParsed?.given_name || "Unknown",
         lastName: keycloak.tokenParsed?.family_name || "",
         username: keycloak.tokenParsed?.preferred_username,
-        roles: ["admin"] // Mock role for local dev
+        roles:
+          keycloak.tokenParsed?.resource_access?.[CLIENT_ID]?.roles || []
       }
     : null;
 

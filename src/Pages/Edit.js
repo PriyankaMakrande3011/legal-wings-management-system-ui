@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Slider from "./Slider";
 import Header from "./Header.js";
 import './AddLead.css'; // Using the same CSS for consistency
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web';
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CustomDatePicker from '../common/CustomDatePicker.js';

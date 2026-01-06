@@ -198,7 +198,7 @@ import { MdDashboard } from "react-icons/md";
 import { AiOutlineDown, AiOutlineRight, AiOutlineLeft } from "react-icons/ai";
 import '../Pages/Slider.css';
 import { useUser } from "../Pages/UserContext"; 
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web';
 
 const Slider = ({ child }) => {
   const [isSiderOpen, setIsSiderOpen] = useState(false);

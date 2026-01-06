@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AssingLead.css";
 import { useParams } from 'react-router-dom';
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web';
 const AssignLead = ({ isOpen, onClose, onAssignSuccess, leadId }) => {
   const [executives, setExecutives] = useState([]);
   const [loading, setLoading] = useState(false);
