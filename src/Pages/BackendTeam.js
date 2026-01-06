@@ -244,6 +244,7 @@ import React, { useEffect, useState } from "react";
 import Slider from "./Slider";
 import Header from "./Header.js";
 import "./Calling.css";
+import "./BackendTeam.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsBoxArrowInRight } from "react-icons/bs";
 import { FaPlus, FaEye, FaEdit, FaTrash, FaRegCalendarAlt, FaTimes } from "react-icons/fa";
@@ -254,7 +255,7 @@ import Api from "./Api.js";
 import AssignLead from "./AssingLead.js";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 import "./ClientPage.css"
 import Select from "react-select";
 
@@ -374,15 +375,19 @@ const BackendTeam = () => {
     try {
       const headers = { "Authorization": `Bearer ${keycloak.token}` };
       const [leadRes, agreementRes, backOfficeRes] = await Promise.all([
-        axios.get(`${Api.BASE_URL}leads/lead-status`, { headers }),
-        axios.get(`${Api.BASE_URL}agreements/agreement-status`, { headers }),
-        axios.get(`${Api.BASE_URL}agreements/back-office-status`, { headers })
+        axios.get(`${Api.BASE_URL}leads/lead-status`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${Api.BASE_URL}agreements/agreement-status`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${Api.BASE_URL}agreements/back-office-status`, { headers }).catch(() => ({ data: [] }))
       ]);
       setLeadStatusOptions(leadRes.data.map(s => ({ id: s.name, name: s.value })));
       setAgreementStatusOptions(agreementRes.data.map(s => ({ id: s.name, name: s.value })));
       setBackOfficeStatusOptions(backOfficeRes.data.map(s => ({ id: s.name, name: s.value })));
     } catch (error) {
-      console.error("Error fetching status dropdowns:", error);
+      console.error("Error fetching status dropdowns:", error.message);
+      // Use empty arrays as fallback
+      setLeadStatusOptions([]);
+      setAgreementStatusOptions([]);
+      setBackOfficeStatusOptions([]);
     }
   };
 
@@ -398,18 +403,26 @@ const BackendTeam = () => {
     try {
       const response = await fetch(`${Api.BASE_URL}geographic-nexus/allDropDowns`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" ,
+        headers: { 
+          "Content-Type": "application/json",
           "Authorization": `Bearer ${keycloak.token}` 
         },
-        body: JSON.stringify(requestBody),
-        "Authorization": `Bearer ${keycloak.token}`
+        body: JSON.stringify(requestBody)
       });
+
+      if (!response.ok) {
+        console.warn(`API returned ${response.status}, using default values`);
+        return;
+      }
 
       const data = await response.json();
       setCities(data?.cities || []);
       setAreas(data?.areas || []);
     } catch (error) {
-      console.error("Error fetching dropdown data:", error);
+      console.error("Error fetching dropdown data:", error.message);
+      // Use empty arrays as fallback
+      setCities([]);
+      setAreas([]);
     }
   };
 
@@ -457,9 +470,15 @@ const BackendTeam = () => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${keycloak.token}`
         },
-        body: JSON.stringify(requestBody),
-        "Authorization": `Bearer ${keycloak.token}`
+        body: JSON.stringify(requestBody)
       });
+
+      if (!response.ok) {
+        console.warn(`API returned ${response.status}, setting empty data`);
+        setRecords([]);
+        return;
+      }
+
       let data = (await response.json())?.leadPage?.content || [];
 
       if (searchText.trim()) {
@@ -473,7 +492,8 @@ const BackendTeam = () => {
 
       setRecords(data);
     } catch (error) {
-      console.error("Failed to fetch leads:", error);
+      console.error("Failed to fetch leads:", error.message);
+      setRecords([]);
     }
   };
 

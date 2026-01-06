@@ -72,3 +72,47 @@ h3 {
   color: #333;
   font-size: 14px;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .lead-details-content {
+    padding: 15px;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tabs button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+  
+  .input-row {
+    flex-direction: column;
+  }
+  
+  .input-group {
+    width: 100%;
+  }
+  
+  .tab-content {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  h3 {
+    font-size: 16px;
+  }
+  
+  .input-group input {
+    padding: 8px;
+    font-size: 13px;
+  }
+}

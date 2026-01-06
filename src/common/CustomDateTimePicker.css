@@ -48,4 +48,31 @@
   pointer-events: none;
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+  .datetimepicker-label {
+    font-size: 13px;
+  }
+  
+  .custom-datetime-input {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+  
+  .calendar-icon {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .datetimepicker-label {
+    font-size: 12px;
+  }
+  
+  .custom-datetime-input {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+}
+
 

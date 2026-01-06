@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useUser } from "./UserContext";
 import "./Header.css";
 import { FiLogOut } from "react-icons/fi"; // Logout icon
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 
 const Header = ({ title, onBack }) => {
   const location = useLocation();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
- const { keycloak } = useKeycloak();
+  const { keycloak } = useKeycloak();
+  const dropdownRef = useRef(null);
+  
   const pageNames = {
     "/calling-team": "Calling Team",
     "/executive-team": "Executive Team",
@@ -23,81 +25,27 @@ const Header = ({ title, onBack }) => {
     "/edit": "Edit Lead"
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+
   const getInitials = () => {
     const firstInitial = user?.firstName?.charAt(0).toUpperCase() || "";
     const lastInitial = user?.lastName?.charAt(0).toUpperCase() || "";
     return firstInitial + lastInitial;
-  };
-
-  const styles = {
-    avatar: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "40px",
-      height: "40px",
-      borderRadius: "5px",
-      backgroundColor: "#d9d9d9",
-      color: "#000",
-      fontSize: "15px",
-      fontWeight: "bold",
-      textTransform: "uppercase",
-      marginLeft: "10px",
-      cursor: "pointer"
-    },
-    userInfo: {
-      display: "flex",
-      alignItems: "center",
-      position: "relative",
-      cursor: "pointer"
-    },
-    dropdown: {
-      position: "absolute",
-      top: "50px",
-      right: 0,
-      backgroundColor: "#fff",
-      borderRadius: "10px",
-      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
-      zIndex: 999,
-      padding: "15px",
-      width: "220px"
-    },
-    dropdownTop: {
-      display: "flex",
-      alignItems: "center",
-      marginBottom: "15px"
-    },
-    dropdownInitials: {
-      width: "45px",
-      height: "45px",
-      borderRadius: "10px",
-      backgroundColor: "#d9d9d9",
-      color: "#000",
-      fontWeight: "bold",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "16px",
-      marginRight: "10px"
-    },
-    dropdownName: {
-      fontWeight: "bold",
-      color: "orange",
-      fontSize: "16px"
-    },
-    logoutButton: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "100%",
-      padding: "8px 12px",
-      border: "1px solid #ccc",
-      borderRadius: "8px",
-      backgroundColor: "#fff",
-      cursor: "pointer",
-      fontSize: "14px",
-      gap: "6px"
-    }
   };
 
   const pageName = title ?? (pageNames[location.pathname] || "Management System");
@@ -110,26 +58,31 @@ const Header = ({ title, onBack }) => {
         <h1 style={{ margin: 0 }}>{title ?? pageName}</h1>
       </div>
 
-      <div style={styles.userInfo} onClick={toggleMenu}>
-        <h5 style={{ margin: 0 }}>
-          Hi, {user.firstName} {user.lastName}
-        </h5>
-        <div className="header-right" style={styles.avatar}>
-          {getInitials()}
+      <div className="user-info-container" ref={dropdownRef}>
+        <div className="user-info" onClick={toggleMenu}>
+          <h5 className="user-greeting">
+            Hi, {user.firstName} {user.lastName}
+          </h5>
+          <div className="user-avatar">
+            {getInitials()}
+          </div>
         </div>
 
         {menuOpen && (
-          <div style={styles.dropdown}>
-            <div style={styles.dropdownTop}>
-              <div style={styles.dropdownInitials}>{getInitials()}</div>
-              <div style={styles.dropdownName}>
-                {user.firstName} {user.lastName}
+          <>
+            <div className="dropdown-backdrop" onClick={() => setMenuOpen(false)}></div>
+            <div className="user-dropdown">
+              <div className="dropdown-top">
+                <div className="dropdown-initials">{getInitials()}</div>
+                <div className="dropdown-name">
+                  {user.firstName} {user.lastName}
+                </div>
               </div>
+              <button className="logout-button" onClick={logout}>
+                <FiLogOut size={16} /> Logout
+              </button>
             </div>
-            <button style={styles.logoutButton} onClick={logout}>
-              <FiLogOut size={16} /> Logout
-            </button>
-          </div>
+          </>
         )}
       </div>
     </header>

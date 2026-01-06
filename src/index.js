@@ -16,7 +16,7 @@ root.render(
   <ReactKeycloakProvider
   authClient={keycloak}
   initOptions={{ onLoad: 'login-required' }} // OR 'check-sso' for silent login
->
+  >
   <UserProvider>
     <App />
   </UserProvider>
