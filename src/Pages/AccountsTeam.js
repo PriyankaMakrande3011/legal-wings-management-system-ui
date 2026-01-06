@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 import ReactPaginate from "react-paginate";
 import "./ClientPage.css";
 import Select from "react-select";
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web';
 
 const AccountsTeam = () => {
   const location = useLocation();

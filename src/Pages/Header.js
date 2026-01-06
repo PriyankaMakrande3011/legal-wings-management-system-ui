@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useUser } from "./UserContext";
 import "./Header.css";
 import { FiLogOut } from "react-icons/fi"; // Logout icon
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 
 const Header = ({ title, onBack }) => {
   const location = useLocation();

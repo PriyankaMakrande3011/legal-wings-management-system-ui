@@ -1,6 +1,6 @@
 // UserContext.js
 import React, { createContext, useContext } from "react";
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 
 const UserContext = createContext();
 

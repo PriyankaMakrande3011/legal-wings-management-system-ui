@@ -255,7 +255,7 @@ import Api from "./Api.js";
 import AssignLead from "./AssingLead.js";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 import "./ClientPage.css"
 import Select from "react-select";
 

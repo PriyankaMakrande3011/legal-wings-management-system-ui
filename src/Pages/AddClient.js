@@ -407,7 +407,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import "./AddClient.css";
 import Api from './Api.js';
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 
 const AddClientModal = ({ isOpen, onClose }) => {
   const {

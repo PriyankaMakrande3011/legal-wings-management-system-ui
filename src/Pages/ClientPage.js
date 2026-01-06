@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import Api from "./Api.js";
 import EditClient from "./EditClient.js";
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 
 const ClientType = {
   OWNER: "OWNER",

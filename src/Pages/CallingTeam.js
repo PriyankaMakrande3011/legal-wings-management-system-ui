@@ -17,7 +17,7 @@ import "./ClientPage.css"
 import Select from "react-select";
 import CallingData from "../Callingdb.json";
 
-import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
+import { useKeycloak } from '@react-keycloak/web'; // Mock for local dev
 
 
 const CallingTeam = () => {
