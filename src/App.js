@@ -18,15 +18,15 @@ import AssignLead from './Pages/AssingLead';
 import AccountsTeam from './Pages/AccountsTeam';
 import Edit from './Pages/Edit';
 import EditClient from './Pages/EditClient';
-// import { useKeycloak } from '@react-keycloak/web';
+import { useKeycloak } from '@react-keycloak/web';
 
 function App() {
 
-  // const { keycloak, initialized } = useKeycloak();
+  const { keycloak, initialized } = useKeycloak();
 
-  // if (!initialized) return <div>Loading...</div>;
+  if (!initialized) return <div>Loading...</div>;
 
-  // if (!keycloak?.authenticated) return <div>Not authenticated</div>;
+  if (!keycloak?.authenticated) return <div>Not authenticated</div>;
 
   const teams = [
     { name: 'Calling Team', path: '/calling-team' },

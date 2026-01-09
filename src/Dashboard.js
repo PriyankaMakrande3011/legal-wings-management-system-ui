@@ -24,6 +24,7 @@ const Dashboard = () => {
         { name: 'Backend Team', path: '/backend-team', role: 'backend' },
         { name: 'Account Team', path: '/account-team', role: 'accounting' },
         { name: 'Marketing Team', path: '/marketing-team', role: 'marketing' },
+ 
     ];
 
     const visibleTeams = user.roles.includes('admin')
