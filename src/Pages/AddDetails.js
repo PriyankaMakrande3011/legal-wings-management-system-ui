@@ -4,7 +4,7 @@ import { Dropdown } from "primereact/dropdown";
 import { RadioButton } from "primereact/radiobutton";
 import { Button } from "primereact/button";
 import "./AddClient.css"
-import { useKeycloak } from "@react-keycloak/web";
+import { useKeycloak } from '../mockKeycloak'; // Mock for local dev
 
 const AddDetails = () => {
    const { keycloak } = useKeycloak();
